@@ -40,6 +40,26 @@ rep = {
     "DB_TRAIN": f"{num.get('distilbert_train_min_per_fold', 0):.0f}",
     "DB_INFER": f"{num.get('distilbert_infer_sec_per_1000', 0):.0f}",
 }
+tim = pd.read_csv(os.path.join(R, "distilbert_timing.csv"))
+pc = pd.read_csv(os.path.join(R, "per_source_metrics.csv"))
+def rec(model, src):
+    return float(pc[(pc.model == model) & (pc.test == src)].recall.iat[0])
+pct = lambda x: f"{100 * x:.0f}"
+rep.update({
+    "QWEN_FA_WORST": pct(g("Qwen-2.5-7B", "false_alarm_worst")),
+    "QWEN_FA": pct(g("Qwen-2.5-7B", "false_alarm_rate")),
+    "GEMMA_FA_WORST": pct(g("Gemma-3-12B", "false_alarm_worst")),
+    "GEMMA_FA": pct(g("Gemma-3-12B", "false_alarm_rate")),
+    "GEMMA_AI": f(g("Gemma-3-12B", "ai_phishing_f1")),
+    "GEMMA_NAZ": pct(g("Gemma-3-12B", "nazario_recall")) + "\\%",
+    "GEMMA_COST": f"{cost.loc['Gemma-3-12B', 'usd_per_1000']:.3f}",
+    "L8_FA": pct(g("Llama-3.1-8B", "false_alarm_rate")),
+    "L1_FA": pct(g("Llama-3.2-1B", "false_alarm_rate")),
+    "QWEN_AI_REC": f"{rec('Qwen-2.5-7B', 'ephishllm'):.2f}",
+})
+rep["DB_KAGGLE_N"] = f"{int(tim[(tim.setting == 'loco_clean') & (tim.test == 'kaggle')].train_size.iat[0]):,}".replace(",", "{,}")
+rep["DB_INC"] = f(g("DistilBERT", "in_corpus_f1"))
+rep["DB_AI"] = f(g("DistilBERT", "ai_phishing_f1"))
 if "DistilBERT" in m.index:
     rep["DISTILBERT_SENTENCE"] = (f"the fine-tuned DistilBERT ({f(g('DistilBERT', 'unseen_f1_mean'))}), although")
     rep["DISTILBERT_AI"] = f" and {f(g('DistilBERT', 'ai_phishing_f1'))} (DistilBERT)"
@@ -76,9 +96,13 @@ leave-one-corpus-out F1 by up to 11.5 points. We then compare classical models,
 DistilBERT and six small open LLMs (1B to 14B parameters) on the same held-out
 emails, including AI-written phishing, next to the measured API cost.
 Zero-shot Qwen-2.5-7B gives the best balance, with a mean F1 of
-{rep['QWEN_UNSEEN']} on unseen corpora and {rep['QWEN_AI']} on AI-written phishing for
-{float(rep['QWEN_COST'])*100:.0f} US cents per 1{{,}}000 emails. Few-shot examples taken from old
-corpora raise scores on old mail but lower them on AI-written phishing. The
+{rep['QWEN_UNSEEN']} on unseen corpora, {rep['QWEN_FA']}\\% false alarms and {rep['QWEN_AI']} F1 on
+AI-written phishing, for {float(rep['QWEN_COST'])*100:.0f} US cents per 1{{,}}000 emails.
+Gemma-3-12B catches more AI-written phishing (F1 {rep['GEMMA_AI']}) but flags
+{rep['GEMMA_FA']}\\% of legitimate mail. The fine-tuned DistilBERT has the best
+in-corpus score of all models and the weakest AI-phishing score of the trained
+ones, and few-shot examples taken from old corpora raise scores on old mail
+but lower them on AI-written phishing. The
 whole study ran on one laptop for {rep['TOTAL_USD']} US dollars of API fees."""
 open(os.path.join(HERE, "abstract.tex"), "w").write(abstract)
 print("filled", len(rep), "numbers")

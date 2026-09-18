@@ -1,0 +1,2 @@
+setting,test,train_size,train_sec,infer_sec_per_1000,device
+in_corpus,enron,2000,177.2,22.61,cpu

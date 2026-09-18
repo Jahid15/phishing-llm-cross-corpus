@@ -239,3 +239,70 @@ This took three attempts, and the lessons are worth keeping.
    The subject line and the first hundred or so words carry most phishing
    cues, and the paper states the 128 token limit.
 
+## Step 12. The final numbers (18 September 2026, evening)
+
+Script: `code/final/06_analysis.py`, output `results/final/main_table.csv`
+
+Gemma-3-12B finished last. Its rate-limited calls were retried one at a
+time until only 1 of 19,200 LLM calls was left without an answer (counted
+as "unparsed").
+
+When all rows were in, Gemma looked like the winner on AI-written phishing
+(F1 0.955). Before calling it the best model we checked precision per corpus
+and found it flags 57 percent of the legitimate Enron mail. So we added a
+false alarm column (share of legitimate mail flagged) to the analysis. It
+changed how we describe the results:
+
+| Model | Unseen-corpus F1 | False alarms | AI phishing F1 | USD per 1,000 |
+|---|---|---|---|---|
+| Qwen-2.5-7B, zero-shot | 0.928 | 3% | 0.819 | 0.031 |
+| Gemma-3-12B | 0.882 | 25% | 0.955 | 0.016 |
+| TF-IDF + LogReg | 0.901 | 9% | 0.640 | free |
+| DistilBERT | 0.891 | 6% | 0.493 | free |
+
+- Qwen zero-shot is our recommendation: robust, few false alarms, cheap.
+- Gemma catches the most AI phishing but flags a quarter of normal mail. It
+  fits a "send to review" role, not automatic blocking. Our July preliminary
+  run had already seen Gemma calling almost everything phishing.
+- DistilBERT has the best in-corpus F1 of any model (0.975) and the weakest
+  AI-phishing F1 of the trained models. The usual way of measuring would have
+  picked it.
+- In the Kaggle fold only 4,075 of 5,000 DistilBERT training emails survived
+  decontamination, another sign of how much Kaggle copies the others.
+
+Total API spend: 0.52 dollars of the 2 dollar cap.
+
+## Step 13. Writing it up
+
+- Paper: `paper/main.pdf`, IEEE two-column, 6 pages. Tables are generated
+  from the result CSVs (`paper/make_tables.py`) and every number in the text
+  is filled in by `paper/fill_numbers.py`, so the paper cannot drift from the
+  data. Build with `tectonic main.tex`.
+- Final slides: `final-slides/final_deck.html` (present in a browser, press N
+  for notes) and `final-slides/final_deck.pptx`. Both are generated from
+  `final-slides/numbers.json`. Speaker script in English and Bangla:
+  `final-slides/speaker_script.md`.
+- Notebook: `notebooks/phishing_llm_cross_corpus.ipynb`, opens in Colab,
+  loads every result in seconds or reruns all six steps.
+
+## Step 14. Publishing
+
+Repository: https://github.com/Jahid15/phishing-llm-cross-corpus (public).
+The `.env` file with the OpenRouter key and the `data/` folder are in
+`.gitignore`, and we scanned every committed file for the key before each
+push.
+
+## What is left (next two weeks)
+
+1. Phishsense-1B: get a HuggingFace token and run it on the same 2,400 emails.
+2. Relabel a sample into phishing versus spam and rerun, to close the label gap.
+3. 1,000 emails per test set for the top three models (under 0.50 dollars).
+4. The Italian and German part of E-PhishLLM, and a stronger DistilBERT run.
+
+## How to pick this up
+
+Read this log, then `README.md` for commands. Every result in the paper and
+slides can be rebuilt with `python code/final/06_analysis.py`, then
+`paper/make_tables.py`, `paper/fill_numbers.py`, `final-slides/collect_numbers.py`,
+`final-slides/build_deck.py` and `node final-slides/build_pptx.js`, without
+calling any API again.

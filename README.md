@@ -20,9 +20,12 @@ one corpus. The popular Kaggle phishing set turned out to contain 86 percent of
 SpamAssassin, 90 percent of Ling-Spam and 35 percent of Enron as near
 duplicates, which an exact-match check almost completely misses. Removing
 those copies drops a "good" cross-corpus F1 from 0.966 to 0.666. On honest
-test data a small open LLM (Qwen-2.5-7B, zero-shot) is the best balance of
-robustness, AI-phishing detection and cost, at about 3 US cents per 1,000
-emails.
+test data a small open LLM (Qwen-2.5-7B, zero-shot) is the best balance: 0.928
+F1 on unseen corpora, 3 percent false alarms and 0.819 F1 on AI-written
+phishing, at about 3 US cents per 1,000 emails. Gemma-3-12B catches more
+AI-written phishing (0.955) but flags a quarter of legitimate mail, and the
+fine-tuned DistilBERT, best of all inside one corpus, is the weakest trained
+model on AI-written phishing.
 
 ## Where to look
 
@@ -59,8 +62,8 @@ root or in the environment. The key and the `data/` folder are never
 committed. Every LLM answer we got is saved in `results/final/llm_raw/`, so
 the analysis can be rerun without spending anything.
 
-Seed 42 everywhere. Total API spend for the whole project was under one US
-dollar.
+Seed 42 everywhere. Total API spend for the whole project was 0.52 US dollars
+(19,500 calls, including a discarded trial).
 
 ## Repository layout
 

@@ -1,0 +1,16 @@
+setting,test,train_size,train_sec,infer_sec_per_1000,device
+loco_clean,nigerian,6000,539.2,19.17,cpu
+loco_clean,trec07,5000,448.5,22.24,cpu
+in_corpus,ling,2000,180.5,21.98,cpu
+loco_clean,nazario,6000,539.2,19.0,cpu
+in_corpus,trec07,2000,158.8,20.81,cpu
+loco_clean,enron,5000,477.0,21.09,cpu
+loco_clean,ephishllm,6000,539.2,18.69,cpu
+loco_clean,kaggle,4075,330.7,19.33,cpu
+in_corpus,ceas08,2000,157.0,18.88,cpu
+in_corpus,kaggle,2000,163.8,19.57,cpu
+loco_clean,spamassassin,5000,413.3,19.24,cpu
+loco_clean,ling,5000,426.9,23.1,cpu
+loco_clean,ceas08,5000,418.9,19.06,cpu
+in_corpus,spamassassin,2000,157.6,23.73,cpu
+in_corpus,enron,2000,177.2,22.61,cpu

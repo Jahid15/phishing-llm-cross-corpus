@@ -40,7 +40,9 @@ on Ling-Spam, 10.0 on SpamAssassin, 5.4 on Enron and 4.8 on Kaggle. For CEAS-08
 and TREC-07, which share almost nothing with the other corpora, the change is
 0.1 points or less. The inflation appears exactly where the overlap is, which
 is strong evidence that leakage, and not some other difference between the
-settings, causes it.
+settings, causes it. The Kaggle fold also shows how much of the other
+corpora is copied: after decontamination only DB_KAGGLE_N of the 5{,}000
+sampled training emails for DistilBERT were left.
 
 Fig.~\ref{fig:incorpus} puts the three settings side by side. The usual
 in-corpus split gives 0.93 to 0.99. Honest leave-one-corpus-out testing gives
@@ -76,12 +78,28 @@ Fig.~\ref{fig:percorpus} breaks the scores down per test set.
 \textit{Small LLMs can match or beat trained models on unseen corpora.}
 Zero-shot Qwen-2.5-7B reaches a mean F1 of QWEN_UNSEEN on the six held-out
 corpora, above TF-IDF + LogReg (LR_UNSEEN) and DISTILBERT_SENTENCE Qwen never
-saw any of our training data.
+saw any of our training data. It also raises the fewest false alarms of the
+strong models: on average QWEN_FA\% of legitimate emails are flagged, and at
+most QWEN_FA_WORST\% on any corpus.
 
 \textit{AI-written phishing separates the models.} On E-PhishLLM the trained
 models fall to LR_AI (LogReg) and NB_AI (Naive Bayes)DISTILBERT_AI. They learned
 what old spam looks like, and polished GPT-4o-mini phishing does not look like
 old spam. Qwen-2.5-7B (QWEN_AI) and Llama-3.1-8B (L8_AI) hold up much better.
+DistilBERT shows the problem most clearly: it has the highest in-corpus F1 of
+any model (DB_INC) and the lowest AI-phishing F1 of the trained models
+(DB_AI). The usual measure would rank it first.
+
+\textit{Catching more costs false alarms.} Gemma-3-12B catches the most
+AI-written phishing (F1 GEMMA_AI) and GEMMA_NAZ of the real Nazario phishing,
+at GEMMA_COST dollars per 1{,}000 emails. The price is paid by legitimate mail:
+it flags GEMMA_FA\% of it on average and GEMMA_FA_WORST\% of the Enron business
+mail. Llama-3.1-8B behaves the same way (L8_FA\% false alarms). Qwen sits at
+the other end: few false alarms, but it misses about a third of the AI-written
+phishing (recall QWEN_AI_REC). A single F1 number hides this trade-off, so we
+report the false alarm rate next to it. In July our preliminary run already
+showed Gemma calling almost everything phishing on a small sample; the full
+run confirms it.
 
 \textit{Few-shot examples help on old mail and hurt on new mail.} Four
 examples drawn from the other corpora raise Qwen-2.5-7B from QWEN_UNSEEN to
@@ -96,8 +114,8 @@ longer.
 (PHI_UNSEEN) than the 3B and 8B Llama models. In 37\% of emails it ignored the
 instruction to answer in one word and started an explanation (``As a large
 language model\ldots'', ``Based on the content\ldots''), so no verdict fit in the
-output. GEMMA_SENTENCE Llama-3.2-1B is too weak for the task (L1_UNSEEN, with a
-worst-corpus F1 of L1_WORST).
+output. Llama-3.2-1B is too weak for the task (L1_UNSEEN, with a worst-corpus
+F1 of L1_WORST and L1_FA\% false alarms).
 
 \subsection{Cost}
 
@@ -105,7 +123,7 @@ The measured cost of zero-shot classification ranges from LLM_MIN_COST to
 LLM_MAX_COST US dollars per 1{,}000 emails (Fig.~\ref{fig:cost}). Qwen-2.5-7B
 costs QWEN_COST dollars per 1{,}000 emails, so screening 100{,}000 emails a month
 would cost about QWEN_100K dollars. TF-IDF needs about 0.25 CPU seconds per
-1{,}000 emails and no API. DistilBERT needs DB_TRAIN minutes of laptop GPU time
+1{,}000 emails and no API. DistilBERT needs DB_TRAIN minutes of laptop CPU time
 per training fold and DB_INFER seconds per 1{,}000 emails. The whole study,
 TOTAL_CALLS LLM calls including discarded trials, cost TOTAL_USD US dollars.
 

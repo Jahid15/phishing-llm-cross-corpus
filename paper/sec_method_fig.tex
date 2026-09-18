@@ -1,8 +1,8 @@
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-  box/.style={draw, rounded corners=2pt, align=center, font=\scriptsize, minimum width=2.45cm, minimum height=0.95cm, fill=#1},
-  box/.default=white, >=Stealth, node distance=0.35cm and 0.3cm]
+  box/.style={draw, rounded corners=2pt, align=center, font=\scriptsize, minimum width=2.3cm, minimum height=0.95cm, fill=#1},
+  box/.default=white, >=Stealth, node distance=0.35cm and 0.22cm]
 \node[box=blue!8] (a) {1. Collect\\9 public sources};
 \node[box=red!10, right=of a] (b) {2. Overlap\\exact + MinHash};
 \node[box=red!10, right=of b] (c) {3. Decontaminate\\leave one corpus out};

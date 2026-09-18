@@ -22,6 +22,8 @@ const sa = n.sa_in_kaggle;
 const main = n.main;
 const best = main.find(r => r.model === "Qwen-2.5-7B");
 const qfs = main.find(r => r.model === "Qwen-2.5-7B few-shot");
+const gm = main.find(r => r.model === "Gemma-3-12B");
+const dbm = main.find(r => r.model === "DistilBERT");
 const lr = main.find(r => r.model === "TF-IDF + LogReg");
 const infl = Object.fromEntries(n.inflation_logreg.map(r => [r.test, r]));
 const spent = n.llm_total_usd + n.discarded_usd;
@@ -216,38 +218,39 @@ const cell = (t, o = {}) => ({ text: String(t), options: Object.assign({ color: 
 // 8 main table
 {
   const s = base("Result 3 · The table from the proposal, filled in", "Faria", "Unseen corpora, AI phishing and cost in one place");
-  const rows = [[hdr("Model"), hdr("Unseen-corpus F1 (95% CI)"), hdr("Worst corpus"), hdr("AI phishing F1"), hdr("Nazario recall"), hdr("$ / 1,000")]]
+  const rows = [[hdr("Model"), hdr("Unseen-corpus F1 (95% CI)"), hdr("Worst corpus"), hdr("False alarms"), hdr("AI phishing F1"), hdr("Nazario recall"), hdr("$ / 1,000")]]
     .concat(main.map(r => {
       const o = r === best ? { color: C.accent, bold: true } : {};
       return [cell(r.model, o), cell(`${f3(r.unseen_f1_mean)} (${r.unseen_f1_ci})`, o), cell(f3(r.unseen_f1_worst), o),
-              cell(f3(r.ai_phishing_f1), o), cell(f3(r.nazario_recall), o), cell(r.usd_per_1000 === 0 ? "local" : "$" + r.usd_per_1000.toFixed(3), o)];
+              cell(Math.round(100 * r.false_alarm_rate) + "%", o), cell(f3(r.ai_phishing_f1), o), cell(f3(r.nazario_recall), o), cell(r.usd_per_1000 === 0 ? "local" : "$" + r.usd_per_1000.toFixed(3), o)];
     }));
-  s.addTable(rows, { x: 0.6, y: 1.7, w: 12.1, colW: [2.9, 2.8, 1.5, 1.7, 1.7, 1.5], fontFace: F, fontSize: 12.5,
+  s.addTable(rows, { x: 0.6, y: 1.7, w: 12.1, colW: [2.6, 2.6, 1.3, 1.3, 1.5, 1.5, 1.3], fontFace: F, fontSize: 12.5,
     border: { type: "solid", color: C.line, pt: 0.75 }, fill: { color: C.bg }, rowH: 0.37, valign: "middle", align: "center" });
-  s.addText("All scores on the same held-out emails. Trained models use decontaminated data. LLMs never saw any of our data.",
+  s.addText("All scores on the same held-out emails. Trained models use decontaminated data. LLMs never saw any of our data. False alarms = share of legitimate mail flagged.",
     { x: 0.6, y: 6.6, w: 12, h: 0.35, fontFace: F, fontSize: 12, color: C.muted, margin: 0, isTextBox: true });
   pageNum(s, 8);
-  s.addNotes("60 sec. Read only the top row, the TF-IDF row and the worst LLM. Point at the cost column.");
+  s.addNotes("60 sec. Read the highlighted Qwen row, then Gemma (best on AI phishing, but 25% false alarms), then DistilBERT (best in-corpus, worst on AI phishing). Point at the cost column.");
 }
 
 // 9 takeaways
 {
-  const s = base("Result 4 · What it means", "Faria", "Cheap detectors can be robust, if you pick carefully");
-  const tk = [[`1. Best balance: ${best.model} zero-shot`, `${f3(best.unseen_f1_mean)} F1 on unseen corpora, ${f3(best.ai_phishing_f1)} on AI phishing, $${best.usd_per_1000.toFixed(3)} per 1,000 emails.`, C.good],
-              [`2. Few-shot helps old mail, hurts AI phishing`, `Qwen: unseen ${f3(best.unseen_f1_mean)} to ${f3(qfs.unseen_f1_mean)}, but AI phishing ${f3(best.ai_phishing_f1)} to ${f3(qfs.ai_phishing_f1)}. Old examples anchor the model to old spam.`, C.accent],
-              [`3. TF-IDF is a strong, free baseline`, `${f3(lr.unseen_f1_mean)} on unseen corpora, but only ${f3(lr.ai_phishing_f1)} on AI-written phishing.`, C.blue],
-              [`4. Size is not quality`, `Phi-4 (14B) ignored the one-word format in a third of emails and scored below 3B and 8B models.`, C.amber]];
+  const s = base("Result 4 · What it means", "Faria", "No single winner: pick the trade-off you can live with");
+  const pc = x => Math.round(100 * x) + "%";
+  const tk = [[`1. Best balance: ${best.model} zero-shot`, `${f3(best.unseen_f1_mean)} F1 on unseen corpora, ${pc(best.false_alarm_rate)} false alarms, ${f3(best.ai_phishing_f1)} on AI phishing, $${best.usd_per_1000.toFixed(3)} per 1,000 emails.`, C.good],
+              [`2. ${gm.model} catches more, flags more`, `${f3(gm.ai_phishing_f1)} on AI phishing, but ${pc(gm.false_alarm_rate)} of legitimate mail flagged. Good for review queues, not for blocking.`, C.amber],
+              [`3. Few-shot helps old mail, hurts AI phishing`, `Qwen on AI phishing: ${f3(best.ai_phishing_f1)} to ${f3(qfs.ai_phishing_f1)} with 4 old examples. They anchor it to old spam.`, C.accent],
+              [`4. The usual metric picks the wrong model`, `DistilBERT: best in-corpus F1 (${f3(dbm.in_corpus_f1)}), weakest trained model on AI phishing (${f3(dbm.ai_phishing_f1)}).`, C.blue]];
   tk.forEach((t, i) => cardText(s, 0.6, 1.65 + i * 1.25, 5.9, 1.12, t[0], t[1], t[2], t[2]));
   img(s, "f1_vs_cost.png", 6.75, 1.65, 5.98, 4.85);
   pageNum(s, 9);
-  s.addNotes("60 sec. Four takeaways, one sentence each. Spend the most time on number 2, it is the surprise: examples from old corpora make the model worse on new attacks.");
+  s.addNotes("60 sec. Four points, one sentence each. Spend the time on 2 and 3. Mention Phi-4 only if asked: it ignored the one-word format in a third of emails.");
 }
 
 // 10 limitations
 {
   const s = base("Limitations", "Faria", "What this study does not show");
   const L = [["Labels are mixed", "Four corpora count ordinary spam as positive. We keep the published labels and report phishing-only recall separately."],
-             ["Small evaluation sets", "300 emails per test set keeps the cost low. The 95% intervals are about ±0.02 to ±0.03."],
+             ["Small evaluation sets", "300 emails per test set keeps the cost low. The 95% intervals are about ±0.01 to ±0.03."],
              ["LLM training data is unknown", "Old public corpora may be in the LLMs' pre-training data. E-PhishLLM is newer, but we cannot rule it out."],
              ["Text only, English only", "No headers, URLs or attachments. The Italian and German part of E-PhishLLM is unused."],
              ["Light DistilBERT training", "1,000 emails per corpus and one epoch, to fit an 8 GB laptop."],
@@ -260,7 +263,7 @@ const cell = (t, o = {}) => ({ text: String(t), options: Object.assign({ color: 
 // 11 next two weeks
 {
   const s = base("Scope of improvements within 2 weeks", "Faria", "What we can finish before the final paper");
-  const W = [["DAYS 1 TO 3", "Phishsense-1B", "Get a HuggingFace token, run it locally on the same 2,700 emails. It is the model that fell from 97.5% to 70%.", C.blue],
+  const W = [["DAYS 1 TO 3", "Phishsense-1B", "Get a HuggingFace token, run it locally on the same 2,400 emails. It is the model that fell from 97.5% to 70%.", C.blue],
              ["DAYS 4 TO 6", "Phishing-only labels", "Relabel spam vs phishing on a sample and rerun, to close the label gap.", C.accent],
              ["DAYS 7 TO 9", "Bigger test sets", "1,000 emails per set for the top 3 models. Under $0.50 more.", C.amber],
              ["DAYS 10 TO 14", "Multilingual + write-up", "Italian and German E-PhishLLM, stronger DistilBERT, final paper.", C.good]];

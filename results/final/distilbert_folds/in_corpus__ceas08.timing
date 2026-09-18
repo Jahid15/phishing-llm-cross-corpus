@@ -1,0 +1,2 @@
+setting,test,train_size,train_sec,infer_sec_per_1000,device
+in_corpus,ceas08,2000,157.0,18.88,cpu

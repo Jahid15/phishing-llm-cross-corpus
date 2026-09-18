@@ -61,6 +61,8 @@ main = n["main"]
 top = main[0]
 best = next(r for r in main if r["model"] == "Qwen-2.5-7B")
 qfs = next((r for r in main if r["model"] == "Qwen-2.5-7B few-shot"), None)
+gm = next(r for r in main if r["model"] == "Gemma-3-12B")
+dbm = next(r for r in main if r["model"] == "DistilBERT")
 l3 = next(r for r in main if r["model"] == "Llama-3.2-3B")
 l3fs = next((r for r in main if r["model"] == "Llama-3.2-3B few-shot"), None)
 llm_rows = [r for r in main if r["type"] == "LLM"]
@@ -206,34 +208,34 @@ def tr(r):
     hl = ' class="hl"' if r is best else ""  # highlight the recommended model, not just the top row
     cost = "local" if r["usd_per_1000"] == 0 else f"${r['usd_per_1000']:.3f}"
     return (f"<tr{hl}><td class='l'>{r['model']}</td><td>{f3(r['unseen_f1_mean'])} <span class='small'>({ci})</span></td>"
-            f"<td>{f3(r['unseen_f1_worst'])}</td><td>{f3(r['ai_phishing_f1'])}</td><td>{f3(r['nazario_recall'])}</td><td>{cost}</td></tr>")
+            f"<td>{f3(r['unseen_f1_worst'])}</td><td>{100*r['false_alarm_rate']:.0f}%</td><td>{f3(r['ai_phishing_f1'])}</td><td>{f3(r['nazario_recall'])}</td><td>{cost}</td></tr>")
 slide(8, "Result 3 · The table from the proposal, filled in", "Faria", "Unseen corpora, AI phishing and cost in one place",
 f"""  <table class="tight">
-    <tr><th class="l">Model</th><th>Unseen-corpus F1 (95% CI)</th><th>Worst corpus</th><th>AI phishing F1</th><th>Nazario recall</th><th>$ / 1,000</th></tr>
+    <tr><th class="l">Model</th><th>Unseen-corpus F1 (95% CI)</th><th>Worst corpus</th><th>False alarms</th><th>AI phishing F1</th><th>Nazario recall</th><th>$ / 1,000</th></tr>
     {''.join(tr(r) for r in main)}
   </table>
   <div class="spacer"></div>
-  <div class="small">All scores on the same held-out emails. Trained models use decontaminated data. LLMs never saw any of our data.</div>""",
-"60 sec. Read only the top row, the TF-IDF row and the worst LLM. Point at the cost column.")
+  <div class="small">All scores on the same held-out emails. Trained models use decontaminated data. LLMs never saw any of our data. False alarms = share of legitimate mail flagged.</div>""",
+"60 sec. Read the highlighted Qwen row, then Gemma (best on AI phishing, but 25% false alarms), then DistilBERT (best in-corpus, worst on AI phishing). Point at the cost column.")
 
 # 9 takeaways
-slide(9, "Result 4 · What it means", "Faria", "Cheap detectors can be robust, if you pick carefully",
+slide(9, "Result 4 · What it means", "Faria", "No single winner: pick the trade-off you can live with",
 f"""  <div class="row" style="align-items:stretch;flex:1">
     <div style="flex:1;display:flex;flex-direction:column;gap:10px">
-      <div class="card good" style="padding:12px 18px"><b class="t-good fs-18">1. Best balance: {best['model']} zero-shot</b><div class="small" style="margin-top:3px">{f3(best['unseen_f1_mean'])} F1 on unseen corpora, {f3(best['ai_phishing_f1'])} on AI phishing, ${best['usd_per_1000']:.3f} per 1,000 emails.</div></div>
-      <div class="card accent" style="padding:12px 18px"><b class="t-accent fs-18">2. Few-shot helps old mail, hurts AI phishing</b><div class="small" style="margin-top:3px">Qwen: unseen {f3(best['unseen_f1_mean'])} to {f3(qfs['unseen_f1_mean'])}, but AI phishing {f3(best['ai_phishing_f1'])} to {f3(qfs['ai_phishing_f1'])}. Old examples anchor the model to old spam.</div></div>
-      <div class="card blue" style="padding:12px 18px"><b class="t-blue fs-18">3. TF-IDF is a strong, free baseline</b><div class="small" style="margin-top:3px">{f3(lr['unseen_f1_mean'])} on unseen corpora, but only {f3(lr['ai_phishing_f1'])} on AI-written phishing.</div></div>
-      <div class="card amber" style="padding:12px 18px"><b class="t-amber fs-18">4. Size is not quality</b><div class="small" style="margin-top:3px">Phi-4 (14B) ignored the one-word format in a third of emails and scored below 3B and 8B models.</div></div>
+      <div class="card good" style="padding:11px 18px"><b class="t-good fs-18">1. Best balance: {best['model']} zero-shot</b><div class="small" style="margin-top:3px">{f3(best['unseen_f1_mean'])} F1 on unseen corpora, {100*best['false_alarm_rate']:.0f}% false alarms, {f3(best['ai_phishing_f1'])} on AI phishing, ${best['usd_per_1000']:.3f} per 1,000 emails.</div></div>
+      <div class="card amber" style="padding:11px 18px"><b class="t-amber fs-18">2. {gm['model']} catches more, flags more</b><div class="small" style="margin-top:3px">{f3(gm['ai_phishing_f1'])} on AI phishing, but {100*gm['false_alarm_rate']:.0f}% of legitimate mail flagged. Good for review queues, not for blocking.</div></div>
+      <div class="card accent" style="padding:11px 18px"><b class="t-accent fs-18">3. Few-shot helps old mail, hurts AI phishing</b><div class="small" style="margin-top:3px">Qwen on AI phishing: {f3(best['ai_phishing_f1'])} to {f3(qfs['ai_phishing_f1'])} with 4 old examples. They anchor it to old spam.</div></div>
+      <div class="card blue" style="padding:11px 18px"><b class="t-blue fs-18">4. The usual metric picks the wrong model</b><div class="small" style="margin-top:3px">DistilBERT: best in-corpus F1 ({f3(dbm['in_corpus_f1'])}), weakest trained model on AI phishing ({f3(dbm['ai_phishing_f1'])}).</div></div>
     </div>
-    <div class="fig" style="flex:1">{img('f1_vs_cost.png')}</div>
+    <div class="fig" style="flex:0.95">{img('f1_vs_cost.png')}</div>
   </div>""",
-"60 sec. Four takeaways, one sentence each. Spend the most time on number 2, it is the surprise: examples from old corpora make the model worse on new attacks.")
+"60 sec. Four points, one sentence each. Spend the time on 2 and 3. Mention Phi-4 only if asked: it ignored the one-word format in a third of emails.")
 
 # 10 limitations
 slide(10, "Limitations", "Faria", "What this study does not show",
 """  <div class="grid2">
     <div class="card"><b class="fs-18">Labels are mixed</b><div class="small" style="margin-top:6px">Four corpora count ordinary spam as positive. We keep the published labels and report phishing-only recall separately.</div></div>
-    <div class="card"><b class="fs-18">Small evaluation sets</b><div class="small" style="margin-top:6px">300 emails per test set keeps the cost low. The 95% intervals are about ±0.02 to ±0.03.</div></div>
+    <div class="card"><b class="fs-18">Small evaluation sets</b><div class="small" style="margin-top:6px">300 emails per test set keeps the cost low. The 95% intervals are about ±0.01 to ±0.03.</div></div>
     <div class="card"><b class="fs-18">LLM training data is unknown</b><div class="small" style="margin-top:6px">Old public corpora may be in the LLMs' pre-training data. E-PhishLLM is newer, but we cannot rule it out.</div></div>
     <div class="card"><b class="fs-18">Text only, English only</b><div class="small" style="margin-top:6px">No headers, URLs or attachments. The Italian and German part of E-PhishLLM is unused.</div></div>
     <div class="card"><b class="fs-18">Light DistilBERT training</b><div class="small" style="margin-top:6px">1,000 emails per corpus and one epoch, to fit an 8 GB laptop.</div></div>
@@ -244,7 +246,7 @@ slide(10, "Limitations", "Faria", "What this study does not show",
 # 11 next two weeks
 slide(11, "Scope of improvements within 2 weeks", "Faria", "What we can finish before the final paper",
 """  <div class="tl">
-    <div class="card blue"><div class="date">DAYS 1 TO 3</div><b class="fs-18">Phishsense-1B</b><div class="small" style="margin-top:6px">Get a HuggingFace token, run it locally on the same 2,700 emails. It is the model that fell from 97.5% to 70%.</div></div>
+    <div class="card blue"><div class="date">DAYS 1 TO 3</div><b class="fs-18">Phishsense-1B</b><div class="small" style="margin-top:6px">Get a HuggingFace token, run it locally on the same 2,400 emails. It is the model that fell from 97.5% to 70%.</div></div>
     <div class="card accent"><div class="date">DAYS 4 TO 6</div><b class="fs-18">Phishing-only labels</b><div class="small" style="margin-top:6px">Relabel spam vs phishing on a sample and rerun, to close the label gap.</div></div>
     <div class="card amber"><div class="date">DAYS 7 TO 9</div><b class="fs-18">Bigger test sets</b><div class="small" style="margin-top:6px">1,000 emails per set for the top 3 models. Under $0.50 more.</div></div>
     <div class="card good"><div class="date">DAYS 10 TO 14</div><b class="fs-18">Multilingual + write-up</b><div class="small" style="margin-top:6px">Italian and German E-PhishLLM, stronger DistilBERT, final paper.</div></div>

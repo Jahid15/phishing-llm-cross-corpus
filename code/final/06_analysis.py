@@ -122,6 +122,8 @@ def main():
         if len(unseen) < len(TRAIN_CORPORA):
             continue
         f1s = [f1_score(y, p, zero_division=0) for y, p in unseen]
+        # false alarm rate: share of legitimate emails flagged, mean over the six unseen corpora
+        fprs = [((p == 1) & (y == 0)).sum() / max(1, (y == 0).sum()) for y, p in unseen]
         lo, hi = boot_mean_f1(unseen)
         if name in ("TF-IDF + LogReg", "TF-IDF + NB"):
             inc = cl[(cl.model == name) & (cl.setting == "in_corpus")]["f1"].mean()
@@ -141,6 +143,8 @@ def main():
             "unseen_f1_mean": round(np.mean(f1s), 3),
             "unseen_f1_ci": f"{lo:.3f}-{hi:.3f}",
             "unseen_f1_worst": round(min(f1s), 3),
+            "false_alarm_rate": round(float(np.mean(fprs)), 3),
+            "false_alarm_worst": round(float(np.max(fprs)), 3),
             "ai_phishing_f1": round(m_on("ephishllm", "f1"), 3),
             "nazario_recall": round(m_on("nazario", "recall"), 3),
             "nigerian_recall": round(m_on("nigerian", "recall"), 3),
@@ -191,11 +195,18 @@ def figures(per, main):
 
     # 2. unseen corpus F1 vs cost
     fig, ax = plt.subplots(figsize=(4.6, 3.0))
+    # hand-placed label offsets (points) so crowded labels do not overlap
+    offs = {"TF-IDF + LogReg": (6, 6), "TF-IDF + NB": (6, -2), "DistilBERT": (6, -10),
+            "Gemma-3-12B": (-8, 8), "Llama-3.1-8B": (-62, -4), "Qwen-2.5-7B": (-50, 4),
+            "Qwen-2.5-7B few-shot": (-40, 6), "Llama-3.2-3B few-shot": (5, -2), "Llama-3.2-3B": (5, -6)}
     for _, r in main.iterrows():
         x = max(r.usd_per_1000, 0.001)
         c = "#d62728" if r.type == "LLM" else ("#1f77b4" if r.type == "classical" else "#2ca02c")
         ax.scatter(x, r.unseen_f1_mean, color=c, s=22, zorder=3)
-        ax.annotate(r.model, (x, r.unseen_f1_mean), fontsize=6, xytext=(3, 2), textcoords="offset points")
+        ax.annotate(r.model, (x, r.unseen_f1_mean), fontsize=6, xytext=offs.get(r.model, (4, 2)),
+                    textcoords="offset points")
+    ax.set_xlim(0.0006, 0.15)
+    ax.set_ylim(top=0.965)
     ax.set_xscale("log"); ax.set_xlabel("API cost, USD per 1,000 emails (local models drawn at 0.001)")
     ax.set_ylabel("mean F1 on unseen corpora"); ax.grid(alpha=0.3)
     fig.tight_layout(); fig.savefig(os.path.join(FIG_DIR, "f1_vs_cost.png")); plt.close(fig)

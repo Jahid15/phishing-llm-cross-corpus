@@ -14,12 +14,15 @@ mail from the training collection. On unseen corpora the same TF-IDF model
 drops by 4 to 15 points, and on AI-written phishing by about 30.
 
 \textit{What we would deploy.} For an organisation with no GPU and a small
-budget, zero-shot Qwen-2.5-7B is the best balance we found. It is the most
-robust model across old corpora and one of the two best on AI-written
-phishing, at about three cents per thousand emails. TF-IDF remains a useful,
-free first filter for bulk spam, but it should not be trusted on modern
-phishing. Few-shot prompting needs care: examples must look like the mail the
-system will actually see, or they make it worse.
+budget, zero-shot Qwen-2.5-7B is the best balance we found: the highest
+unseen-corpus F1 among zero-shot models, about 3\% false alarms, good
+AI-phishing detection, and about three cents per thousand emails. Gemma-3-12B
+catches more AI-written phishing but flags about a quarter of legitimate mail,
+so it fits a second-opinion role (for example, deciding what goes to a
+quarantine folder for human review) better than automatic blocking. TF-IDF
+remains a useful, free first filter for bulk spam, but it should not be
+trusted on modern phishing. Few-shot prompting needs care: examples must look
+like the mail the system will actually see, or they make it worse.
 
 \textit{Output format is part of the model's quality.} Phi-4's score is low
 partly because it did not follow the one-word format. In a real pipeline an
@@ -35,7 +38,7 @@ Nazario separately, but a clean phishing versus spam relabelling is still
 missing.
 \item \textit{Sample size.} Each test set has 300 emails (150 for the
 one-class sets), which keeps cost low. The 95\% intervals of the mean F1 are
-about $\pm$0.02, so differences below that are not meaningful.
+about $\pm$0.01 to $\pm$0.03, so smaller differences are not meaningful.
 \item \textit{LLM pre-training.} The old public corpora may be part of the
 LLMs' pre-training data. E-PhishLLM was released in 2025, after most of these
 models, which makes it the most trustworthy test for them.
@@ -56,7 +59,8 @@ third of Enron. Removing these copies lowers cross-corpus F1 by up to 30
 points for a single pair and up to 11.5 points in leave-one-corpus-out
 testing. On honest, unseen test data, a small open LLM used zero-shot is as
 robust as trained models on old mail and much better on AI-written phishing,
-for a few cents per thousand emails. High accuracy on one dataset is easy.
+for a few cents per thousand emails. The models differ mostly in how they
+trade missed phishing against false alarms, which a single F1 score hides. High accuracy on one dataset is easy.
 Honest evaluation is the hard part. All code, results and a Colab notebook are
 public so that others can check and extend this work.
 

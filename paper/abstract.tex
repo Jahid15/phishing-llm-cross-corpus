@@ -13,7 +13,11 @@ leave-one-corpus-out F1 by up to 11.5 points. We then compare classical models,
 DistilBERT and six small open LLMs (1B to 14B parameters) on the same held-out
 emails, including AI-written phishing, next to the measured API cost.
 Zero-shot Qwen-2.5-7B gives the best balance, with a mean F1 of
-0.928 on unseen corpora and 0.819 on AI-written phishing for
-3 US cents per 1{,}000 emails. Few-shot examples taken from old
-corpora raise scores on old mail but lower them on AI-written phishing. The
-whole study ran on one laptop for 0.50 US dollars of API fees.
+0.928 on unseen corpora, 3\% false alarms and 0.819 F1 on
+AI-written phishing, for 3 US cents per 1{,}000 emails.
+Gemma-3-12B catches more AI-written phishing (F1 0.955) but flags
+25\% of legitimate mail. The fine-tuned DistilBERT has the best
+in-corpus score of all models and the weakest AI-phishing score of the trained
+ones, and few-shot examples taken from old corpora raise scores on old mail
+but lower them on AI-written phishing. The
+whole study ran on one laptop for 0.52 US dollars of API fees.

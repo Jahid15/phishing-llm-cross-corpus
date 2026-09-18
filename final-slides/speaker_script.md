@@ -141,35 +141,38 @@ overlap আছে, ঠিক সেখানেই score পড়ে। এখ�
 
 EN: This is the table from our proposal, filled in. Every model on the same
 held-out emails. The highlighted row is zero-shot Qwen-2.5-7B, our
-recommendation. Look at three things: the unseen-corpus F1, the AI phishing
-column, and the cost column. TF-IDF is still strong on old mail but weak on
-AI-written phishing. The smallest Llama is simply too weak.
+recommendation: 0.928 F1 on unseen corpora and only 3 percent false alarms.
+Now look at Gemma: it is the best on AI-written phishing, 0.955, but it flags
+25 percent of legitimate mail. And DistilBERT: the best in-corpus score of all,
+but only 0.49 on AI phishing. The last column is the cost.
 
-BN: এটা আমাদের proposal এর table, এখন পূরণ করা। সব model একই অদেখা email এ। হাইলাইট
-করা row টা zero-shot Qwen-2.5-7B, এটাই আমাদের সুপারিশ। তিনটা জিনিস দেখেন: অদেখা
-corpus এ F1, AI phishing এর কলাম, আর খরচের কলাম। TF-IDF পুরনো email এ এখনো ভালো, কিন্তু
-AI দিয়ে লেখা phishing এ দুর্বল। সবচেয়ে ছোট Llama এই কাজের জন্য যথেষ্ট না।
+BN: এটা আমাদের proposal এর table, এখন পূরণ করা। সব model একই অদেখা email এ।
+হাইলাইট করা row টা zero-shot Qwen-2.5-7B, এটাই আমাদের সুপারিশ: অদেখা corpus এ F1
+০.৯২৮, আর মাত্র ৩ percent ভুল alarm। এবার Gemma দেখেন: AI দিয়ে লেখা phishing এ সবচেয়ে
+ভালো, ০.৯৫৫, কিন্তু ২৫ percent আসল email কেও phishing বলে দেয়। আর DistilBERT: নিজের
+corpus এ সবার চেয়ে ভালো, কিন্তু AI phishing এ মাত্র ০.৪৯। শেষ কলামটা খরচ।
 
 ### Slide 9. What it means (60 sec)
 
-EN: Four takeaways. One, zero-shot Qwen gives the best balance for about three
-cents per thousand emails. Two, and this surprised us: few-shot examples from
-old corpora make the model better on old mail but much worse on AI phishing,
-because they teach it that phishing looks like old spam. Three, TF-IDF is a
-free and strong baseline, but not for modern phishing. Four, bigger is not
-better: Phi-4 ignored our one-word format in a third of emails.
+EN: There is no single winner, so pick the trade-off you can live with. One,
+Qwen zero-shot is the best balance for about three cents per thousand emails.
+Two, Gemma catches more but flags more, so use it to decide what goes to a
+review folder, not to block mail. Three, and this surprised us: few-shot
+examples from old corpora make the model worse on AI phishing, because they
+teach it that phishing looks like old spam. Four, the usual metric picks the
+wrong model: DistilBERT looks best in-corpus and is the weakest on new attacks.
 
-BN: চারটা কথা। এক, zero-shot Qwen হাজার email এ প্রায় তিন cent এ সবচেয়ে ভালো ভারসাম্য
-দেয়। দুই, এটা আমাদের অবাক করেছে: পুরনো corpus থেকে few-shot উদাহরণ দিলে model পুরনো
-email এ ভালো করে কিন্তু AI phishing এ অনেক খারাপ করে, কারণ উদাহরণগুলো শেখায় যে
-phishing দেখতে পুরনো spam এর মতো। তিন, TF-IDF বিনা খরচে শক্ত baseline, কিন্তু আধুনিক
-phishing এর জন্য না। চার, বড় মানেই ভালো না: Phi-4 এক তৃতীয়াংশ email এ আমাদের এক শব্দের
-উত্তরের নিয়ম মানেনি।
+BN: একক কোনো বিজয়ী নেই, তাই যে trade-off মেনে নিতে পারবেন সেটা বেছে নিন। এক, Qwen
+zero-shot হাজার email এ প্রায় তিন cent এ সবচেয়ে ভালো ভারসাম্য। দুই, Gemma বেশি ধরে
+কিন্তু বেশি ভুল alarm দেয়, তাই এটা review folder এর জন্য ভালো, mail block করার জন্য না।
+তিন, এটা আমাদের অবাক করেছে: পুরনো corpus এর few-shot উদাহরণ AI phishing এ model কে
+খারাপ করে দেয়, কারণ উদাহরণগুলো শেখায় যে phishing দেখতে পুরনো spam এর মতো। চার, প্রচলিত
+মাপকাঠি ভুল model বেছে নেয়: DistilBERT নিজের corpus এ সেরা, অথচ নতুন আক্রমণে সবচেয়ে দুর্বল।
 
 ### Slide 10. Limitations (40 sec)
 
 EN: Some honest limits. Four corpora count spam as positive, not only
-phishing. Our test sets are 300 emails, so differences under about 0.02 do not
+phishing. Our test sets are 300 emails, so differences under about 0.02 to 0.03 do not
 mean much. And the LLMs may have seen the old corpora during pre-training. That
 is exactly why the newer E-PhishLLM test matters most for them.
 
@@ -207,4 +210,6 @@ BN: সবকিছু public: code, result, paper, আর একটা Colab no
 - *How do you know the near duplicates are real?* We searched 400 of them by brute force and read many by hand. Same messages, different line breaks.
 - *Did the LLMs see these corpora in training?* Maybe for the old ones. E-PhishLLM is from 2025, which is why we weight it most.
 - *Why did few-shot hurt on AI phishing?* The examples come from 2002 to 2008 corpora, so they anchor the model to old spam style.
-- *How much did it cost?* Under one US dollar for the whole study, measured per call.
+- *How much did it cost?* 0.52 US dollars for the whole study, measured per call.
+- *Why not recommend Gemma, it has the best AI-phishing score?* It flags 25 percent of legitimate mail (57 percent of Enron). In a real mailbox that means one in four normal emails blocked.
+- *Why is Phi-4 so low?* In 37 percent of emails it ignored the one-word format and started explaining, so no verdict was given.

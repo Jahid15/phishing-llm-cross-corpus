@@ -1,0 +1,2 @@
+setting,test,train_size,train_sec,infer_sec_per_1000,device
+loco_clean,nigerian,6000,539.2,19.17,cpu

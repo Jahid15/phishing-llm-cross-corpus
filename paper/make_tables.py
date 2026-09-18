@@ -45,13 +45,13 @@ for a, b in [("kaggle", "spamassassin"), ("kaggle", "ling"), ("kaggle", "enron")
     cells = " & ".join(fmt(*get(l, a, b)) for l in ["exact_raw", "exact_norm", "near"])
     lines.append(f"{nice[b]} in {nice[a]} & {cells} \\\\")
 w("tab_overlap.tex", r"""\begin{table}[t]
-\caption{Emails of one corpus found inside another, at three levels of matching. Percentages are of the first corpus.}
+\caption{Emails of one corpus found inside another, at three levels of matching: exact text, exact after removing all whitespace, and near duplicate. Percentages are of the first corpus.}
 \label{tab:overlap}
 \centering\footnotesize
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{1.6pt}
 \begin{tabular}{lrrr}
 \toprule
-Pair & Exact raw & No whitespace & Near duplicate \\
+Pair & Exact & No space & Near dup. \\
 \midrule
 """ + "\n".join(lines) + r"""
 \bottomrule
@@ -110,14 +110,15 @@ for r in m.itertuples():
     inc = f"{r.in_corpus_f1:.3f}" if isinstance(r.in_corpus_f1, float) and r.in_corpus_f1 == r.in_corpus_f1 else "--"
     cost = "local" if r.usd_per_1000 == 0 else f"{r.usd_per_1000:.3f}"
     rows.append(f"{r.model} & {inc} & {r.unseen_f1_mean:.3f} & {r.unseen_f1_ci.replace('-', '--')} & {r.unseen_f1_worst:.3f} & "
-                f"{r.ai_phishing_f1:.3f} & {r.nazario_recall:.3f} & {r.nigerian_recall:.3f} & {cost} \\\\")
+                f"{100*r.false_alarm_rate:.1f} & {r.ai_phishing_f1:.3f} & {r.nazario_recall:.3f} & {r.nigerian_recall:.3f} & {cost} \\\\")
 w("tab_main.tex", r"""\begin{table*}[t]
-\caption{Main results. All numbers are on the same fixed evaluation emails. Trained models use decontaminated leave-one-corpus-out data. ``Unseen'' is the mean F1 over the six held-out corpora with a 95\% bootstrap interval, ``Worst'' the lowest of the six. AI phishing is F1 on E-PhishLLM. Nazario and Nigerian contain only positives, so we report recall. Cost is the measured OpenRouter charge in USD per 1{,}000 emails.}
+\caption{Main results. All numbers are on the same fixed evaluation emails. Trained models use decontaminated leave-one-corpus-out data. ``Unseen'' is the mean F1 over the six held-out corpora with a 95\% bootstrap interval, ``Worst'' the lowest of the six. FA is the false alarm rate, the share of legitimate emails flagged as phishing, averaged over the six corpora. AI phishing is F1 on E-PhishLLM. Nazario and Nigerian contain only positives, so we report recall. Cost is the measured OpenRouter charge in USD per 1{,}000 emails.}
 \label{tab:main}
 \centering\footnotesize
-\begin{tabular}{lrrrrrrrr}
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{lrrrrrrrrr}
 \toprule
-Model & In-corpus & Unseen & 95\% CI & Worst & AI phishing & Nazario rec. & Nigerian rec. & USD/1k \\
+Model & In-corpus & Unseen & 95\% CI & Worst & FA (\%) & AI phishing & Nazario rec. & Nigerian rec. & USD/1k \\
 \midrule
 """ + "\n".join(rows) + r"""
 \bottomrule
