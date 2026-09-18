@@ -1,0 +1,33 @@
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+microsoft/phi-4 zero spamassassin: 300 emails, total spend $0.1739
+microsoft/phi-4 zero ceas08: 300 emails, total spend $0.1797
+microsoft/phi-4 zero trec07: 300 emails, total spend $0.1864
+microsoft/phi-4 zero ling: 300 emails, total spend $0.1937
+microsoft/phi-4 zero enron: 300 emails, total spend $0.1995
+microsoft/phi-4 zero kaggle: 300 emails, total spend $0.2057
+microsoft/phi-4 zero nazario: 150 emails, total spend $0.2083
+microsoft/phi-4 zero nigerian: 150 emails, total spend $0.2126
+microsoft/phi-4 zero ephishllm: 300 emails, total spend $0.2163
+done. total spend $0.2163
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+meta-llama/llama-3.2-3b-instruct few spamassassin: 300 emails, total spend $0.2273
+meta-llama/llama-3.2-3b-instruct few ceas08: 300 emails, total spend $0.2379
+meta-llama/llama-3.2-3b-instruct few trec07: 300 emails, total spend $0.2495
+meta-llama/llama-3.2-3b-instruct few ling: 300 emails, total spend $0.2621
+meta-llama/llama-3.2-3b-instruct few enron: 300 emails, total spend $0.2730
+meta-llama/llama-3.2-3b-instruct few kaggle: 300 emails, total spend $0.2843
+meta-llama/llama-3.2-3b-instruct few nazario: 150 emails, total spend $0.2895
+meta-llama/llama-3.2-3b-instruct few nigerian: 150 emails, total spend $0.2960
+meta-llama/llama-3.2-3b-instruct few ephishllm: 300 emails, total spend $0.3054
+qwen/qwen-2.5-7b-instruct few spamassassin: 300 emails, total spend $0.3268
+qwen/qwen-2.5-7b-instruct few ceas08: 300 emails, total spend $0.3477
+qwen/qwen-2.5-7b-instruct few trec07: 300 emails, total spend $0.3709
+qwen/qwen-2.5-7b-instruct few ling: 300 emails, total spend $0.4004
+qwen/qwen-2.5-7b-instruct few enron: 300 emails, total spend $0.4223
+qwen/qwen-2.5-7b-instruct few kaggle: 300 emails, total spend $0.4448
+qwen/qwen-2.5-7b-instruct few nazario: 150 emails, total spend $0.4552
+qwen/qwen-2.5-7b-instruct few nigerian: 150 emails, total spend $0.4681
+qwen/qwen-2.5-7b-instruct few ephishllm: 300 emails, total spend $0.4867
+done. total spend $0.4867

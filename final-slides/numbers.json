@@ -1,0 +1,405 @@
+{
+ "datasets": [
+  {
+   "source": "spamassassin",
+   "role": "train+test",
+   "emails_after_cleaning": 5803,
+   "emails_used": 5803,
+   "phishing_or_spam": 1712,
+   "legitimate": 4091,
+   "eval_subset": 300
+  },
+  {
+   "source": "ceas08",
+   "role": "train+test",
+   "emails_after_cleaning": 39091,
+   "emails_used": 10000,
+   "phishing_or_spam": 5574,
+   "legitimate": 4426,
+   "eval_subset": 300
+  },
+  {
+   "source": "trec07",
+   "role": "train+test",
+   "emails_after_cleaning": 53638,
+   "emails_used": 10000,
+   "phishing_or_spam": 5460,
+   "legitimate": 4540,
+   "eval_subset": 300
+  },
+  {
+   "source": "ling",
+   "role": "train+test",
+   "emails_after_cleaning": 2858,
+   "emails_used": 2858,
+   "phishing_or_spam": 458,
+   "legitimate": 2400,
+   "eval_subset": 300
+  },
+  {
+   "source": "enron",
+   "role": "train+test",
+   "emails_after_cleaning": 29604,
+   "emails_used": 10000,
+   "phishing_or_spam": 4689,
+   "legitimate": 5311,
+   "eval_subset": 300
+  },
+  {
+   "source": "kaggle",
+   "role": "train+test",
+   "emails_after_cleaning": 17505,
+   "emails_used": 10000,
+   "phishing_or_spam": 3731,
+   "legitimate": 6269,
+   "eval_subset": 300
+  },
+  {
+   "source": "nazario",
+   "role": "test only",
+   "emails_after_cleaning": 1554,
+   "emails_used": 1554,
+   "phishing_or_spam": 1554,
+   "legitimate": 0,
+   "eval_subset": 150
+  },
+  {
+   "source": "nigerian",
+   "role": "test only",
+   "emails_after_cleaning": 3316,
+   "emails_used": 3316,
+   "phishing_or_spam": 3316,
+   "legitimate": 0,
+   "eval_subset": 150
+  },
+  {
+   "source": "ephishllm",
+   "role": "test only",
+   "emails_after_cleaning": 11502,
+   "emails_used": 10000,
+   "phishing_or_spam": 5213,
+   "legitimate": 4787,
+   "eval_subset": 300
+  }
+ ],
+ "total_emails_used": 63531,
+ "total_emails_clean": 164871,
+ "sa_in_kaggle": {
+  "exact_raw": [
+   2,
+   0.03
+  ],
+  "exact_norm": [
+   3850,
+   66.34
+  ],
+  "near": [
+   5009,
+   86.32
+  ]
+ },
+ "ling_in_kaggle_near": [
+  2577,
+  90.17
+ ],
+ "enron_in_kaggle_near": [
+  10229,
+  34.55
+ ],
+ "kaggle_in_enron_near": [
+  9212,
+  52.62
+ ],
+ "kaggle_to_sa": {
+  "raw": 0.9655,
+  "clean": 0.6661
+ },
+ "kaggle_to_enron": {
+  "raw": 0.9694,
+  "clean": 0.7377
+ },
+ "kaggle_to_ling": {
+  "raw": 0.979,
+  "clean": 0.8395
+ },
+ "inflation_logreg": [
+  {
+   "model": "TF-IDF + LogReg",
+   "test": "ceas08",
+   "loco_clean": 0.832,
+   "loco_raw": 0.833,
+   "removed": 13,
+   "inflation": 0.001,
+   "in_corpus": 0.986
+  },
+  {
+   "model": "TF-IDF + LogReg",
+   "test": "enron",
+   "loco_clean": 0.919,
+   "loco_raw": 0.972,
+   "removed": 6091,
+   "inflation": 0.054,
+   "in_corpus": 0.981
+  },
+  {
+   "model": "TF-IDF + LogReg",
+   "test": "ephishllm",
+   "loco_clean": 0.675,
+   "loco_raw": 0.675,
+   "removed": 0,
+   "inflation": 0.0,
+   "in_corpus": null
+  },
+  {
+   "model": "TF-IDF + LogReg",
+   "test": "kaggle",
+   "loco_clean": 0.928,
+   "loco_raw": 0.976,
+   "removed": 11018,
+   "inflation": 0.048,
+   "in_corpus": 0.965
+  },
+  {
+   "model": "TF-IDF + LogReg",
+   "test": "ling",
+   "loco_clean": 0.847,
+   "loco_raw": 0.962,
+   "removed": 1444,
+   "inflation": 0.115,
+   "in_corpus": 0.93
+  },
+  {
+   "model": "TF-IDF + LogReg",
+   "test": "nazario",
+   "loco_clean": 0.825,
+   "loco_raw": 0.825,
+   "removed": 0,
+   "inflation": 0.0,
+   "in_corpus": null
+  },
+  {
+   "model": "TF-IDF + LogReg",
+   "test": "nigerian",
+   "loco_clean": 0.996,
+   "loco_raw": 0.996,
+   "removed": 79,
+   "inflation": 0.0,
+   "in_corpus": null
+  },
+  {
+   "model": "TF-IDF + LogReg",
+   "test": "spamassassin",
+   "loco_clean": 0.847,
+   "loco_raw": 0.947,
+   "removed": 3165,
+   "inflation": 0.1,
+   "in_corpus": 0.966
+  },
+  {
+   "model": "TF-IDF + LogReg",
+   "test": "trec07",
+   "loco_clean": 0.871,
+   "loco_raw": 0.871,
+   "removed": 7,
+   "inflation": 0.0,
+   "in_corpus": 0.985
+  }
+ ],
+ "main": [
+  {
+   "model": "Qwen-2.5-7B few-shot",
+   "type": "LLM",
+   "in_corpus_f1": "",
+   "unseen_f1_mean": 0.937,
+   "unseen_f1_ci": "0.925-0.949",
+   "unseen_f1_worst": 0.844,
+   "ai_phishing_f1": 0.598,
+   "nazario_recall": 0.847,
+   "nigerian_recall": 1.0,
+   "usd_per_1000": 0.0737,
+   "unparsed_pct": 0.0
+  },
+  {
+   "model": "Qwen-2.5-7B",
+   "type": "LLM",
+   "in_corpus_f1": "",
+   "unseen_f1_mean": 0.928,
+   "unseen_f1_ci": "0.914-0.940",
+   "unseen_f1_worst": 0.85,
+   "ai_phishing_f1": 0.819,
+   "nazario_recall": 0.94,
+   "nigerian_recall": 1.0,
+   "usd_per_1000": 0.0307,
+   "unparsed_pct": 0.0
+  },
+  {
+   "model": "TF-IDF + LogReg",
+   "type": "classical",
+   "in_corpus_f1": 0.969,
+   "unseen_f1_mean": 0.901,
+   "unseen_f1_ci": "0.886-0.916",
+   "unseen_f1_worst": 0.807,
+   "ai_phishing_f1": 0.64,
+   "nazario_recall": 0.713,
+   "nigerian_recall": 1.0,
+   "usd_per_1000": 0.0,
+   "unparsed_pct": 0.0
+  },
+  {
+   "model": "Llama-3.2-3B few-shot",
+   "type": "LLM",
+   "in_corpus_f1": "",
+   "unseen_f1_mean": 0.901,
+   "unseen_f1_ci": "0.886-0.916",
+   "unseen_f1_worst": 0.848,
+   "ai_phishing_f1": 0.438,
+   "nazario_recall": 0.68,
+   "nigerian_recall": 0.993,
+   "usd_per_1000": 0.0371,
+   "unparsed_pct": 0.0
+  },
+  {
+   "model": "TF-IDF + NB",
+   "type": "classical",
+   "in_corpus_f1": 0.929,
+   "unseen_f1_mean": 0.895,
+   "unseen_f1_ci": "0.879-0.909",
+   "unseen_f1_worst": 0.773,
+   "ai_phishing_f1": 0.631,
+   "nazario_recall": 0.6,
+   "nigerian_recall": 0.987,
+   "usd_per_1000": 0.0,
+   "unparsed_pct": 0.0
+  },
+  {
+   "model": "Llama-3.1-8B",
+   "type": "LLM",
+   "in_corpus_f1": "",
+   "unseen_f1_mean": 0.881,
+   "unseen_f1_ci": "0.866-0.896",
+   "unseen_f1_worst": 0.779,
+   "ai_phishing_f1": 0.817,
+   "nazario_recall": 0.973,
+   "nigerian_recall": 1.0,
+   "usd_per_1000": 0.0111,
+   "unparsed_pct": 0.8
+  },
+  {
+   "model": "Llama-3.2-3B",
+   "type": "LLM",
+   "in_corpus_f1": "",
+   "unseen_f1_mean": 0.85,
+   "unseen_f1_ci": "0.832-0.869",
+   "unseen_f1_worst": 0.799,
+   "ai_phishing_f1": 0.507,
+   "nazario_recall": 0.827,
+   "nigerian_recall": 1.0,
+   "usd_per_1000": 0.0163,
+   "unparsed_pct": 0.1
+  },
+  {
+   "model": "Phi-4-14B",
+   "type": "LLM",
+   "in_corpus_f1": "",
+   "unseen_f1_mean": 0.727,
+   "unseen_f1_ci": "0.703-0.749",
+   "unseen_f1_worst": 0.621,
+   "ai_phishing_f1": 0.759,
+   "nazario_recall": 0.66,
+   "nigerian_recall": 0.513,
+   "usd_per_1000": 0.0208,
+   "unparsed_pct": 37.1
+  },
+  {
+   "model": "Llama-3.2-1B",
+   "type": "LLM",
+   "in_corpus_f1": "",
+   "unseen_f1_mean": 0.623,
+   "unseen_f1_ci": "0.599-0.647",
+   "unseen_f1_worst": 0.359,
+   "ai_phishing_f1": 0.474,
+   "nazario_recall": 0.76,
+   "nigerian_recall": 0.607,
+   "usd_per_1000": 0.0087,
+   "unparsed_pct": 1.0
+  }
+ ],
+ "llm_cost": [
+  {
+   "model": "Qwen-2.5-7B",
+   "usd_per_1000": 0.03073,
+   "total_usd": 0.07375,
+   "calls": 2400,
+   "unparsed_pct": 0.0,
+   "median_latency_s": 0.6135,
+   "tokens_in_mean": 301.28
+  },
+  {
+   "model": "Llama-3.1-8B",
+   "usd_per_1000": 0.01114,
+   "total_usd": 0.02674,
+   "calls": 2400,
+   "unparsed_pct": 0.79167,
+   "median_latency_s": 0.745,
+   "tokens_in_mean": 299.44458
+  },
+  {
+   "model": "Phi-4-14B",
+   "usd_per_1000": 0.02078,
+   "total_usd": 0.04987,
+   "calls": 2400,
+   "unparsed_pct": 37.08333,
+   "median_latency_s": 0.602,
+   "tokens_in_mean": 288.03958
+  },
+  {
+   "model": "Qwen-2.5-7B few-shot",
+   "usd_per_1000": 0.07372,
+   "total_usd": 0.17693,
+   "calls": 2400,
+   "unparsed_pct": 0.0,
+   "median_latency_s": 0.646,
+   "tokens_in_mean": 731.28
+  },
+  {
+   "model": "Llama-3.2-3B",
+   "usd_per_1000": 0.01632,
+   "total_usd": 0.03917,
+   "calls": 2400,
+   "unparsed_pct": 0.08333,
+   "median_latency_s": 0.528,
+   "tokens_in_mean": 303.30958
+  },
+  {
+   "model": "Llama-3.2-1B",
+   "usd_per_1000": 0.00868,
+   "total_usd": 0.02083,
+   "calls": 2400,
+   "unparsed_pct": 1.0,
+   "median_latency_s": 0.527,
+   "tokens_in_mean": 292.7275
+  },
+  {
+   "model": "Gemma-3-12B",
+   "usd_per_1000": 0.01714,
+   "total_usd": 0.01543,
+   "calls": 900,
+   "unparsed_pct": 1.66667,
+   "median_latency_s": 0.837,
+   "tokens_in_mean": 333.96667
+  },
+  {
+   "model": "Llama-3.2-3B few-shot",
+   "usd_per_1000": 0.03715,
+   "total_usd": 0.08916,
+   "calls": 2400,
+   "unparsed_pct": 0.0,
+   "median_latency_s": 0.533,
+   "tokens_in_mean": 715.36542
+  }
+ ],
+ "llm_total_usd": 0.4919,
+ "llm_calls": 17700,
+ "discarded_usd": 0.01,
+ "logreg_cpu_sec_per_1000": 0.25
+}

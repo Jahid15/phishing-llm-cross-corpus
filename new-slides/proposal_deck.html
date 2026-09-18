@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phishing Email Detection Using LLMs: Proposal</title>
+<style>
+:root{
+  --bg:#0F1420; --card:#1B2335; --text:#F5F7FA; --muted:#94A3B8;
+  --accent:#FF6B4A; --good:#4ADE80; --blue:#60A5FA; --amber:#FBBF24;
+  --line:#2A3448;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#05070C;color:var(--text);
+  font-family:"Segoe UI",Roboto,system-ui,-apple-system,sans-serif;overflow:hidden}
+
+/* ---- stage scales a fixed 1280x720 canvas to any screen ---- */
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:1280px;height:720px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--bg);padding:52px 64px;
+  display:none;flex-direction:column;border-radius:6px}
+.slide.on{display:flex}
+
+/* ---- chrome ---- */
+.kicker{color:var(--accent);font-size:14px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase}
+h1{font-size:40px;font-weight:700;line-height:1.15;margin:10px 0 26px}
+.speaker{position:absolute;top:52px;right:64px;color:var(--muted);font-size:13px}
+.num{position:absolute;bottom:26px;right:64px;color:var(--muted);font-size:13px}
+.sub{color:var(--muted);font-size:18px}
+.small{font-size:15px;color:var(--muted)}
+
+/* ---- building blocks ---- */
+.card{background:var(--card);border-radius:12px;padding:20px 24px;border:1.5px solid transparent}
+.card.accent{border-color:var(--accent)} .card.good{border-color:var(--good)}
+.card.blue{border-color:var(--blue)} .card.amber{border-color:var(--amber)}
+.card.muted{border-color:var(--line)}
+.row{display:flex;gap:18px} .row>*{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.big{font-size:62px;font-weight:700;line-height:1}
+.mid{font-size:38px;font-weight:700;line-height:1}
+.label{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.t-accent{color:var(--accent)} .t-good{color:var(--good)}
+.t-blue{color:var(--blue)} .t-amber{color:var(--amber)} .t-muted{color:var(--muted)}
+.spacer{flex:1}
+
+table{width:100%;border-collapse:collapse;font-size:16px}
+th{color:var(--blue);font-weight:700;text-align:left;padding:11px 14px;
+  border-bottom:1.5px solid var(--line)}
+td{padding:11px 14px;border-bottom:1px solid var(--line)}
+td:not(:first-child),th:not(:first-child){text-align:center}
+tr.hl td{color:var(--accent);font-weight:700}
+
+.arrow{display:grid;place-items:center;flex:0 0 46px;color:var(--muted);font-size:26px}
+.pipe{display:flex;gap:8px;align-items:stretch}
+.pipe .card{flex:1;padding:16px 10px;text-align:center}
+.pipe .arrow{flex:0 0 18px;font-size:18px}
+
+/* ---- fragments: hidden until revealed ---- */
+.frag{opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease}
+.frag.shown{opacity:1;transform:none}
+
+/* ---- font-size utilities (were inline; classed so mobile can override) ---- */
+.fs-12{font-size:12px} .fs-14{font-size:14px} .fs-16{font-size:16px}
+.fs-18{font-size:18px} .fs-19{font-size:19px} .fs-20{font-size:20px}
+.fs-21{font-size:21px} .fs-22{font-size:22px} .fs-23{font-size:23px}
+.fs-24{font-size:24px} .fs-26{font-size:26px} .fs-27{font-size:27px}
+.fs-28{font-size:28px} .fs-52{font-size:52px}
+
+/* ---- progress + hint ---- */
+#bar{position:fixed;left:0;top:0;height:3px;background:var(--accent);width:0;
+  transition:width .3s ease;z-index:10}
+#hint{position:fixed;left:18px;bottom:14px;font-size:12px;color:#44506A;z-index:10}
+.note{display:none}
+#notes{position:fixed;left:0;right:0;bottom:0;background:#080B12;
+  border-top:1px solid var(--line);padding:16px 24px;font-size:15px;color:var(--muted);
+  display:none;z-index:11;max-height:32vh;overflow:auto}
+#notes.on{display:block}
+#notes b{color:var(--amber)}
+
+/* ---- on-screen navigation, phones/tablets only ---- */
+#navbtns{display:none;position:fixed;left:0;right:0;bottom:0;z-index:12;
+  gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,rgba(5,7,12,.96),rgba(5,7,12,0))}
+#navbtns button{flex:1;padding:13px 0;font-size:20px;border:1px solid var(--line);
+  border-radius:10px;background:var(--card);color:var(--text)}
+#navbtns button:active{background:var(--accent);color:#0F1420}
+
+/* =========================================================================
+   RESPONSIVE MODE — phones and portrait tablets.
+   The fixed 1280x720 canvas is right for a projector but unreadable on a
+   phone, so below this breakpoint the deck reflows instead of scaling:
+   columns stack, slides grow as tall as they need, and type scales with the
+   viewport but never exceeds its desktop size.
+   ========================================================================= */
+@media (max-width:900px), (orientation:portrait) and (max-width:1200px){
+  html,body{overflow:auto;height:auto}
+  #stage{position:static;display:block}
+  #deck{width:100%;height:auto;transform:none!important}
+  .slide{position:relative;inset:auto;height:auto;min-height:100svh;
+    padding:52px 20px 62px;border-radius:0}
+  .slide.on{display:flex}
+
+  /* every multi-column block becomes a single column */
+  .row,.grid2,.grid3,.pipe{display:flex;flex-direction:column;gap:12px}
+  .row>*,.pipe>*{flex:none}
+  .arrow,.pipe .arrow{flex:none;height:24px;font-size:20px;transform:rotate(90deg)}
+  /* the title slide's name / university row */
+  [style*="justify-content:space-between"]{flex-direction:column;
+    align-items:flex-start!important;gap:14px}
+
+  /* fluid type, capped at the desktop size (430px = mobile design width) */
+  h1{font-size:min(40px,calc(40*100vw/430));margin:8px 0 18px}
+  .kicker{font-size:min(14px,calc(14*100vw/430))}
+  .sub{font-size:min(18px,calc(18*100vw/430))}
+  .small{font-size:min(15px,calc(15*100vw/430))}
+  .label{font-size:min(12px,calc(12*100vw/430))}
+  .big{font-size:min(62px,calc(62*100vw/430))}
+  .mid{font-size:min(38px,calc(38*100vw/430))}
+  .speaker,.num{font-size:min(13px,calc(13*100vw/430))}
+  .fs-12{font-size:min(12px,calc(12*100vw/430))}
+  .fs-14{font-size:min(14px,calc(14*100vw/430))}
+  .fs-16{font-size:min(16px,calc(16*100vw/430))}
+  .fs-18{font-size:min(18px,calc(18*100vw/430))}
+  .fs-19{font-size:min(19px,calc(19*100vw/430))}
+  .fs-20{font-size:min(20px,calc(20*100vw/430))}
+  .fs-21{font-size:min(21px,calc(21*100vw/430))}
+  .fs-22{font-size:min(22px,calc(22*100vw/430))}
+  .fs-23{font-size:min(23px,calc(23*100vw/430))}
+  .fs-24{font-size:min(24px,calc(24*100vw/430))}
+  .fs-26{font-size:min(26px,calc(26*100vw/430))}
+  .fs-27{font-size:min(27px,calc(27*100vw/430))}
+  .fs-28{font-size:min(28px,calc(28*100vw/430))}
+  .fs-52{font-size:min(52px,calc(52*100vw/430))}
+
+  .card{padding:16px}
+  .speaker{top:18px;right:20px}
+  .num{bottom:18px;right:20px}
+  /* Let table text wrap rather than scroll: the numbers in the last column are
+     the point of these slides, so they must never be pushed off-screen. */
+  table{width:100%;table-layout:auto;white-space:normal;
+    font-size:min(16px,calc(14*100vw/430))}
+  th,td{padding:8px 6px;word-break:break-word}
+
+  #hint{display:none}
+  #navbtns{display:flex}
+  #notes{max-height:42vh;padding-bottom:76px}
+}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="stage"><div id="deck">
+
+<!-- 1 ................................................................. -->
+<section class="slide">
+  <div style="height:6px;background:var(--accent);position:absolute;left:0;right:0;top:0;
+    border-radius:6px 6px 0 0"></div>
+  <div class="spacer"></div>
+  <div class="kicker">Computer Security · Project Proposal</div>
+  <h1 class="fs-52" style="margin:14px 0 8px">Phishing Email Detection<br>Using Large Language Models</h1>
+  <div class="fs-22" style="color:var(--blue)">Cost-Aware Benchmarking of Small Open LLMs for Cross-Corpus Detection</div>
+  <div style="height:2px;background:var(--line);width:420px;margin:30px 0 24px"></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end">
+    <div class="small" style="line-height:1.9">
+      Jahid Ibna Sinha (011221376)<br>
+      Md. Jakaria Alam Saimon (011221002)<br>
+      Nowshin Anjum Faria (011221372)
+    </div>
+    <div style="text-align:right"><b>United International University</b><br>
+      <span class="small">Group 18</span></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="num">1</div>
+  <div class="note">20 sec. Team + title only. <b>No motivation</b>, the teacher asked for technical content only.</div>
+</section>
+
+<!-- 2 ................................................................. -->
+<section class="slide">
+  <div class="kicker">1. The topic, technically</div>
+  <div class="speaker">Sinha</div>
+  <h1>It is a binary text classification problem</h1>
+  <div class="row" style="align-items:stretch">
+    <div class="card blue"><div class="label t-blue">Input</div>
+      <div class="fs-26" style="font-weight:700;margin:6px 0 4px">Raw email</div>
+      <div class="small">subject + body text</div></div>
+    <div class="arrow">→</div>
+    <div class="card muted"><div class="label t-muted">Model</div>
+      <div class="fs-26" style="font-weight:700;margin:6px 0 4px">Classifier</div>
+      <div class="small">one decision rule</div></div>
+    <div class="arrow">→</div>
+    <div class="card accent"><div class="label t-accent">Output</div>
+      <div class="fs-24" style="font-weight:700;margin:6px 0 4px">Phishing / Legitimate</div>
+      <div class="small">one label per email</div></div>
+  </div>
+  <div class="fs-21" style="font-weight:700;margin:30px 0 16px">Three model families do this today</div>
+  <div class="grid3">
+    <div class="card"><b class="t-muted fs-18">Classical ML</b>
+      <div class="small" style="margin-top:6px">TF-IDF features + Logistic Regression / Naive Bayes</div></div>
+    <div class="card"><b class="t-blue fs-18">Fine-tuned encoders</b>
+      <div class="small" style="margin-top:6px">BERT, RoBERTa, DistilBERT trained on labelled email</div></div>
+    <div class="card"><b class="t-accent fs-18">Decoder LLMs</b>
+      <div class="small" style="margin-top:6px">prompted zero-shot / few-shot, or LoRA fine-tuned</div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="small">Public corpora everyone uses: SpamAssassin · CEAS-08 · Nazario · Enron · Nigerian Fraud · Ling-Spam · TREC</div>
+  <div class="num">2</div>
+  <div class="note">45 sec. Input → model → output, then the three families. Finish on: every dataset is free and public, that is why this fits our budget.</div>
+</section>
+
+<!-- 3 ................................................................. -->
+<section class="slide">
+  <div class="kicker">2. State of the art</div>
+  <div class="speaker">Sinha</div>
+  <h1>2022 to 2026: everybody reports 97 to 99%</h1>
+  <table>
+    <tr><th>Work</th><th>Approach</th><th>Result</th></tr>
+    <tr><td>Koide et al. 2024</td><td>GPT-4 + chain-of-thought prompt</td><td>99.70%</td></tr>
+    <tr><td>Uddin et al. 2024</td><td>Fine-tuned RoBERTa + explainability</td><td>98.45%</td></tr>
+    <tr><td>Alhuzali et al. 2025</td><td>14 models across 10 datasets</td><td>99.08%</td></tr>
+    <tr><td>Lin et al. 2025</td><td>3B small LLMs + LoRA fine-tuning</td><td>0.59 → 0.96</td></tr>
+    <tr><td>MultiPhishGuard 2025</td><td>5 cooperative LLM agents</td><td>97.89%</td></tr>
+    <tr class="hl"><td>Blake 2025 (Phishsense-1B)</td><td>1B open model, phishing-specific</td><td>97.5% → 70%</td></tr>
+  </table>
+  <div class="spacer"></div>
+  <div class="card accent frag">
+    <div style="font-weight:700" class="t-accent fs-23">Every number above is measured on ONE dataset at a time.</div>
+    <div class="small" style="margin-top:6px">The one row that tested a second dataset lost 27 points.</div>
+  </div>
+  <div class="num">3</div>
+  <div class="note">50 sec. Walk the table fast. The point is the numbers all look the same. <b>Then click</b> to reveal the red box and land on it. The Phishsense row is the clue.</div>
+</section>
+
+<!-- 4 ................................................................. -->
+<section class="slide">
+  <div class="kicker">3. We tested it ourselves</div>
+  <div class="speaker">Saimon</div>
+  <h1>First we reproduced the good news</h1>
+  <div class="grid3">
+    <div class="card"><b class="fs-20">Kaggle</b><div class="small">17,505 emails</div>
+      <div class="mid t-good" style="margin-top:18px">97.9%</div></div>
+    <div class="card"><b class="fs-20">SpamAssassin</b><div class="small">5,809 emails</div>
+      <div class="mid t-good" style="margin-top:18px">97.3%</div></div>
+    <div class="card"><b class="fs-20">Nazario + Enron</b><div class="small">3,128 emails</div>
+      <div class="mid t-good" style="margin-top:18px">99.2%</div></div>
+  </div>
+  <div class="fs-20" style="margin-top:30px">TF-IDF + Logistic Regression. No LLM. No GPU.</div>
+  <div class="sub" style="margin-top:6px">Exactly the same 97 to 99% band as GPT-4 and RoBERTa.</div>
+  <div class="spacer"></div>
+  <div class="card amber frag" style="text-align:center">
+    <div style="font-weight:700" class="t-amber fs-27">So phishing detection is solved… right?</div>
+  </div>
+  <div class="num">4</div>
+  <div class="note">35 sec. A technique from before deep learning ties GPT-4. <b>Click</b> to reveal the question, then PAUSE. Do not answer it.</div>
+</section>
+
+<!-- 5 ................................................................. -->
+<section class="slide">
+  <div class="kicker">4. Gap 1 · the collapse</div>
+  <div class="speaker">Saimon</div>
+  <h1>Train on one corpus. Test on another.</h1>
+  <div class="card amber">
+    <div style="font-weight:700" class="t-amber fs-20">
+      ASK THE AUDIENCE: F1 was 0.992 on its own corpus. What is it on a new corpus?</div>
+  </div>
+  <div class="row" style="margin-top:26px;align-items:stretch">
+    <div class="card good"><div class="label t-good">Same corpus</div>
+      <div class="big t-good" style="margin:10px 0 8px">0.992</div>
+      <div class="small">F1 score, looks excellent</div></div>
+    <div class="arrow t-accent frag">→</div>
+    <div class="card accent frag"><div class="label t-accent">Unseen corpus</div>
+      <div class="big t-accent" style="margin:10px 0 8px">0.304</div>
+      <div class="small">the same model, new emails</div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="frag">
+    <div class="fs-19">The model answers “legitimate” to almost every phishing email it has not seen before.</div>
+    <div class="sub" style="margin-top:6px">Accuracy only drops to 0.69, so an accuracy-only report hides this completely.</div>
+  </div>
+  <div class="num">5</div>
+  <div class="note"><b>THE INTERACTIVE MOMENT.</b> 50 sec. Really stop and take 1 or 2 guesses. If nobody answers: “higher or lower than 0.9?” Then <b>click</b> to reveal 0.304, say it slowly: zero point three zero four.</div>
+</section>
+
+<!-- 6 ................................................................. -->
+<section class="slide">
+  <div class="kicker">5. Gap 2 · the contamination</div>
+  <div class="speaker">Saimon</div>
+  <h1>One transfer looked great. It was cheating.</h1>
+  <div class="sub">Kaggle → SpamAssassin scored F1 0.97. Suspicious. So we hashed every email body.</div>
+  <div class="row" style="margin-top:22px;align-items:stretch">
+    <div class="card accent frag"><div class="big t-accent">74.4%</div>
+      <div style="margin-top:8px">of SpamAssassin sits inside the Kaggle set</div>
+      <div class="small">4,282 near-duplicate emails</div></div>
+    <div class="card muted frag"><div class="big t-good">0</div>
+      <div style="margin-top:8px">shared emails for the one clean pair</div>
+      <div class="small">and that is exactly where F1 fell to 0.35</div></div>
+  </div>
+  <div class="card amber frag" style="margin-top:20px">
+    <div style="font-weight:700" class="t-amber fs-20">
+      Exact-duplicate check found 48. Near-duplicate check found 4,282.</div>
+    <div class="small" style="margin-top:6px">One stripped subject line hid 99% of the contamination. Normal deduplication misses it.</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="frag">
+    <div class="fs-19" style="font-weight:700">That “good transfer” was memorisation, not generalisation.</div>
+    <div class="sub" style="margin-top:4px">No paper in our review measures overlap between the benchmarks it uses.</div>
+  </div>
+  <div class="num">6</div>
+  <div class="note">55 sec. Our strongest original result. Emphasise <b>48 vs 4,282</b>. Anyone deduplicating the normal way would call these corpora clean.</div>
+</section>
+
+<!-- 7 ................................................................. -->
+<section class="slide">
+  <div class="kicker">6. Gaps 3 &amp; 4</div>
+  <div class="speaker">Faria</div>
+  <h1>Cost is never reported. Bigger is not better.</h1>
+  <div class="grid2">
+    <div class="card"><div class="label t-accent">Gap 3 · cost</div>
+      <div class="mid t-good" style="margin:10px 0 8px">$0.006</div>
+      <div>per 1,000 emails with llama-3.2-3b</div>
+      <div class="small" style="margin-top:12px">Lin et al. list “no cost-benefit analysis” as their own limitation.</div></div>
+    <div class="card frag"><div class="label t-accent">Gap 4 · size ≠ quality</div>
+      <div class="mid t-accent" style="margin:10px 0 8px">0.58</div>
+      <div>precision of the 4× bigger gemma-3-12b</div>
+      <div class="small" style="margin-top:12px">It flags almost every email as phishing. 3× the price, worse results.</div></div>
+  </div>
+  <div class="card blue frag" style="margin-top:22px">
+    <div style="font-weight:700" class="t-blue fs-20">The small 3B model held 0.80 to 0.84 on all three corpora. It never collapsed.</div>
+    <div class="small" style="margin-top:6px">15 points worse in-corpus, far more robust across corpora, for half a cent.</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="small">Nobody reports accuracy, robustness and cost in the same table, but that is exactly what a deployment decision needs.</div>
+  <div class="num">7</div>
+  <div class="note">40 sec. Optional show of hands: “who thinks the 12B beats the 3B?” then <b>click</b> to reveal that it is worse. Land on the blue box.</div>
+</section>
+
+<!-- 8 ................................................................. -->
+<section class="slide">
+  <div class="kicker">7. Objectives</div>
+  <div class="speaker">Faria</div>
+  <h1>What we will actually build</h1>
+  <div class="grid2">
+    <div class="card"><div style="display:flex;gap:16px"><div class="mid t-accent">1</div>
+      <div><b class="fs-18">Decontaminated benchmark</b>
+      <div class="small">6 independent public corpora, near-duplicate matrix published</div></div></div></div>
+    <div class="card"><div style="display:flex;gap:16px"><div class="mid t-accent">2</div>
+      <div><b class="fs-18">Leave-one-corpus-out</b>
+      <div class="small">always tested on a corpus the model has never seen</div></div></div></div>
+    <div class="card"><div style="display:flex;gap:16px"><div class="mid t-accent">3</div>
+      <div><b class="fs-18">One protocol, all families</b>
+      <div class="small">classical · DistilBERT · small open LLMs · Phishsense-1B</div></div></div></div>
+    <div class="card"><div style="display:flex;gap:16px"><div class="mid t-accent">4</div>
+      <div><b class="fs-18">Cost measured in dollars</b>
+      <div class="small">logged tokens → USD per 1,000 emails, not adjectives</div></div></div></div>
+    <div class="card"><div style="display:flex;gap:16px"><div class="mid t-accent">5</div>
+      <div><b class="fs-18">AI-written phishing</b>
+      <div class="small">public E-PhishLLM corpus as held-out shift test</div></div></div></div>
+    <div class="card"><div style="display:flex;gap:16px"><div class="mid t-accent">6</div>
+      <div><b class="fs-18">One honest table</b>
+      <div class="small">accuracy + robustness + cost, with confidence intervals</div></div></div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="fs-16" style="color:var(--blue)">All six run on our own laptops. Total budget: under $2 of the $5 allowance.</div>
+  <div class="num">8</div>
+  <div class="note">40 sec. Do not read all six. Read the bold titles; add one sentence only on 4 and 5. Those are the new ones.</div>
+</section>
+
+<!-- 9 ................................................................. -->
+<section class="slide">
+  <div class="kicker">8. Proposed method</div>
+  <div class="speaker">Faria</div>
+  <h1>Six stages, all on a laptop</h1>
+  <div class="pipe">
+    <div class="card blue"><div class="t-blue"><b>1</b></div><b class="fs-14">COLLECT</b>
+      <div class="small fs-12" style="margin-top:8px">6 public corpora from Zenodo</div></div>
+    <div class="arrow">→</div>
+    <div class="card accent"><div class="t-accent"><b>2</b></div><b class="fs-14">DECONTAMINATE</b>
+      <div class="small fs-12" style="margin-top:8px">MinHash + LSH, drop duplicates</div></div>
+    <div class="arrow">→</div>
+    <div class="card blue"><div class="t-blue"><b>3</b></div><b class="fs-14">SPLIT</b>
+      <div class="small fs-12" style="margin-top:8px">train on 5, test on the 6th</div></div>
+    <div class="arrow">→</div>
+    <div class="card blue"><div class="t-blue"><b>4</b></div><b class="fs-14">RUN MODELS</b>
+      <div class="small fs-12" style="margin-top:8px">classical, DistilBERT, small LLMs</div></div>
+    <div class="arrow">→</div>
+    <div class="card accent"><div class="t-accent"><b>5</b></div><b class="fs-14">SHIFT TEST</b>
+      <div class="small fs-12" style="margin-top:8px">E-PhishLLM, AI-written phishing</div></div>
+    <div class="arrow">→</div>
+    <div class="card good"><div class="t-good"><b>6</b></div><b class="fs-14">REPORT</b>
+      <div class="small fs-12" style="margin-top:8px">accuracy, robustness, cost per 1,000</div></div>
+  </div>
+  <div class="grid2" style="margin-top:26px">
+    <div class="card muted"><b class="t-blue">What makes it honest</b>
+      <div class="small" style="margin-top:6px">Stage 2: no other benchmark removes cross-corpus duplicates first.</div></div>
+    <div class="card muted"><b class="t-good">What makes it cheap</b>
+      <div class="small" style="margin-top:6px">Free datasets, free CPU models, ~$0.006 per 1,000 LLM calls.</div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="small">We do not generate phishing ourselves. We use the published E-PhishLLM corpus. Cheaper, citable, and we create no new attack content.</div>
+  <div class="num">9</div>
+  <div class="note">50 sec. Main visual. Walk left to right once. Spend the time on <b>stage 2 and stage 5</b>. The two nobody else does. End on the ethics point.</div>
+</section>
+
+<!-- 10 ................................................................ -->
+<section class="slide">
+  <div class="kicker">9. Expected outcome</div>
+  <div class="speaker">Faria</div>
+  <h1>One table that does not exist yet</h1>
+  <table>
+    <tr><th>Model</th><th>In-corpus F1</th><th>Unseen-corpus F1</th><th>AI-phishing F1</th><th>$ / 1,000</th></tr>
+    <tr><td>TF-IDF + LogReg</td><td>0.99</td><td>0.30</td><td>?</td><td>0.00</td></tr>
+    <tr><td>DistilBERT (local)</td><td>?</td><td>?</td><td>?</td><td>0.00</td></tr>
+    <tr><td>llama-3.2-3b</td><td>0.85</td><td>0.85</td><td>?</td><td>0.006</td></tr>
+    <tr><td>gemma-3-12b</td><td>?</td><td>?</td><td>?</td><td>0.017</td></tr>
+  </table>
+  <div class="small" style="margin-top:14px">Filled in properly, deduplicated, on corpora each model has never seen. Plus public code so anyone can re-run it.</div>
+  <div class="spacer"></div>
+  <div class="card accent frag" style="text-align:center;padding:26px">
+    <div style="font-weight:700;line-height:1.35" class="t-accent fs-28">
+      High accuracy on one dataset is easy.<br>Honest evaluation is the hard part.</div>
+  </div>
+  <div class="small" style="margin-top:16px">Thank you. Questions?</div>
+  <div class="num">10</div>
+  <div class="note">30 sec. The question marks are the project. <b>Click</b> for the closing line, deliver it slowly, then stop.</div>
+</section>
+
+</div></div>
+
+<div id="hint">← → navigate · N notes · F fullscreen</div>
+<div id="notes"></div>
+<div id="navbtns">
+  <button id="prevb" aria-label="Previous slide">‹ Back</button>
+  <button id="nextb" aria-label="Next slide">Next ›</button>
+</div>
+
+<script>
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, fi = 0;
+
+// Pull the .note divs out of the slides and into the notes panel.
+const notes = slides.map(s => {
+  const n = s.querySelector('.note');
+  if (!n) return '';
+  n.remove();
+  return n.innerHTML;
+});
+
+const frags = () => [...slides[si].querySelectorAll('.frag')];
+
+function render(){
+  slides.forEach((s,i)=>s.classList.toggle('on', i===si));
+  frags().forEach((f,i)=>f.classList.toggle('shown', i<fi));
+  document.getElementById('bar').style.width =
+    ((si+1)/slides.length*100) + '%';
+  document.getElementById('notes').innerHTML =
+    '<b>Slide '+(si+1)+'</b>: ' + (notes[si]||'');
+  try { history.replaceState(null, '', '#' + (si+1)); } catch (e) { /* file:// */ }
+}
+
+// A tall phone slide is scrolled; jump back to the top when the slide changes,
+// but not when we are only revealing the next fragment of the same slide.
+function toTop(){ if (isFluid()) scrollTo(0, 0); }
+
+function next(){
+  if (fi < frags().length) { fi++; }
+  else if (si < slides.length-1) { si++; fi = 0; toTop(); }
+  render();
+}
+function prev(){
+  if (fi > 0) { fi--; }
+  else if (si > 0) { si--; fi = slides[si].querySelectorAll('.frag').length; toTop(); }
+  render();
+}
+function go(i){
+  si = Math.max(0, Math.min(slides.length-1, i)); fi = 0; toTop(); render();
+}
+
+addEventListener('keydown', e => {
+  if (['ArrowRight','ArrowDown',' ','PageDown','Enter'].includes(e.key)){ e.preventDefault(); next(); }
+  else if (['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){ e.preventDefault(); prev(); }
+  else if (e.key==='Home') go(0);
+  else if (e.key==='End') go(slides.length-1);
+  else if (e.key.toLowerCase()==='n') document.getElementById('notes').classList.toggle('on');
+  else if (e.key.toLowerCase()==='f'){
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  }
+  else if (/^[1-9]$/.test(e.key)) go(+e.key-1);
+  else if (e.key==='0') go(9);
+});
+
+// Phones and portrait tablets reflow instead of scaling (see the media query).
+const fluidMQ = matchMedia('(max-width:900px), (orientation:portrait) and (max-width:1200px)');
+const isFluid = () => fluidMQ.matches;
+
+// Click to advance on desktop only — on a phone that would fight with scrolling,
+// so there we use swipes and the on-screen buttons instead.
+addEventListener('click', e => {
+  if (isFluid() || e.target.closest('#notes') || e.target.closest('#navbtns')) return;
+  (e.clientX > innerWidth/2) ? next() : prev();
+});
+
+document.getElementById('nextb').addEventListener('click', next);
+document.getElementById('prevb').addEventListener('click', prev);
+
+// Horizontal swipe = navigate; vertical is left alone so the slide can scroll.
+let tx = 0, ty = 0;
+addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; },
+                 {passive:true});
+addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+  if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) (dx < 0 ? next() : prev());
+}, {passive:true});
+
+// Scale the fixed canvas to fill whatever screen it is projected on.
+// In fluid mode the CSS clears the transform, so skip it entirely.
+function fit(){
+  const d = document.getElementById('deck');
+  d.style.transform = isFluid() ? ''
+    : 'scale(' + Math.min(innerWidth/1280, innerHeight/720) + ')';
+}
+// Deep link: opening the file with #5 jumps to slide 5, and the hash follows you
+// as you navigate — handy for practising one slide on your phone.
+const startAt = parseInt(location.hash.slice(1), 10);
+if (startAt >= 1 && startAt <= slides.length) si = startAt - 1;
+addEventListener('hashchange', () => {
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length && n - 1 !== si) go(n - 1);
+});
+
+addEventListener('resize', fit);
+fluidMQ.addEventListener('change', fit);
+fit(); render();
+</script>
+</body>
+</html>

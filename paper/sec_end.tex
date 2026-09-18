@@ -1,0 +1,65 @@
+\section{Discussion}
+
+\textit{Check overlap before claiming generalization.} Our clearest finding is
+about the benchmarks, not the models. If a paper trains on the Kaggle set and
+tests on SpamAssassin, most of the test set is already in the training data.
+Exact-match deduplication does not catch it, because the aggregate changed the
+line breaks. A near-duplicate pass takes about five minutes on a laptop for
+165{,}000 emails, and it should come before any cross-dataset claim.
+
+\textit{In-corpus scores are not deployment scores.} The 97 to 99\% in the
+literature is real, but it answers the question ``how well does the model
+recognise more mail from the same collection''. A mail server does not get
+mail from the training collection. On unseen corpora the same TF-IDF model
+drops by 4 to 15 points, and on AI-written phishing by about 30.
+
+\textit{What we would deploy.} For an organisation with no GPU and a small
+budget, zero-shot Qwen-2.5-7B is the best balance we found. It is the most
+robust model across old corpora and one of the two best on AI-written
+phishing, at about three cents per thousand emails. TF-IDF remains a useful,
+free first filter for bulk spam, but it should not be trusted on modern
+phishing. Few-shot prompting needs care: examples must look like the mail the
+system will actually see, or they make it worse.
+
+\textit{Output format is part of the model's quality.} Phi-4's score is low
+partly because it did not follow the one-word format. In a real pipeline an
+answer that cannot be parsed is a missed detection, so format following
+matters as much as reasoning ability.
+
+\section{Limitations}
+
+\begin{itemize}
+\item \textit{Labels.} Four of the six training corpora count ordinary spam as
+positive. We keep the published labels and report phishing-only recall on
+Nazario separately, but a clean phishing versus spam relabelling is still
+missing.
+\item \textit{Sample size.} Each test set has 300 emails (150 for the
+one-class sets), which keeps cost low. The 95\% intervals of the mean F1 are
+about $\pm$0.02, so differences below that are not meaningful.
+\item \textit{LLM pre-training.} The old public corpora may be part of the
+LLMs' pre-training data. E-PhishLLM was released in 2025, after most of these
+models, which makes it the most trustworthy test for them.
+\item \textit{Scope.} Text only, English only, one prompt, one run per model.
+Headers, URLs and attachments are ignored. OpenRouter providers can change the
+model behind a name without notice.
+\item \textit{DistilBERT} is trained lightly (1{,}000 emails per corpus, one
+epoch) to fit an 8\,GB laptop, so it is a lower bound for fine-tuned encoders.
+\item \textit{Phishsense-1B}, which we planned to include, needs a
+HuggingFace access token and was not run.
+\end{itemize}
+
+\section{Conclusion}
+
+Public phishing corpora overlap heavily, mostly in ways that exact matching
+cannot see. The Kaggle set contains most of SpamAssassin and Ling-Spam and a
+third of Enron. Removing these copies lowers cross-corpus F1 by up to 30
+points for a single pair and up to 11.5 points in leave-one-corpus-out
+testing. On honest, unseen test data, a small open LLM used zero-shot is as
+robust as trained models on old mail and much better on AI-written phishing,
+for a few cents per thousand emails. High accuracy on one dataset is easy.
+Honest evaluation is the hard part. All code, results and a Colab notebook are
+public so that others can check and extend this work.
+
+\section*{Acknowledgment}
+We thank our Computer Security course instructor at United International
+University for the feedback on our literature review and proposal.

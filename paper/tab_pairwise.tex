@@ -1,0 +1,16 @@
+\begin{table}[t]
+\caption{Single-corpus transfer with TF-IDF + LogReg, before and after removing training emails that also appear in the test corpus.}
+\label{tab:pairwise}
+\centering\footnotesize
+\begin{tabular}{lrrr}
+\toprule
+Train $\rightarrow$ test & Removed & Raw F1 & Clean F1 \\
+\midrule
+Kaggle $\rightarrow$ SpamAssassin & 2,935 & 0.966 & 0.666 \\
+Kaggle $\rightarrow$ Enron & 5,294 & 0.969 & 0.738 \\
+Kaggle $\rightarrow$ Ling-Spam & 1,436 & 0.979 & 0.840 \\
+SpamAssassin $\rightarrow$ Kaggle & 5,009 & 0.766 & 0.596 \\
+SpamAssassin $\rightarrow$ Enron & 793 & 0.673 & 0.473 \\
+\bottomrule
+\end{tabular}
+\end{table}

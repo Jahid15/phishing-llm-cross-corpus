@@ -1,0 +1,10 @@
+train_on,test_on,accuracy,f1
+kaggle,kaggle,0.9786,0.9709
+kaggle,spamassassin,0.9833,0.9718
+kaggle,nazario_enron,0.9047,0.8966
+spamassassin,kaggle,0.8418,0.7637
+spamassassin,spamassassin,0.9733,0.9537
+spamassassin,nazario_enron,0.8123,0.8014
+nazario_enron,kaggle,0.6875,0.3039
+nazario_enron,spamassassin,0.7557,0.3535
+nazario_enron,nazario_enron,0.992,0.992

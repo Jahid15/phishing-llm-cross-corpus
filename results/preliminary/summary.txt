@@ -1,0 +1,62 @@
+Summary of preliminary experiment results
+Topic: Phishing Email Detection Using Large Language Models
+
+Datasets after cleaning (data/processed):
+  kaggle          17505 emails (6531 phishing)  - Kaggle Phishing Email dataset, used by Uddin et al.
+  spamassassin     5809 emails (1718 phishing)  - SpamAssassin public corpus, used by Lin et al.
+  nazario_enron    3128 emails (1564 phishing)  - Nazario phishing + Enron ham, same pairing as Kuikel et al.
+
+Experiment 1, in-dataset baselines (80/20 split, seed 42), from baseline_results.csv:
+  kaggle         logreg  acc 0.9786  f1 0.9709 | naive_bayes  acc 0.9729  f1 0.9628
+  spamassassin   logreg  acc 0.9733  f1 0.9537 | naive_bayes  acc 0.9518  f1 0.9133
+  nazario_enron  logreg  acc 0.9920  f1 0.9920 | naive_bayes  acc 0.9888  f1 0.9889
+
+Experiment 2, cross-dataset generalization (TF-IDF + logreg), from cross_dataset_results.csv:
+  train on         test on         acc     f1
+  kaggle           spamassassin    0.9833  0.9718
+  kaggle           nazario_enron   0.9047  0.8966
+  spamassassin     kaggle          0.8418  0.7637
+  spamassassin     nazario_enron   0.8123  0.8014
+  nazario_enron    kaggle          0.6875  0.3039
+  nazario_enron    spamassassin    0.7557  0.3535
+
+Main observations:
+  1. Every model looks excellent when trained and tested on the same corpus (97 to 99 percent),
+     which matches the numbers reported in the papers we reviewed.
+  2. The same models lose a lot when moved to a different corpus. The worst case drops from
+     f1 0.992 to f1 0.304. A detector trained on the small Nazario+Enron pair mostly predicts
+     legitimate on other corpora, so accuracy stays okay while f1 collapses.
+  3. The kaggle to spamassassin direction barely drops (f1 0.972). The Kaggle set is an
+     aggregate of several older corpora, so it probably shares content with SpamAssassin.
+     This means cross-dataset tests that include aggregated datasets can be too optimistic.
+
+Experiment 3, LLM zero-shot via OpenRouter (100 sampled emails per dataset, balanced,
+seed 42), from llm_zero_shot_summary.csv:
+  model                             dataset         acc     f1
+  meta-llama/llama-3.2-3b-instruct  kaggle          0.80    0.8148
+  meta-llama/llama-3.2-3b-instruct  spamassassin    0.84    0.8545
+  meta-llama/llama-3.2-3b-instruct  nazario_enron   0.83    0.8496
+  google/gemma-3-12b-it             kaggle          0.63    0.7259
+  google/gemma-3-12b-it             spamassassin    0.86    0.8772
+  google/gemma-3-12b-it             nazario_enron   0.64    0.7353
+
+  Estimated cost: about $0.002 for 300 emails with llama-3.2-3b (about $0.006 per
+  1000 emails) and about $0.005 for 300 emails with gemma-3-12b.
+
+Experiment 4, duplicate check between corpora (check_overlap.py, normalized body text),
+from dataset_overlap.csv:
+  kaggle vs spamassassin    3838 shared emails (66.4 percent of spamassassin)
+  kaggle vs nazario_enron   2 shared emails (about 0 percent)
+  spamassassin vs nazario_enron  0 shared emails
+
+  So the good kaggle to spamassassin transfer in experiment 2 was not generalization,
+  the Kaggle aggregate literally contains two thirds of SpamAssassin. The pairs that
+  share nothing are the ones where performance really collapsed.
+
+Observations for experiment 3:
+  4. Zero-shot llama-3.2-3b sits around 0.80 to 0.84 on every corpus. It never reaches
+     the 0.97+ of the in-dataset classical baselines, but it also never collapses the
+     way the classical models do across corpora, without seeing any training data.
+  5. The bigger gemma-3-12b is not better. Its recall is 0.98 to 1.00 but precision is
+     0.58 on two corpora, so it calls most legitimate emails phishing too. Model size
+     does not fix the problem, calibration matters more.

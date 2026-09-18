@@ -1,0 +1,4 @@
+corpus_a,corpus_b,unique_a,unique_b,shared_emails,pct_of_smaller
+kaggle,spamassassin,17477,5780,3838,66.4
+kaggle,nazario_enron,17477,16877,2,0.01
+spamassassin,nazario_enron,5780,16877,0,0.0

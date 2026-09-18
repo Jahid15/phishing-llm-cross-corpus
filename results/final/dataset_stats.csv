@@ -1,0 +1,10 @@
+source,role,emails_after_cleaning,emails_used,phishing_or_spam,legitimate,eval_subset
+spamassassin,train+test,5803,5803,1712,4091,300
+ceas08,train+test,39091,10000,5574,4426,300
+trec07,train+test,53638,10000,5460,4540,300
+ling,train+test,2858,2858,458,2400,300
+enron,train+test,29604,10000,4689,5311,300
+kaggle,train+test,17505,10000,3731,6269,300
+nazario,test only,1554,1554,1554,0,150
+nigerian,test only,3316,3316,3316,0,150
+ephishllm,test only,11502,10000,5213,4787,300

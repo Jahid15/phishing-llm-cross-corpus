@@ -1,0 +1,118 @@
+\section{Results}
+
+\subsection{The corpora overlap far more than exact matching shows}
+
+Table~\ref{tab:overlap} and Fig.~\ref{fig:overlap} show the overlap. Compared
+exactly as a model reads them, SpamAssassin and Kaggle share only 2 emails.
+With whitespace removed they share 3{,}850, and with near-duplicate matching
+5{,}009, which is 86\% of SpamAssassin. The Kaggle set also contains 90\% of
+Ling-Spam and 35\% of Enron, and more than half of Kaggle has a copy in Enron.
+In other words, the Kaggle ``dataset'' is mostly three older corpora put
+together, with formatting changed on the way. Anyone who deduplicates the usual
+way, by exact text, would call these corpora independent. The older corpora
+also overlap each other: 14\% of SpamAssassin has a near copy in Enron.
+
+CEAS-08, TREC-07, Nazario and E-PhishLLM share almost nothing with any other
+source. This gives us a natural control group for the next experiment.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.88\columnwidth]{overlap_heatmap.png}
+\caption{Near-duplicate overlap. Cell $(A,B)$ is the share of corpus $B$ that
+has a near duplicate in corpus $A$.}
+\label{fig:overlap}
+\end{figure}
+
+\input{tab_overlap}
+
+\subsection{Leaked emails inflate cross-corpus scores}
+
+Table~\ref{tab:pairwise} repeats the one-corpus-to-one-corpus test from our
+preliminary work. The Kaggle to SpamAssassin transfer, which looked almost
+perfect (F1 0.966), falls to 0.666 once the 2{,}935 Kaggle training emails that
+also appear in SpamAssassin are removed. Kaggle to Enron falls from 0.969 to
+0.738. The ``good transfer'' was the model recognising emails it had already
+seen.
+
+Table~\ref{tab:inflation} shows the same effect in the leave-one-corpus-out
+setting. Removing leaked emails lowers Logistic Regression F1 by 11.5 points
+on Ling-Spam, 10.0 on SpamAssassin, 5.4 on Enron and 4.8 on Kaggle. For CEAS-08
+and TREC-07, which share almost nothing with the other corpora, the change is
+0.1 points or less. The inflation appears exactly where the overlap is, which
+is strong evidence that leakage, and not some other difference between the
+settings, causes it.
+
+Fig.~\ref{fig:incorpus} puts the three settings side by side. The usual
+in-corpus split gives 0.93 to 0.99. Honest leave-one-corpus-out testing gives
+0.83 to 0.93. The in-corpus number overstates what the model will do on mail
+from a new source by 4 to 15 points.
+
+\input{tab_pairwise}
+\input{tab_inflation}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\columnwidth]{incorpus_vs_unseen.png}
+\caption{TF-IDF + LogReg F1 per held-out corpus: in-corpus split, unseen
+corpus with raw training data, and unseen corpus after decontamination.}
+\label{fig:incorpus}
+\end{figure}
+
+\subsection{Comparing all models on unseen mail}
+
+Table~\ref{tab:main} is the table our proposal promised: every model on the
+same held-out emails, with robustness, AI phishing and cost in one place.
+Fig.~\ref{fig:percorpus} breaks the scores down per test set.
+
+\input{tab_main}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{per_corpus_f1.png}
+\caption{F1 of every model on each held-out test set.}
+\label{fig:percorpus}
+\end{figure}
+
+\textit{Small LLMs can match or beat trained models on unseen corpora.}
+Zero-shot Qwen-2.5-7B reaches a mean F1 of QWEN_UNSEEN on the six held-out
+corpora, above TF-IDF + LogReg (LR_UNSEEN) and DISTILBERT_SENTENCE Qwen never
+saw any of our training data.
+
+\textit{AI-written phishing separates the models.} On E-PhishLLM the trained
+models fall to LR_AI (LogReg) and NB_AI (Naive Bayes)DISTILBERT_AI. They learned
+what old spam looks like, and polished GPT-4o-mini phishing does not look like
+old spam. Qwen-2.5-7B (QWEN_AI) and Llama-3.1-8B (L8_AI) hold up much better.
+
+\textit{Few-shot examples help on old mail and hurt on new mail.} Four
+examples drawn from the other corpora raise Qwen-2.5-7B from QWEN_UNSEEN to
+QWENFS_UNSEEN on the held-out corpora, and Llama-3.2-3B from L3_UNSEEN to
+L3FS_UNSEEN. The same examples lower AI-phishing F1 from QWEN_AI to QWENFS_AI
+for Qwen and from L3_AI to L3FS_AI for Llama. The examples come from old
+corpora, and they seem to anchor the model to what phishing looked like in
+2002 to 2008. Few-shot also more than doubles the cost, because the prompt is
+longer.
+
+\textit{Bigger is not automatically better.} Phi-4 (14B) has a lower mean F1
+(PHI_UNSEEN) than the 3B and 8B Llama models. In 37\% of emails it ignored the
+instruction to answer in one word and started an explanation (``As a large
+language model\ldots'', ``Based on the content\ldots''), so no verdict fit in the
+output. GEMMA_SENTENCE Llama-3.2-1B is too weak for the task (L1_UNSEEN, with a
+worst-corpus F1 of L1_WORST).
+
+\subsection{Cost}
+
+The measured cost of zero-shot classification ranges from LLM_MIN_COST to
+LLM_MAX_COST US dollars per 1{,}000 emails (Fig.~\ref{fig:cost}). Qwen-2.5-7B
+costs QWEN_COST dollars per 1{,}000 emails, so screening 100{,}000 emails a month
+would cost about QWEN_100K dollars. TF-IDF needs about 0.25 CPU seconds per
+1{,}000 emails and no API. DistilBERT needs DB_TRAIN minutes of laptop GPU time
+per training fold and DB_INFER seconds per 1{,}000 emails. The whole study,
+TOTAL_CALLS LLM calls including discarded trials, cost TOTAL_USD US dollars.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{f1_vs_cost.png}
+\caption{Mean F1 on unseen corpora against measured API cost. Local models
+have no API cost and are drawn at 0.001.}
+\label{fig:cost}
+\end{figure}

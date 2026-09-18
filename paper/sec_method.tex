@@ -1,0 +1,70 @@
+\section{Method}
+
+Fig.~\ref{fig:pipeline} shows the pipeline. It has six steps, one script each.
+
+\subsection{Overlap between corpora}
+
+We compare every pair of the nine sources on the full cleaned corpora, before
+sampling, at three levels.
+\begin{itemize}
+\item \textit{Exact raw}: MD5 of the text exactly as the model reads it.
+\item \textit{Exact normalized}: MD5 of the body after lowercasing and
+removing all whitespace. This is the check we used in our preliminary work.
+\item \textit{Near duplicate}: MinHash~\cite{broder} with 128 permutations over
+9-character shingles of the first 2{,}000 letters and digits of the body, with
+locality sensitive hashing to find candidates. Two emails count as the same
+if their estimated Jaccard similarity is at least 0.8.
+\end{itemize}
+We first tried 5-word shingles. They missed many copies, because the Kaggle
+aggregate often deletes line breaks and glues two words together
+(``cream?Isn't''). Character shingles over letters and digits ignore that. To
+check the matcher, we took 400 random SpamAssassin emails that had no
+normalized exact match in Kaggle and searched Kaggle by brute force. 59\% had a
+Kaggle email with a true Jaccard of at least 0.8, the same rate MinHash
+reported for that group, and manual reading confirmed they were the same
+messages with different line breaks or a cut first word.
+
+\subsection{Leave-one-corpus-out with decontamination}
+
+For each of the six corpora $T$ we train on the other five and test on all of
+$T$. We run this twice. In the \textit{raw} setting the training data is used
+as it is. In the \textit{clean} setting we first remove every training email
+that has a near duplicate in $T$. The difference in F1 between the two is the
+inflation caused by leaked emails. The three test-only sets are scored with a
+model trained on all six corpora, again with near duplicates of the test set
+removed. As a reference we also report the usual in-corpus score, an 80/20
+stratified split inside each corpus.
+
+\subsection{Models}
+
+\textit{Classical.} TF-IDF over word unigrams and bigrams (50{,}000 features,
+minimum document frequency 2) with Logistic Regression or multinomial Naive
+Bayes, as in our preliminary work.
+
+\textit{DistilBERT.} \texttt{distilbert-base-uncased}~\cite{distilbert} fine-tuned
+for one epoch, 128 tokens, batch 16, learning rate $5\times10^{-5}$, on a
+stratified sample of 1{,}000 emails per training corpus (about 5{,}000 per
+fold). It runs on the laptop CPU (Apple M1). Only the clean setting is run.
+
+\textit{Small open LLMs.} Llama-3.2-1B, Llama-3.2-3B, Llama-3.1-8B,
+Qwen-2.5-7B, Gemma-3-12B and Phi-4 (14B), all instruction-tuned and called
+through OpenRouter. The system prompt asks whether the email is ``malicious or
+unwanted (phishing, scam or spam) or legitimate'' and to answer with one word.
+Temperature is 0, output is limited to 5 tokens, and emails are cut to 1{,}500
+characters. An answer containing ``phish'', ``spam'' or ``malicious'' counts as
+positive, one containing ``legit'' as negative. Anything else (for example a
+refusal) counts as negative and is reported. An LLM never sees our training
+data, so every test set is unseen for it. In the few-shot setting the prompt
+holds four short examples (two positive, two negative) drawn from corpora
+other than the test corpus, which keeps the leave-one-corpus-out rule.
+
+\subsection{Metrics and cost}
+
+We report F1 for the positive class, because accuracy hides the failure we care
+about (a model that calls everything legitimate still gets high accuracy on a
+mostly legitimate corpus). The headline robustness number is the mean F1 over
+the six held-out corpora, with a 95\% interval from 1{,}000 bootstrap
+resamples of the emails in each test set, plus the worst of the six. For
+LLMs, cost is the sum of the \texttt{usage.cost} field that OpenRouter returns
+for every call, divided by the number of emails. Local models have no API
+cost. We report their inference time instead.

@@ -1,0 +1,23 @@
+# secrets, never commit
+.env
+*.env
+.env.*
+
+# large data, rebuilt by code/final/01_prepare_data.py
+data/
+
+# local tooling
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+**/.DS_Store
+
+# latex build files
+paper/*.aux
+paper/*.log
+paper/*.out
+
+# old submission zips (their content is already in the repo)
+*.zip
