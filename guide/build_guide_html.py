@@ -450,6 +450,14 @@ label করা না। সামনের দুই সপ্তাহে আ
 <p>পুরোটা মিলিয়ে প্রায় <b>৯ মিনিট ৪৫ সেকেন্ড</b>। প্রতিটা slide এ কী বলবে সেটা
 <code>final-slides/speaker_script.md</code> ফাইলে ইংরেজি আর বাংলা দুইভাবেই লেখা আছে।</p>
 
+<div class="card good"><p style="margin:0"><b>Practice করার সবচেয়ে সহজ উপায়:</b>
+<code>final-slides/PRACTICE.html</code> খোলো। সেখানে বাম পাশে slide আর ডান পাশে ঠিক ওই
+slide এর script একসাথে দেখা যায়। উপরে নিজের নাম চাপলে শুধু তোমার slide গুলো থাকবে,
+আর <b>শুরু</b> চাপলে ওই slide এর জন্য যত সেকেন্ড বরাদ্দ সেটা গোনা শুরু হয়। সময় পেরিয়ে
+গেলে লাল হয়ে যাবে, তাই বুঝতে পারবে কোথায় বেশি কথা বলছ।<br><br>
+তবে <b>আসল presentation</b> এই page থেকে না, <code>final_deck.html</code> (browser এ,
+F চেপে fullscreen) অথবা <code>final_deck.pptx</code> থেকেই হবে।</p></div>
+
 <div class="foot">সব সংখ্যা <code>results/final/</code> থেকে তৈরি ·
 github.com/Jahid15/phishing-llm-cross-corpus · মোট খরচ ${spend:.2f}</div>
 </div></body></html>"""

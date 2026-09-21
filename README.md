@@ -37,7 +37,10 @@ phishing and what cheap two-stage detectors achieve.
 | The paper (IEEE, two columns) | [`paper/main.pdf`](paper/main.pdf) |
 | The whole story, step by step | [`RESEARCH_LOG.md`](RESEARCH_LOG.md) |
 | Notebook with every table and figure | [`notebooks/phishing_llm_cross_corpus.ipynb`](notebooks/phishing_llm_cross_corpus.ipynb) |
-| Final presentation | [`final-slides/final_deck.html`](final-slides/final_deck.html), [`final-slides/final_deck.pptx`](final-slides/final_deck.pptx) |
+| Final presentation | [`final-slides/final_deck.html`](final-slides/final_deck.html), [`final-slides/final_deck.pptx`](final-slides/final_deck.pptx), [`final-slides/group-18.pdf`](final-slides/group-18.pdf) |
+| Rehearsal view, slide and script side by side | [`final-slides/PRACTICE.html`](final-slides/PRACTICE.html) |
+| Speaker script, English and Bangla | [`final-slides/speaker_script.md`](final-slides/speaker_script.md) |
+| The whole study explained in Bangla | [`GUIDE.html`](GUIDE.html) |
 | Final code | [`code/final/`](code/final/) |
 | Final results (CSV + figures) | [`results/final/`](results/final/) |
 | Guide for the team, with a question bank | [`TEAM_GUIDE.md`](TEAM_GUIDE.md) |
