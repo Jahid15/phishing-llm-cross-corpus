@@ -1,0 +1,2 @@
+setting,test,train_size,train_sec,infer_sec_per_1000,device
+loco_raw,spamassassin,5000,616.7,38.52,cpu

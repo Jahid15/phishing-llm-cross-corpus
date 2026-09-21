@@ -1,2 +1,2 @@
 setting,test,train_size,train_sec,infer_sec_per_1000,device
-loco_clean,nazario,6000,539.2,19.0,cpu
+loco_clean,nazario,6000,465.4,18.17,cpu

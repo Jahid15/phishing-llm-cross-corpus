@@ -21,3 +21,6 @@ paper/*.out
 
 # old submission zips (their content is already in the repo)
 *.zip
+
+# browser automation logs
+.playwright-mcp/

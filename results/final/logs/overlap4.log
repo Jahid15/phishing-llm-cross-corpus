@@ -1,0 +1,19 @@
+loaded 169921 emails in 18.6 s
+minhash done 137.7 s
+lsh built 143.0 s
+exact check of 2819547 candidate pairs done 282.9 s
+exact_raw emails with a copy in another corpus: 136
+exact_norm emails with a copy in another corpus: 8182
+near emails with a copy in another corpus: 35112
+within {'source': 'spamassassin', 'corpus_internal_near_dup_pct': 13.7, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 17.33}
+within {'source': 'ceas08', 'corpus_internal_near_dup_pct': 28.95, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 19.0}
+within {'source': 'trec07', 'corpus_internal_near_dup_pct': 18.98, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 11.0}
+within {'source': 'ling', 'corpus_internal_near_dup_pct': 9.73, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 11.33}
+within {'source': 'enron', 'corpus_internal_near_dup_pct': 17.36, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 8.67}
+within {'source': 'kaggle', 'corpus_internal_near_dup_pct': 12.43, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 9.67}
+within {'source': 'nazario', 'corpus_internal_near_dup_pct': 21.94, 'eval_emails': 150, 'eval_with_near_dup_in_own_train_pct': 22.0}
+within {'source': 'nigerian', 'corpus_internal_near_dup_pct': 36.13, 'eval_emails': 150, 'eval_with_near_dup_in_own_train_pct': 33.33}
+within {'source': 'ephishllm', 'corpus_internal_near_dup_pct': 0.0, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 0.0}
+within {'source': 'ephishllm_it', 'corpus_internal_near_dup_pct': 0.0, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 0.0}
+within {'source': 'ephishllm_de', 'corpus_internal_near_dup_pct': 0.0, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 0.0}
+saved overlap results, total time 296.4 s

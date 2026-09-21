@@ -1,0 +1,27 @@
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+  retry 1 google/gemini-3.1-flash-lite 'choices'
+  retry 1 google/gemini-3.1-flash-lite 'choices'
+  retry 2 google/gemini-3.1-flash-lite 'choices'
+  retry 2 google/gemini-3.1-flash-lite 'choices'
+  retry 3 google/gemini-3.1-flash-lite 'choices'
+  retry 3 google/gemini-3.1-flash-lite 'choices'
+  retry 4 google/gemini-3.1-flash-lite 'choices'
+  retry 4 google/gemini-3.1-flash-lite 'choices'
+google/gemini-3.1-flash-lite zero ling: 2 emails, total spend $0.9555
+google/gemini-3.1-flash-lite zero ephishllm_it: 300 emails, total spend $0.9759
+google/gemini-3.1-flash-lite zero ephishllm_de: 300 emails, total spend $0.9915
+openai/gpt-4o-mini zero spamassassin: 300 emails, total spend $1.0091
+openai/gpt-4o-mini zero ceas08: 300 emails, total spend $1.0289
+openai/gpt-4o-mini zero trec07: 300 emails, total spend $1.0432
+openai/gpt-4o-mini zero ling: 300 emails, total spend $1.0587
+openai/gpt-4o-mini zero enron: 300 emails, total spend $1.0709
+openai/gpt-4o-mini zero kaggle: 300 emails, total spend $1.0840
+openai/gpt-4o-mini zero nazario: 150 emails, total spend $1.0894
+openai/gpt-4o-mini zero nigerian: 150 emails, total spend $1.0984
+openai/gpt-4o-mini zero ephishllm: 300 emails, total spend $1.1062
+openai/gpt-4o-mini zero ephishllm_it: 300 emails, total spend $1.1152
+openai/gpt-4o-mini zero ephishllm_de: 300 emails, total spend $1.2032
+openai/gpt-4o-mini zero ephishllm_nolink: 300 emails, total spend $1.2506
+openai/gpt-4o-mini zero ephishllm_url: 300 emails, total spend $1.2925
+done. total spend $1.2925

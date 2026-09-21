@@ -8,3 +8,5 @@ kaggle,train+test,17505,10000,3731,6269,300
 nazario,test only,1554,1554,1554,0,150
 nigerian,test only,3316,3316,3316,0,150
 ephishllm,test only,11502,10000,5213,4787,300
+ephishllm_it,test only,2701,2701,1131,1570,300
+ephishllm_de,test only,2349,2349,1077,1272,300

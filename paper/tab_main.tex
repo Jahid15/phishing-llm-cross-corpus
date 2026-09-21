@@ -1,23 +1,36 @@
 \begin{table*}[t]
-\caption{Main results. All numbers are on the same fixed evaluation emails. Trained models use decontaminated leave-one-corpus-out data. ``Unseen'' is the mean F1 over the six held-out corpora with a 95\% bootstrap interval, ``Worst'' the lowest of the six. FA is the false alarm rate, the share of legitimate emails flagged as phishing, averaged over the six corpora. AI phishing is F1 on E-PhishLLM. Nazario and Nigerian contain only positives, so we report recall. Cost is the measured OpenRouter charge in USD per 1{,}000 emails.}
+\caption{Main results, all on the same evaluation emails. Trained models use decontaminated leave-one-corpus-out data. ``Unseen'' is the mean F1 over the six held-out corpora, with a paired bootstrap interval over emails and a leave-one-corpus-out jackknife range over corpora. FA is the share of legitimate emails flagged. AI phishing is F1 on E-PhishLLM. Nazario contains only phishing, so we report recall. Cost is the measured charge in USD per 1{,}000 emails on the six corpora.}
 \label{tab:main}
 \centering\footnotesize
-\setlength{\tabcolsep}{4.5pt}
-\begin{tabular}{lrrrrrrrrr}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrrrrr}
 \toprule
-Model & In-corpus & Unseen & 95\% CI & Worst & FA (\%) & AI phishing & Nazario rec. & Nigerian rec. & USD/1k \\
+Model & In-corpus & Unseen & Bootstrap & Jackknife & FA (\%) & AI phish & Nazario & USD/1k \\
 \midrule
-Qwen-2.5-7B few-shot & -- & 0.937 & 0.925--0.948 & 0.844 & 4.8 & 0.598 & 0.847 & 1.000 & 0.074 \\
-Qwen-2.5-7B & -- & 0.928 & 0.915--0.940 & 0.850 & 3.0 & 0.819 & 0.940 & 1.000 & 0.031 \\
-TF-IDF + LogReg & 0.969 & 0.901 & 0.886--0.916 & 0.807 & 9.3 & 0.640 & 0.713 & 1.000 & local \\
-Llama-3.2-3B few-shot & -- & 0.901 & 0.885--0.915 & 0.848 & 2.7 & 0.438 & 0.680 & 0.993 & 0.037 \\
-TF-IDF + NB & 0.929 & 0.895 & 0.879--0.909 & 0.773 & 6.6 & 0.631 & 0.600 & 0.987 & local \\
-DistilBERT & 0.975 & 0.891 & 0.875--0.906 & 0.838 & 6.3 & 0.493 & 0.760 & 0.947 & local \\
-Gemma-3-12B & -- & 0.882 & 0.866--0.896 & 0.768 & 25.1 & 0.955 & 0.980 & 1.000 & 0.016 \\
-Llama-3.1-8B & -- & 0.881 & 0.865--0.896 & 0.779 & 21.4 & 0.817 & 0.973 & 1.000 & 0.011 \\
-Llama-3.2-3B & -- & 0.850 & 0.832--0.868 & 0.799 & 5.1 & 0.507 & 0.827 & 1.000 & 0.016 \\
-Phi-4-14B & -- & 0.727 & 0.702--0.749 & 0.621 & 27.6 & 0.759 & 0.660 & 0.513 & 0.021 \\
-Llama-3.2-1B & -- & 0.623 & 0.597--0.647 & 0.359 & 60.0 & 0.474 & 0.760 & 0.607 & 0.009 \\
+TF-IDF + LogReg & 0.968 & 0.899 & 0.882--0.914 & 0.886--0.917 & 9.6 & 0.640 & 0.713 & local \\
+TF-IDF + NB & 0.884 & 0.894 & 0.879--0.909 & 0.877--0.918 & 6.6 & 0.631 & 0.600 & local \\
+\midrule
+DistilBERT & 0.975 & 0.891 & 0.876--0.906 & 0.885--0.902 & 6.3 & 0.540 & 0.780 & local \\
+\midrule
+BERT-phishing (published) & -- & 0.962 & 0.952--0.971 & 0.955--0.982 & 2.8 & 0.470 & 0.893 & local \\
+Phishsense-1B (published) & -- & 0.947 & 0.935--0.958 & 0.938--0.967 & 7.0 & 0.839 & 1.000 & local \\
+ModernBERT-phishing (published) & -- & 0.892 & 0.876--0.906 & 0.882--0.901 & 3.4 & 0.149 & 0.513 & local \\
+\midrule
+Qwen-2.5-7B few-shot mixed & -- & 0.948 & 0.936--0.958 & 0.944--0.953 & 4.9 & 0.673 & -- & 0.083 \\
+Qwen-2.5-7B few-shot & -- & 0.937 & 0.924--0.949 & 0.928--0.955 & 4.8 & 0.598 & 0.847 & 0.075 \\
+Qwen-2.5-7B few-shot AI & -- & 0.930 & 0.916--0.944 & 0.920--0.940 & 10.4 & 0.723 & -- & 0.079 \\
+Qwen-2.5-7B & -- & 0.928 & 0.915--0.941 & 0.921--0.944 & 3.0 & 0.819 & 0.940 & 0.033 \\
+Llama-3.2-3B few-shot AI & -- & 0.903 & 0.886--0.919 & 0.889--0.919 & 9.9 & 0.649 & -- & 0.040 \\
+Llama-3.2-3B few-shot & -- & 0.901 & 0.885--0.917 & 0.892--0.912 & 2.7 & 0.438 & 0.680 & 0.038 \\
+Gemma-3-12B & -- & 0.882 & 0.859--0.901 & 0.867--0.905 & 25.1 & 0.955 & 0.987 & 0.017 \\
+Llama-3.1-8B & -- & 0.881 & 0.859--0.902 & 0.870--0.901 & 21.4 & 0.817 & 0.973 & 0.012 \\
+Llama-3.2-3B & -- & 0.850 & 0.831--0.869 & 0.836--0.861 & 5.1 & 0.507 & 0.827 & 0.017 \\
+Phi-4-14B relaxed & -- & 0.754 & 0.716--0.788 & 0.746--0.762 & 48.0 & 0.700 & 0.773 & 0.029 \\
+Phi-4-14B & -- & 0.727 & 0.694--0.753 & 0.710--0.748 & 27.6 & 0.759 & 0.660 & 0.022 \\
+Llama-3.2-1B & -- & 0.623 & 0.580--0.662 & 0.600--0.676 & 59.9 & 0.474 & 0.760 & 0.009 \\
+\midrule
+Gemini-3.1-Flash-Lite & -- & 0.960 & 0.950--0.968 & 0.955--0.973 & 1.7 & 0.950 & 0.987 & 0.080 \\
+GPT-4o-mini & -- & 0.950 & 0.939--0.961 & 0.944--0.961 & 4.3 & 0.917 & 0.987 & 0.046 \\
 \bottomrule
 \end{tabular}
 \end{table*}

@@ -1,2 +1,2 @@
 setting,test,train_size,train_sec,infer_sec_per_1000,device
-loco_clean,ephishllm,6000,539.2,18.69,cpu
+loco_clean,ephishllm,6000,465.4,17.66,cpu

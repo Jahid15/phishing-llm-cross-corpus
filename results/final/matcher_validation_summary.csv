@@ -1,0 +1,2 @@
+sampled,brute_force_duplicates,pipeline_duplicates,precision,recall,share_of_hard_cases_that_are_duplicates
+400,247,247,1.0,1.0,0.618

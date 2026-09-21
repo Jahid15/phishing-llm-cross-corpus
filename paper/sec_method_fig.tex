@@ -1,17 +1,18 @@
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-  box/.style={draw, rounded corners=2pt, align=center, font=\scriptsize, minimum width=2.3cm, minimum height=0.95cm, fill=#1},
-  box/.default=white, >=Stealth, node distance=0.35cm and 0.22cm]
+  box/.style={draw, rounded corners=2pt, align=center, font=\scriptsize,
+              minimum width=2.25cm, minimum height=1.0cm, fill=#1},
+  box/.default=white, >=Stealth, node distance=0.3cm and 0.2cm]
 \node[box=blue!8] (a) {1. Collect\\9 public sources};
-\node[box=red!10, right=of a] (b) {2. Overlap\\exact + MinHash};
-\node[box=red!10, right=of b] (c) {3. Decontaminate\\leave one corpus out};
-\node[box=gray!10, below=of c] (d) {4. Models\\TF-IDF, DistilBERT,\\6 small LLMs};
-\node[box=orange!12, left=of d] (e) {5. Shift test\\E-PhishLLM, Nazario,\\Nigerian};
-\node[box=green!10, left=of e] (f) {6. Report\\F1, 95\% CI,\\USD per 1k};
+\node[box=red!10, right=of a] (b) {2. Measure overlap\\MinHash, then\\exact Jaccard};
+\node[box=red!10, right=of b] (c) {3. Decontaminate\\leave one corpus out\\+ random control};
+\node[box=gray!10, below=of c] (d) {4. Run models\\classical, DistilBERT,\\LLMs, published};
+\node[box=orange!12, left=of d] (e) {5. Shift tests\\AI-written mail,\\sanitised, it/de};
+\node[box=green!10, left=of e] (f) {6. Report\\F1, false alarms,\\base rate, cost};
 \draw[->] (a) -- (b); \draw[->] (b) -- (c); \draw[->] (c) -- (d); \draw[->] (d) -- (e); \draw[->] (e) -- (f);
 \end{tikzpicture}
-\caption{The six steps of our pipeline. Steps 2 and 3 are what most prior
-work skips.}
+\caption{The pipeline. Steps 2 and 3, and the operating-point part of step 6,
+are what earlier cross-corpus work does not do.}
 \label{fig:pipeline}
 \end{figure}

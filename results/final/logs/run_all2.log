@@ -1,0 +1,26 @@
+skip 02_overlap, already done
+skip 03_classical, already done
+
+=== 04_distilbert ===
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+loco_clean nazario acc 0.78 train 6000 in 465 s
+loco_clean nigerian acc 0.953 train 6000 in 465 s
+loco_clean ephishllm acc 0.62 train 6000 in 465 s
+loco_clean ephishllm_it acc 0.503 train 6000 in 465 s
+loco_clean ephishllm_de acc 0.54 train 6000 in 465 s
+loco_clean ephishllm_nolink acc 0.62 train 6000 in 465 s
+loco_clean ephishllm_url acc 0.63 train 6000 in 465 s
+saved distilbert results
+[progress] 04_distilbert done. 8.4 min
+
+=== 06_analysis ===
+Traceback (most recent call last):
+  File "/Users/sinha/Downloads/uiu/cn/code/final/06_analysis.py", line 328, in <module>
+    main()
+  File "/Users/sinha/Downloads/uiu/cn/code/final/06_analysis.py", line 207, in main
+    "unseen_f1_jackknife": f"{jk_lo:.3f}-{jk_hi:.3f}",
+NameError: name 'jk_lo' is not defined
+06_analysis failed with code 1, stopping so it can be resumed

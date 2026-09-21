@@ -1,0 +1,12 @@
+source,corpus_internal_near_dup_pct,eval_emails,eval_with_near_dup_in_own_train_pct
+spamassassin,13.7,300,17.33
+ceas08,28.95,300,19.0
+trec07,18.98,300,11.0
+ling,9.73,300,11.33
+enron,17.36,300,8.67
+kaggle,12.43,300,9.67
+nazario,21.94,150,22.0
+nigerian,36.13,150,33.33
+ephishllm,0.0,300,0.0
+ephishllm_it,0.0,300,0.0
+ephishllm_de,0.0,300,0.0

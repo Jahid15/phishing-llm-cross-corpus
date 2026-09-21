@@ -1,103 +1,137 @@
 \section{Introduction}
 
 Phishing email is still one of the most common ways into an organization. The
-attacker does not break any technical control. They write a message that looks
-like it came from a bank, a colleague or a delivery company, and the reader
-hands over the password. Generative AI made this cheaper. Heiding et
+attacker does not break a technical control. They write a message that looks
+like it came from a bank, a colleague or a supplier, and the reader hands over
+the password. Generative AI made writing such mail cheap: Heiding et
 al.~\cite{heiding} showed that phishing written by GPT-4 already gets click
 rates close to phishing written by human experts.
 
-The defense side has moved to language models too, and the published numbers
-look excellent. ChatSpamDetector reports 99.70\% accuracy with
-GPT-4~\cite{koide}. A fine-tuned RoBERTa reaches 98.45\%~\cite{uddin}. A five
-agent LLM system reaches 97.89\%~\cite{multiphish}. When we reproduced the
-setting with a plain TF-IDF and Logistic Regression model, we also got 97 to
-99\% accuracy. A method older than deep learning matching GPT-4 is a warning
-sign. It suggests the benchmark, not the model, is doing the work.
+Detection results in the literature look excellent. ChatSpamDetector reports
+99.70\% accuracy with GPT-4~\cite{koide}, a fine-tuned RoBERTa reports
+98.45\%~\cite{uddin}, and a five agent LLM system reports 97.89\%~\cite{multiphish}.
+When we reproduced the setting with TF-IDF and logistic regression we also got
+97 to 99\%. A method older than deep learning matching GPT-4 is a warning sign:
+it suggests the benchmark, not the model, is doing the work.
 
-Two things make these numbers hard to trust. First, most studies train and
-test inside a single corpus, while a real mail server sees mail that looks
-nothing like any training set. Second, the public corpora are not
-independent. Popular datasets such as the Kaggle phishing email set are
-aggregates built from older collections, so the same email can sit on both
-sides of a train and test split, even when the two sides come from
-``different'' datasets. A third, practical point is cost. For a university or
-a small company, the price of running a detector matters as much as its
-accuracy, yet none of the LLM papers we reviewed report it.
+This paper asks what these detectors are worth when the test mail comes from a
+corpus the model has never seen, and when the emails that the corpora share
+with each other are removed first. Three things make the question concrete.
+First, the popular corpora are not independent. Aggregated sets such as the
+Kaggle phishing email set are built from older collections, so the same email
+can sit on both sides of a train and test split even when the two sides come
+from datasets with different names. Second, the cost of running a detector is
+never reported, although for a university or a small company it decides what
+can be deployed at all. Third, a single F1 score hides the thing an operator
+cares about most, which is how much legitimate mail gets flagged.
 
-This paper asks a simple question. If we remove the leaked emails and always
-test on a corpus the model has never seen, how good are cheap detectors, and
-what do they cost? Our contributions are:
+Our contributions are:
 
 \begin{enumerate}
 \item A measurement of email overlap between nine public phishing and spam
-sources at three levels of strictness. We show that exact matching, the check
-most people would run, misses almost all of it.
-\item A leave-one-corpus-out benchmark over six corpora in which every
-training email that has a near duplicate in the test corpus is removed, and a
-measurement of how much leaked emails inflate the score.
-\item A comparison of classical models, a fine-tuned DistilBERT and six small
-open LLMs (1B to 14B parameters) on the same emails, including AI-written
-phishing, with the measured dollar cost of every LLM call.
+sources at three levels of strictness, with every near-duplicate pair verified
+by exact Jaccard similarity and the matcher itself validated against brute
+force. Exact matching, the check most people would run, finds almost none of
+the overlap.
+\item A decontaminated leave-one-corpus-out benchmark, with a control that
+removes the same number of training emails at random. The control separates
+the effect of leaked emails from the effect of simply having less data, which
+no earlier work on this question reports.
+\item A measurement of what the corpora actually contain. An LLM annotator with
+a second annotator for agreement finds that only 15 to 25\% of the positive
+emails in these corpora are phishing; the rest is bulk spam.
+\item A comparison on identical emails of classical models, a fine-tuned
+DistilBERT, six small open LLMs, three published phishing detectors and two
+current commercial models, reporting the false alarm rate and the measured
+dollar cost next to accuracy.
+\item An analysis of AI-written phishing that finds a give-away token in the
+E-PhishLLM corpus and then shows, with a paired test on sanitised copies of the
+same emails, that it is not what the detectors respond to, together with
+results on the Italian and German parts of the corpus.
+\item An ablation that changes only the source of the few-shot examples, which
+shows that examples drawn from old corpora, and not few-shot prompting itself,
+are what lower performance on AI-written phishing.
+\item Operating-point analysis: how the ranking changes at a realistic amount
+of phishing, and what two-stage detectors built from the same models achieve
+at a fraction of the cost.
 \end{enumerate}
 
-The whole study cost under one US dollar in API fees and ran on one 8\,GB
-laptop. Code, results and a notebook are public.\footnote{\url{https://github.com/Jahid15/phishing-llm-cross-corpus}}
+The whole study ran on one 8\,GB laptop for under two US dollars of API fees.
+Code, raw model answers, results and a notebook are public.\footnote{\url{https://github.com/Jahid15/phishing-llm-cross-corpus}}
 
 \section{Related Work}
 
-\textit{LLM detectors.} Koide et al.~\cite{koide} prompt GPT-4 with a chain of
-thought and parse the verdict. Heiding et al.~\cite{heiding} test GPT-4,
-Claude, Bard and LLaMA as judges of suspicious mail. Lin et
-al.~\cite{lin} show that 3B models perform poorly out of the box but improve
-with prompt engineering, LoRA fine-tuning on explanations from a paid
-GPT-4o-mini teacher, and ensembling. They list the missing cost analysis as a
-limitation. MultiPhishGuard~\cite{multiphish} combines five cooperating agents.
-Phishsense-1B~\cite{phishsense} is a LoRA-tuned 1B model that reports 97.5\%
-accuracy on its own data and 70\% on a separate real-world set, the clearest
-sign in the literature that in-corpus scores do not transfer.
+\textit{LLM detectors for phishing email.} Koide et al.~\cite{koide} prompt
+GPT-4 with a chain of thought and parse the verdict. Heiding et
+al.~\cite{heiding} use LLMs as judges of suspicious mail. Uddin et
+al.~\cite{uddin} fine-tune RoBERTa and add word level explanations. Lin et
+al.~\cite{lin} study small LLMs of about three billion parameters, the same
+size range we use, and improve them with prompt engineering, LoRA fine-tuning
+on explanations from a paid teacher model, and ensembling; they list the
+missing cost analysis as a limitation. MultiPhishGuard~\cite{multiphish}
+combines five agents and reports a 2.73\% false positive rate.
+Phishsense-1B~\cite{phishsense} is a phishing-specific 1B model that reports
+97.5\% on its own data and 70\% on a separate real-world set. Kuikel et
+al.~\cite{kuikel} find that the most accurate model is not the one with the
+most faithful explanations. A 2026 review~\cite{survey} covers the field from
+both the attack and the defence side.
 
-\textit{Encoders and explanations.} Uddin et al.~\cite{uddin} fine-tune RoBERTa
-on the Kaggle set and add LIME based explanations. Kuikel et
-al.~\cite{kuikel} find that the most accurate models are not the ones with the
-most faithful explanations. Alhuzali et al.~\cite{alhuzali} compare many
-classical and deep models on several public datasets.
+\textit{Cross-corpus evaluation.} Two recent works already test across
+datasets, and we position ourselves against them rather than around them.
+E-PhishGen~\cite{ephishgen} reassesses eight legacy corpora with a
+leave-one-dataset-out protocol over classical models, DistilBERT and several
+LLMs, and releases E-PhishLLM, a corpus of emails written by GPT-4o and
+GPT-4o-mini, which we use as our AI-phishing test. Bhuiyan and
+Bhuiyan~\cite{bhuiyan} study six corpora with leave-one-corpus-out training,
+prevalence shift and artifact learning for classical models. Fomin~\cite{lodo}
+reports the same kind of gap between pooled cross-validation and
+leave-one-dataset-out for malicious prompt classifiers, and Gutierrez et
+al.~\cite{gutierrez} show that much of the transfer gap to LLM-written
+phishing can be recovered by recalibrating the decision threshold. Neither
+E-PhishGen nor Bhuiyan and Bhuiyan measure or remove the overlap between the
+corpora they train and test on, and none of these works report what the
+detectors cost to run. Those two gaps, together with false alarm rates on
+legitimate mail, are what this paper adds.
 
-\textit{Cross-dataset testing.} The closest work to ours is
-E-PhishGen~\cite{ephishgen}. The authors reassess eight legacy corpora, show
-that a Logistic Regression model trained on CEAS falls from 0.98 F1 to 0.27 on
-average on other corpora, and release E-PhishLLM, a set of emails generated
-with GPT-4o-mini. We use E-PhishLLM as our AI-phishing test. Our work differs in
-three ways: we measure and remove near-duplicate leakage between corpora before
-testing, we include the Kaggle aggregate that much of the LLM literature uses,
-and we report measured cost next to accuracy.
+\textit{Leakage and deduplication.} Arp et al.~\cite{arp} list data snooping and
+sampling bias among the most common pitfalls of machine learning in security.
+Lee et al.~\cite{leededup} show that near-duplicates are pervasive in standard
+text corpora and that removing them is needed for honest evaluation; our
+matcher follows their MinHash approach~\cite{broder}. Liu et
+al.~\cite{malwareleak} find near-identical samples leaking between train and
+test splits in Android malware detection, the closest analogue in security to
+what we find for email. For LLMs evaluated zero-shot there is the further
+worry that public corpora were part of pre-training, which a recent survey
+treats in detail~\cite{contamsurvey}.
 
-\textit{Leakage in ML.} Arp et al.~\cite{arp} list data snooping and sampling
-bias among the most common pitfalls of machine learning in security. Kapoor and
-Narayanan~\cite{kapoor} trace many published results in other fields to
-leakage between training and test data. Our overlap study is a concrete case of
-this problem in phishing detection.
+\textit{Operating points.} Al Barwani et al.~\cite{ragfp} motivate their work by
+the false positive burden that standalone LLM classifiers create. \c{S}ahin and
+Mert~\cite{triage} propose conformal deferral for security alert triage, which
+is the natural next step for the operating points we report.
 
 \section{Data}
 
-We use nine sources (Table~\ref{tab:data}). Six contain both classes and serve
-for training and testing: SpamAssassin, CEAS-08, TREC-07, Ling-Spam and Enron
-from the curated collection of Champa et al.~\cite{champa}, and the Kaggle
-phishing email set used by~\cite{uddin}. Three are test-only. Nazario contains
-real credential phishing and Nigerian contains advance-fee fraud, both with no
-legitimate class. E-PhishLLM~\cite{ephishgen} contains phishing and legitimate
-emails written by GPT-4o-mini. We keep its English part.
+We use nine sources (Table~\ref{tab:data}). Six contain both classes and take
+turns as the held-out corpus: SpamAssassin, CEAS-08, TREC-07, Ling-Spam and
+Enron from the curated collection of Champa et al.~\cite{champa}, and the
+Kaggle phishing email set used by~\cite{uddin}. Three are test only. Nazario
+contains real credential phishing and Nigerian contains advance fee fraud,
+both with no legitimate class. E-PhishLLM~\cite{ephishgen} contains phishing
+and legitimate emails written by GPT-4o and GPT-4o-mini; we use its English
+part as a test set and its Italian and German parts as a second test of
+language transfer.
 
 For every source the model input is the subject and the body joined by a new
 line. Label 1 means phishing or spam and label 0 means legitimate. We drop
-bodies shorter than 20 characters and exact duplicates inside a corpus. Corpora
-larger than 10{,}000 emails are reduced to a stratified sample of 10{,}000
-(seed 42) so that the three largest ones do not dominate training. From each
-source we also draw a fixed evaluation subset of 300 emails, balanced where
-both classes exist (150 for the one-class sets). All models are scored on these
-same emails, which makes the LLM and non-LLM numbers directly comparable.
+bodies shorter than 20 characters and exact duplicates inside a corpus.
+Corpora larger than 10{,}000 emails are reduced to a stratified sample of
+10{,}000 (seed 42) so that the three largest ones do not dominate training.
+From each source we also draw a fixed evaluation subset of 300 emails,
+balanced where both classes exist (150 for the one-class sets). Every model,
+local or paid, is scored on exactly these emails.
 
-The positive class is not the same across corpora. SpamAssassin, CEAS, TREC and
-Ling mark ordinary spam as positive, while Nazario is pure phishing. We keep
-the labels as published and phrase the LLM prompt to match (``phishing, scam or
-spam''), and we report recall on Nazario and Nigerian separately.
+Two properties of this data matter for reading our results. The positive class
+is not the same across corpora: Section~\ref{sec:labels} measures what it
+actually contains. And the Kaggle set has no subject field, so its text is
+structurally unlike the other corpora, which is a difference that has nothing
+to do with phishing.

@@ -1,0 +1,15 @@
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+bert: labels {0: 'benign', 1: 'phishing'}, phishing index 1
+bert spamassassin: acc 0.990 (587 s per 1000)
+bert ceas08: acc 0.873 (553 s per 1000)
+bert trec07: acc 0.927 (565 s per 1000)
+bert ling: acc 1.000 (574 s per 1000)
+bert enron: acc 0.990 (483 s per 1000)
+bert kaggle: acc 1.000 (520 s per 1000)
+bert ephishllm: acc 0.617 (170 s per 1000)
+bert ephishllm_nolink: acc 0.633 (166 s per 1000)
+bert ephishllm_it: acc 0.540 (284 s per 1000)
+bert ephishllm_de: acc 0.613 (333 s per 1000)
+bert nazario: acc 0.893 (493 s per 1000)
+[progress] 12_offtheshelf done. 11 model/test-set files

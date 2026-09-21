@@ -1,0 +1,17 @@
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+qwen/qwen-2.5-7b-instruct few_ai spamassassin: 300 emails, total spend $0.5780
+qwen/qwen-2.5-7b-instruct few_ai ceas08: 300 emails, total spend $0.6218
+qwen/qwen-2.5-7b-instruct few_ai trec07: 300 emails, total spend $0.6458
+qwen/qwen-2.5-7b-instruct few_ai ling: 300 emails, total spend $0.6961
+qwen/qwen-2.5-7b-instruct few_ai enron: 300 emails, total spend $0.7186
+qwen/qwen-2.5-7b-instruct few_ai kaggle: 300 emails, total spend $0.7673
+qwen/qwen-2.5-7b-instruct few_ai ephishllm: 300 emails, total spend $0.7864
+meta-llama/llama-3.2-3b-instruct few_ai spamassassin: 300 emails, total spend $0.8196
+meta-llama/llama-3.2-3b-instruct few_ai ceas08: 300 emails, total spend $0.8531
+meta-llama/llama-3.2-3b-instruct few_ai trec07: 300 emails, total spend $0.8750
+meta-llama/llama-3.2-3b-instruct few_ai ling: 300 emails, total spend $0.9028
+meta-llama/llama-3.2-3b-instruct few_ai enron: 300 emails, total spend $0.9143
+meta-llama/llama-3.2-3b-instruct few_ai kaggle: 300 emails, total spend $0.9387
+meta-llama/llama-3.2-3b-instruct few_ai ephishllm: 300 emails, total spend $0.9487
+done. total spend $0.9487

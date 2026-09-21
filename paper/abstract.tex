@@ -1,23 +1,26 @@
-Published phishing email detectors, from GPT-4 prompts to fine-tuned
-transformers, report 97 to 99\% accuracy. Almost all of these numbers come from
-training and testing inside one dataset. We ask how good cheap detectors are
-when the test mail comes from a corpus the model has never seen, and when
-emails shared between corpora are removed first. Comparing nine public email
-sources, we find that the widely used Kaggle phishing set contains
-86\% of SpamAssassin, 90\% of Ling-Spam and
-35\% of Enron as near duplicates, while an exact-match check
-finds only 2 of the SpamAssassin copies. Removing the copies lowers the
-F1 of a TF-IDF model transferred from Kaggle to SpamAssassin from
-0.966 to 0.666, and lowers
-leave-one-corpus-out F1 by up to 11.5 points. We then compare classical models,
-DistilBERT and six small open LLMs (1B to 14B parameters) on the same held-out
-emails, including AI-written phishing, next to the measured API cost.
-Zero-shot Qwen-2.5-7B gives the best balance, with a mean F1 of
-0.928 on unseen corpora, 3\% false alarms and 0.819 F1 on
-AI-written phishing, for 3 US cents per 1{,}000 emails.
-Gemma-3-12B catches more AI-written phishing (F1 0.955) but flags
-25\% of legitimate mail. The fine-tuned DistilBERT has the best
-in-corpus score of all models and the weakest AI-phishing score of the trained
-ones, and few-shot examples taken from old corpora raise scores on old mail
-but lower them on AI-written phishing. The
-whole study ran on one laptop for 0.52 US dollars of API fees.
+Published phishing email detectors report 97 to 99\% accuracy, almost always
+measured inside a single corpus. We ask what they are worth on mail from a
+corpus they have never seen, once the emails that public corpora share with
+each other are removed. Comparing nine public sources, we find that
+87\% of SpamAssassin, 91\% of Ling-Spam and
+36\% of Enron have a near duplicate inside the widely used Kaggle
+phishing set, while an exact-match check finds 2 of the
+SpamAssassin copies. Removing the duplicates lowers a transfer score from
+0.966 to 0.672 F1, and removing the same number of
+training emails at random instead changes nothing, which separates leakage from
+lost data. An LLM annotator finds that only 15 to 25\% of
+the positive emails in these corpora are phishing rather than bulk spam. On
+decontaminated leave-one-corpus-out data we compare classical models, a
+fine-tuned DistilBERT, six small open LLMs, three published phishing detectors
+and two commercial models on identical emails, with false alarm rates and the
+measured dollar cost. Zero-shot Qwen-2.5-7B reaches 0.928 mean F1
+with 3\% false alarms at three US cents per 1{,}000 emails,
+Gemini-3.1-Flash-Lite reaches 0.960, and a two-stage detector that
+sends only flagged mail to an LLM reaches 0.911 at
+1.1\% false alarms for 0.0161 dollars per
+1{,}000. We also show that the AI-written phishing corpus used here carries a
+give-away token which a naive comparison blames for 16 points of recall,
+but which a paired test clears (0.9 points), and that
+few-shot examples taken from old corpora, rather than few-shot prompting
+itself, are what lower performance on AI-written mail. The whole study ran on
+one laptop for 1.58 US dollars.

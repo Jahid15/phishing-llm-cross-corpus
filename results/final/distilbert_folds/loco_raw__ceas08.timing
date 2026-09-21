@@ -1,0 +1,2 @@
+setting,test,train_size,train_sec,infer_sec_per_1000,device
+loco_raw,ceas08,5000,1001.1,30.83,cpu

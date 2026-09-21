@@ -1,0 +1,19 @@
+\begin{table*}[t]
+\caption{The same models at a realistic amount of phishing. Recall and false alarm rate are measured; precision and F1 are recomputed for a mailbox where 5\% of mail is phishing. The last column is how many legitimate emails out of 1{,}000 would be flagged.}
+\label{tab:baserate}
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Model & Recall & FA (\%) & Prec. at 50\% & Prec. at 5\% & F1 at 5\% & Bad alerts/1k \\
+\midrule
+Gemini-3.1-Flash-Lite & 0.940 & 1.7 & 0.983 & 0.748 & 0.833 & 16 \\
+Qwen-2.5-7B & 0.893 & 3.0 & 0.968 & 0.610 & 0.725 & 28 \\
+DistilBERT & 0.857 & 6.3 & 0.931 & 0.416 & 0.560 & 60 \\
+TF-IDF + LogReg & 0.898 & 9.6 & 0.904 & 0.331 & 0.484 & 91 \\
+Llama-3.1-8B & 0.948 & 21.4 & 0.815 & 0.189 & 0.315 & 204 \\
+Gemma-3-12B & 0.977 & 25.1 & 0.795 & 0.170 & 0.289 & 239 \\
+Phi-4-14B & 0.732 & 27.6 & 0.727 & 0.123 & 0.210 & 262 \\
+\bottomrule
+\end{tabular}
+\end{table*}

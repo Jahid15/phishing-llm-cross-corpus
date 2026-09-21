@@ -18,8 +18,14 @@ SEED = 42
 # six corpora that have both classes, used for leave-one-corpus-out
 TRAIN_CORPORA = ["spamassassin", "ceas08", "trec07", "ling", "enron", "kaggle"]
 # extra test sets, never used for training
-EXTRA_TESTS = ["nazario", "nigerian", "ephishllm"]
+EXTRA_TESTS = ["nazario", "nigerian", "ephishllm", "ephishllm_it", "ephishllm_de"]
+# sanitised copies of the English AI-written set, built by 10_variants.py.
+# They are evaluation sets only: they are never part of the overlap study,
+# because by construction they are copies of ephishllm.
+VARIANT_TESTS = ["ephishllm_nolink", "ephishllm_url"]
+
 ALL_SOURCES = TRAIN_CORPORA + EXTRA_TESTS
+EVAL_SETS = ALL_SOURCES + VARIANT_TESTS
 
 # emails per corpus kept for the experiments (stratified sample, after cleaning)
 CAP_PER_CORPUS = 10000

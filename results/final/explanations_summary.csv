@@ -1,0 +1,3 @@
+model,n,accuracy,gave_reason,grounded,supports_verdict,grounded_when_wrong
+google/gemma-3-12b-it,100,0.92,1.0,0.92,0.92,0.5
+qwen/qwen-2.5-7b-instruct,100,0.84,1.0,0.91,0.92,0.562

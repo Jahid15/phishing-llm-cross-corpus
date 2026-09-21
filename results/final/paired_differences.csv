@@ -1,0 +1,6 @@
+model_a,model_b,mean_difference,ci_low,ci_high,excludes_zero
+Qwen-2.5-7B,TF-IDF + LogReg,0.0292,0.0156,0.0444,True
+Qwen-2.5-7B,DistilBERT,0.0371,0.0238,0.0524,True
+Qwen-2.5-7B few-shot,Qwen-2.5-7B,0.0085,-0.001,0.0183,False
+Gemma-3-12B,Qwen-2.5-7B,-0.0468,-0.0703,-0.0249,True
+Gemini-3.1-Flash-Lite,Qwen-2.5-7B,0.0319,0.0198,0.0435,True

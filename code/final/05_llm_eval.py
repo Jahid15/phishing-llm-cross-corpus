@@ -6,8 +6,16 @@ so the LLM numbers are directly comparable with the classical and DistilBERT
 numbers computed on the same emails.
 
 An LLM never trains on our corpora, so every test set is unseen for it.
-Few-shot examples for a test corpus are always taken from the OTHER training
-corpora, the same leave-one-corpus-out rule the trained models follow.
+Few-shot examples for a test corpus are always taken from the OTHER sources,
+the same leave-one-corpus-out rule the trained models follow.
+
+Few-shot example pools (mode names):
+  few      four examples from the other legacy corpora (2002 to 2008 style mail)
+  few_ai   four examples of AI-written mail from E-PhishLLM, never the emails
+           used for evaluation
+  few_mix  two legacy and two AI-written examples
+This is how we test whether the examples themselves, and not few-shot
+prompting as such, are what changes behaviour on AI-written phishing.
 
 The dollar cost is the real cost OpenRouter reports for each call
 (usage.cost), not an estimate from the price list. A hard budget stops the
@@ -16,6 +24,8 @@ run before it goes over.
 Usage
   python 05_llm_eval.py --mode zero --models all
   python 05_llm_eval.py --mode few  --models meta-llama/llama-3.2-3b-instruct
+  python 05_llm_eval.py --mode few_ai --models qwen/qwen-2.5-7b-instruct
+  python 05_llm_eval.py --mode zero --models google/gemini-3.1-flash-lite --sources ephishllm_it,ephishllm_de
   python 05_llm_eval.py --mode long --models microsoft/phi-4
 
 Mode "long" is the zero-shot prompt with room for 80 output tokens. Some models
@@ -39,7 +49,7 @@ from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 import requests
 
-from common import ALL_SOURCES, RESULTS_DIR, ROOT, SEED, TRAIN_CORPORA, load, load_eval
+from common import EVAL_SETS, RESULTS_DIR, ROOT, SEED, TRAIN_CORPORA, load, load_eval
 
 MODELS = [
     "meta-llama/llama-3.2-1b-instruct",
@@ -51,7 +61,7 @@ MODELS = [
 ]
 MAX_CHARS = 1500
 WORKERS = 8
-BUDGET_USD = 1.90
+BUDGET_USD = 3.00     # total project spend allowed, checked before each test set
 RAW_DIR = os.path.join(RESULTS_DIR, "llm_raw")
 SPEND_FILE = os.path.join(RESULTS_DIR, "llm_spend.json")
 
@@ -87,14 +97,23 @@ def add_spend(usd):
         return total
 
 
-def few_shot_messages(test_source):
-    """2 phishing + 2 legitimate short emails from corpora other than the test one."""
-    pool = [c for c in TRAIN_CORPORA if c != test_source]
+def _pick(source, label, seed, exclude_ids=()):
+    df = load(source)
+    df = df[(df.label == label) & (df.text.str.len().between(150, 600)) & (~df.id.isin(exclude_ids))]
+    return df.sample(n=1, random_state=seed).text.iat[0]
+
+
+def few_shot_messages(test_source, kind="few"):
+    """Four short examples, two positive and two negative, never from the test set."""
+    legacy = [c for c in TRAIN_CORPORA if c != test_source]
+    ai_source = "ephishllm"
+    ai_exclude = set(load_eval("ephishllm").id) | set(load_eval("ephishllm_it").id) | set(load_eval("ephishllm_de").id)
     examples = []
     for i, label in enumerate([1, 0, 1, 0]):
-        df = load(pool[i % len(pool)])
-        df = df[(df.label == label) & (df.text.str.len().between(150, 600))]
-        examples.append((df.sample(n=1, random_state=SEED + i).text.iat[0], label))
+        if kind == "few" or (kind == "few_mix" and i < 2):
+            examples.append((_pick(legacy[i % len(legacy)], label, SEED + i), label))
+        else:
+            examples.append((_pick(ai_source, label, SEED + i, ai_exclude), label))
     msgs = [{"role": "system", "content": INSTRUCTION}]
     for text, label in examples:
         msgs.append({"role": "user", "content": "Email:\n" + text[:MAX_CHARS]})
@@ -114,6 +133,10 @@ def ask(key, model, prefix, text, max_tokens=5):
                               timeout=90)
             r.raise_for_status()
             d = r.json()
+            if "choices" not in d:
+                # some providers answer 200 with an error body, for example when
+                # they are rate limited; treat it as a retryable failure
+                raise RuntimeError(str(d.get("error", d))[:120])
             u = d.get("usage", {})
             return {"answer": (d["choices"][0]["message"]["content"] or "").strip().lower(),
                     "tokens_in": u.get("prompt_tokens", 0), "tokens_out": u.get("completion_tokens", 0),
@@ -125,11 +148,23 @@ def ask(key, model, prefix, text, max_tokens=5):
 
 
 def parse(answer):
-    if "phish" in answer or "spam" in answer or "malicious" in answer:
-        return 1
-    if "legit" in answer:
+    """Read a one-word verdict.
+
+    Two things this has to survive. Some models answer with a negation
+    ("not phishing"), so the negative cases are checked first. Some providers
+    cut the answer to a single token, so Gemini replies "ph" or "leg" rather
+    than the whole word; a prefix is enough to know what it meant.
+    """
+    a = " ".join(str(answer).lower().split())
+    if not a:
+        return -1
+    if a.startswith("not ") or "not phishing" in a or "not spam" in a or "not malicious" in a:
         return 0
-    return -1   # unparsed, counted as legitimate later and reported separately
+    if a.startswith("leg") or "legit" in a or "benign" in a or "safe" in a:
+        return 0
+    if a.startswith("ph") or "phish" in a or a.startswith("spam") or "malicious" in a or a.startswith("mal"):
+        return 1
+    return -1   # no verdict given, counted as legitimate later and reported separately
 
 
 VERDICT = re.compile(r"\b(phishing|legitimate|spam|scam|malicious|fraudulent|not phishing)\b")
@@ -144,23 +179,26 @@ def parse_long(answer):
     return 0 if hits[-1] in ("legitimate", "not phishing") else 1
 
 
-def run(model, mode, key, workers=WORKERS):
+def run(model, mode, key, workers=WORKERS, sources=None):
     os.makedirs(RAW_DIR, exist_ok=True)
     out = os.path.join(RAW_DIR, f"{model.replace('/', '__')}__{mode}.csv")
-    done = pd.read_csv(out) if os.path.exists(out) else pd.DataFrame(columns=["id", "tokens_in"])
+    done = pd.read_csv(out) if os.path.exists(out) else pd.DataFrame(columns=["id", "source", "tokens_in"])
     # a call that failed after all retries has zero tokens, it is tried again
     done = done[done["tokens_in"] > 0]
-    done_ids = set(done["id"])
+    # keyed by (test set, id): the sanitised copies of a test set reuse the ids
+    # of the original, so an id on its own is not unique
+    done_keys = set(zip(done["source"], done["id"])) if len(done) else set()
     rows = done.to_dict("records")
 
-    for source in ALL_SOURCES:
+    for source in (sources or EVAL_SETS):
         ev = load_eval(source)
-        todo = ev[~ev["id"].isin(done_ids)]
+        todo = ev[[(source, i) not in done_keys for i in ev["id"]]]
         if todo.empty:
             continue
         if spent() > BUDGET_USD:
             print("budget reached, stopping"); break
-        prefix = few_shot_messages(source) if mode == "few" else [{"role": "system", "content": INSTRUCTION}]
+        prefix = ([{"role": "system", "content": INSTRUCTION}] if mode in ("zero", "long")
+                  else few_shot_messages(source, mode))
         max_tokens = 80 if mode == "long" else 5
         with ThreadPoolExecutor(max_workers=workers) as pool:
             res = list(pool.map(lambda t: ask(key, model, prefix, t, max_tokens), todo["text"]))
@@ -176,14 +214,15 @@ def run(model, mode, key, workers=WORKERS):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["zero", "few", "long"], default="zero")
+    ap.add_argument("--mode", choices=["zero", "few", "few_ai", "few_mix", "long"], default="zero")
     ap.add_argument("--models", default="all")
     ap.add_argument("--workers", type=int, default=WORKERS)
+    ap.add_argument("--sources", default="", help="comma separated test sets, default all")
     a = ap.parse_args()
     models = MODELS if a.models == "all" else a.models.split(",")
     key = api_key()
     for m in models:
-        run(m, a.mode, key, a.workers)
+        run(m, a.mode, key, a.workers, a.sources.split(",") if a.sources else None)
     print("done. total spend $%.4f" % spent())
 
 

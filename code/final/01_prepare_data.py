@@ -7,7 +7,8 @@ label 1 = phishing or spam (unwanted), 0 = legitimate.
 Sources
   training corpora (both classes): spamassassin, ceas08, trec07, ling, enron, kaggle
   extra test sets: nazario (phishing only), nigerian (fraud only),
-                   ephishllm (LLM written, English part only)
+                   ephishllm (LLM written, English), and the Italian and German
+                   parts of the same corpus (ephishllm_it, ephishllm_de)
 
 Raw files come from Zenodo record 8339691, the Kaggle phishing email set
 (HuggingFace mirror) and github.com/pajola/e-phishGen.
@@ -64,10 +65,10 @@ def kaggle():
                          "label": (df["Email Type"] == "Phishing Email").astype(int)})
 
 
-def ephishllm():
+def ephishllm(lang="en"):
     rows = json.load(open(os.path.join(RAW_DIR, "ephishLLM.json")))
     df = pd.DataFrame(rows)
-    df = df[df["Language"] == "en"]
+    df = df[df["Language"] == lang]
     return pd.DataFrame({"subject": df["Subject"].fillna(""),
                          "body": df["Body"].fillna(""),
                          "label": df["type"].astype(int)})
@@ -83,6 +84,8 @@ BUILDERS = {
     "nazario": lambda: zenodo("Nazario.csv"),
     "nigerian": lambda: zenodo("Nigerian_Fraud.csv"),
     "ephishllm": ephishllm,
+    "ephishllm_it": lambda: ephishllm("it"),
+    "ephishllm_de": lambda: ephishllm("de"),
 }
 
 

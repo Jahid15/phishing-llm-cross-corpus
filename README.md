@@ -13,19 +13,22 @@ Term project, Computer Security, United International University (Group 18).
 
 ## In one paragraph
 
-Phishing detectors in the literature report 97 to 99 percent accuracy, but
-almost always train and test inside one dataset. We tested cheap detectors on
-corpora they had never seen, after removing emails that appear in more than
-one corpus. The popular Kaggle phishing set turned out to contain 86 percent of
-SpamAssassin, 90 percent of Ling-Spam and 35 percent of Enron as near
-duplicates, which an exact-match check almost completely misses. Removing
-those copies drops a "good" cross-corpus F1 from 0.966 to 0.666. On honest
-test data a small open LLM (Qwen-2.5-7B, zero-shot) is the best balance: 0.928
-F1 on unseen corpora, 3 percent false alarms and 0.819 F1 on AI-written
-phishing, at about 3 US cents per 1,000 emails. Gemma-3-12B catches more
-AI-written phishing (0.955) but flags a quarter of legitimate mail, and the
-fine-tuned DistilBERT, best of all inside one corpus, is the weakest trained
-model on AI-written phishing.
+Phishing detectors in the literature report 97 to 99 percent accuracy, almost
+always measured inside a single corpus. We asked what they are worth on mail
+from a corpus they have never seen, after removing the emails that the public
+corpora share with each other. Most of the popular Kaggle phishing set turns
+out to have a near duplicate in another public corpus, which an exact-match
+check almost completely misses, and removing those copies drops a "good"
+cross-corpus F1 from 0.966 to 0.666. Removing the same number of training
+emails at random instead changes nothing, so the cause is leakage and not the
+smaller training set. We also find that only 15 to 25 percent of the positive
+emails in these corpora are phishing rather than bulk spam, and that the
+AI-written corpus used as a shift test carries a give-away token worth about 18
+points of recall. On honest, decontaminated data we compare classical models, a
+fine-tuned DistilBERT, six small open LLMs, three published phishing detectors
+and two commercial models on identical emails, with false alarm rates and the
+measured dollar cost, and we report what happens at a realistic amount of
+phishing and what cheap two-stage detectors achieve.
 
 ## Where to look
 
@@ -37,6 +40,8 @@ model on AI-written phishing.
 | Final presentation | [`final-slides/final_deck.html`](final-slides/final_deck.html), [`final-slides/final_deck.pptx`](final-slides/final_deck.pptx) |
 | Final code | [`code/final/`](code/final/) |
 | Final results (CSV + figures) | [`results/final/`](results/final/) |
+| Guide for the team, with a question bank | [`TEAM_GUIDE.md`](TEAM_GUIDE.md) |
+| What is done and what is left | [`PLAN.md`](PLAN.md), `python code/final/run_all.py --status` |
 | Earlier submissions | literature review, proposal, research gaps (root folder), preliminary code in [`code/preliminary/`](code/preliminary/) |
 | Proposal presentation | [`new-slides/`](new-slides/) |
 
@@ -55,7 +60,18 @@ python 04_distilbert_loco.py   # DistilBERT on CPU (set DEVICE=mps for Apple GPU
 python 05_llm_eval.py --mode zero --models all   # needs OPENROUTER_API_KEY
 python 05_llm_eval.py --mode few --models meta-llama/llama-3.2-3b-instruct,qwen/qwen-2.5-7b-instruct
 python 06_analysis.py          # tables, confidence intervals, figures
+python 07_cascade.py           # two-stage detectors, from saved predictions
+python 08_significance.py      # McNemar tests
+python 09_placeholder.py       # the give-away token in the AI-written corpus
+python 13_baserate.py          # precision at a realistic amount of phishing
+python 14_label_study.py       # spam versus phishing annotation (needs the key)
+python 15_explanations.py      # explanation quality (needs the key)
+python 16_validate_matcher.py  # brute-force validation of the matcher
+DEVICE=mps python 12_offtheshelf.py --models bert,modernbert,phishsense
 ```
+
+`python code/final/run_all.py` runs the long steps in order and skips whatever
+is already finished, so it can be stopped and restarted.
 
 For the LLM step, put `OPENROUTER_API_KEY=...` in a `.env` file in the project
 root or in the environment. The key and the `data/` folder are never

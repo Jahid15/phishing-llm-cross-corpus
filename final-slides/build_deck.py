@@ -18,9 +18,8 @@ src = open(os.path.join(ROOT, "new-slides", "proposal_deck.html")).read().split(
 head = "\n".join(src[:149]).replace("Phishing Email Detection Using LLMs: Proposal",
                                     "Phishing Email Detection Using LLMs: Final Update")
 head += """
-.fig{background:#fff;border-radius:10px;padding:8px;display:flex;align-items:center;justify-content:center}
+.fig{background:#fff;border-radius:10px;padding:8px;display:flex;align-items:center;justify-content:center;min-height:0;align-self:flex-start}
 .fig img{max-width:100%;max-height:455px;display:block}
-.fig{min-height:0;align-self:flex-start}
 .tl{display:flex;gap:10px}
 .tl .card{flex:1;padding:14px 14px}
 .date{font-size:12px;color:var(--amber);font-weight:700;letter-spacing:.06em}
@@ -28,6 +27,7 @@ head += """
 .part{color:var(--amber);font-weight:700}
 td.l,th.l{text-align:left!important}
 .tight td,.tight th{padding:7px 10px;font-size:14px}
+.tiny td,.tiny th{padding:5px 8px;font-size:13px}
 a{color:var(--blue)}
 </style>
 </head>
@@ -37,14 +37,41 @@ a{color:var(--blue)}
 """
 footer = "\n".join(src[427:])
 
+
 def img(name):
     b = base64.b64encode(open(os.path.join(FIG, name), "rb").read()).decode()
     return f'<img src="data:image/png;base64,{b}" alt="{name}">'
 
-def f3(x):
-    return f"{x:.3f}" if isinstance(x, (int, float)) else str(x)
+
+f3 = lambda x: f"{x:.3f}" if isinstance(x, (int, float)) else str(x)
+pct = lambda x: f"{100 * x:.0f}%"
+
+main = {r["model"]: r for r in n["main"]}
+cost = {r["model"]: r for r in n["llm_cost"]}
+loco = {(r["model"], r["test"], r["setting"]): r for r in n["classical_loco"]}
+within = {r["source"]: r for r in n["within_corpus_dup"]}
+thr = {(r["source"], r["threshold"]): r for r in n["overlap_thresholds"]}
+label_rows = n["label_study_summary"]
+comp = [r for r in label_rows if r["row"] == "composition"]
+agree = [r for r in label_rows if r["row"] == "agreement"][0]
+base = {r["model"]: r for r in n["base_rate"]}
+casc = n["cascade"]
+ph_rows = [r for r in n["placeholder_effect"] if r["test_set"] == "ephishllm"]
+ph = {r["model"]: r for r in ph_rows}
+expl = {r["model"]: r for r in n["explanations_summary"]}
+mv = n["matcher_validation_summary"][0]
+sa = n["sa_in_kaggle"]
+SIX = ["spamassassin", "ceas08", "trec07", "ling", "enron", "kaggle"]
+
+
+def lf1(test, setting):
+    r = loco.get(("logreg", test, setting))
+    return r["f1"] if r else float("nan")
+
 
 slides = []
+
+
 def slide(num, kicker, speaker, title, body, note):
     slides.append(f"""
 <section class="slide">
@@ -56,20 +83,6 @@ def slide(num, kicker, speaker, title, body, note):
   <div class="note">{note}</div>
 </section>""")
 
-sa = n["sa_in_kaggle"]
-main = n["main"]
-top = main[0]
-best = next(r for r in main if r["model"] == "Qwen-2.5-7B")
-qfs = next((r for r in main if r["model"] == "Qwen-2.5-7B few-shot"), None)
-gm = next(r for r in main if r["model"] == "Gemma-3-12B")
-dbm = next(r for r in main if r["model"] == "DistilBERT")
-l3 = next(r for r in main if r["model"] == "Llama-3.2-3B")
-l3fs = next((r for r in main if r["model"] == "Llama-3.2-3B few-shot"), None)
-llm_rows = [r for r in main if r["type"] == "LLM"]
-lr = next(r for r in main if r["model"] == "TF-IDF + LogReg")
-db = next((r for r in main if r["model"] == "DistilBERT"), None)
-infl = {r["test"]: r for r in n["inflation_logreg"]}
-spent = n["llm_total_usd"] + n["discarded_usd"]
 
 # 1 title
 slides.append(f"""
@@ -86,176 +99,278 @@ slides.append(f"""
   </div>
   <div class="spacer"></div>
   <div class="num">1</div>
-  <div class="note">15 sec. Names and title. Say: in the proposal we promised a table that did not exist. Today we show it filled in.</div>
+  <div class="note">15 sec. In the proposal we showed an empty table. Today it is filled in, and we also found things we did not expect.</div>
 </section>""")
 
 # 2 journey
 slide(2, "Where we started", "Sinha", "From a suspicion to a measured result",
 f"""  <div class="tl">
     <div class="card muted"><div class="date">15 JUL</div><b class="fs-18">Literature review</b>
-      <div class="small" style="margin-top:6px">5 papers, all 97 to 99%. Every one tests inside one dataset. None reports cost.</div></div>
+      <div class="small" style="margin-top:6px">5 papers, all 97 to 99%. Every one tests inside one dataset.</div></div>
     <div class="card muted"><div class="date">21 JUL</div><b class="fs-18">Preliminary run</b>
       <div class="small" style="margin-top:6px">Train on one corpus, test on another: F1 0.99 fell to 0.30.</div></div>
-    <div class="card muted"><div class="date">11 AUG</div><b class="fs-18">Overlap check</b>
-      <div class="small" style="margin-top:6px">Kaggle already contains two thirds of SpamAssassin.</div></div>
-    <div class="card muted"><div class="date">5 SEP</div><b class="fs-18">Proposal talk</b>
-      <div class="small" style="margin-top:6px">Six objectives, one table to fill.</div></div>
-    <div class="card accent"><div class="date">18 SEP</div><b class="fs-18">Final experiments</b>
-      <div class="small" style="margin-top:6px">9 sources, 9 models, {n['total_emails_clean']:,} emails checked for overlap.</div></div>
+    <div class="card muted"><div class="date">5 SEP</div><b class="fs-18">Proposal</b>
+      <div class="small" style="margin-top:6px">Six objectives and one empty table.</div></div>
+    <div class="card accent"><div class="date">21 SEP</div><b class="fs-18">Final study</b>
+      <div class="small" style="margin-top:6px">{n['total_emails_clean']:,} emails checked for overlap, {n['llm_calls']:,} model calls, ${n['total_spend_usd']:.2f}.</div></div>
   </div>
-  <div class="fs-18" style="font-weight:700;margin:26px 0 12px">What changed since the proposal</div>
+  <div class="fs-18" style="font-weight:700;margin:26px 0 12px">What we corrected after review</div>
   <div class="grid3">
-    <div class="card"><b class="t-amber">Prior work found</b><div class="small" style="margin-top:6px">E-PhishGen (AISec 2025) already tested classical models across corpora. So our claim is now leakage removal plus cost, and we cite them.</div></div>
-    <div class="card"><b class="t-amber">Nazario is test-only</b><div class="small" style="margin-top:6px">Enron became a full corpus, so pairing Nazario with Enron mail would leak. Nazario now measures phishing recall only.</div></div>
-    <div class="card"><b class="t-amber">Numbers rebuilt</b><div class="small" style="margin-top:6px">The 74.4% / 4,282 / 48 on our proposal slides came from an unsaved run. Every number today comes from code in the repo.</div></div>
+    <div class="card"><b class="t-amber">We are not first</b><div class="small" style="margin-top:6px">Two 2025-26 papers already test across corpora. Ours is what they skip: removing the overlap, cost, and false alarms.</div></div>
+    <div class="card"><b class="t-amber">We added a control</b><div class="small" style="margin-top:6px">Decontamination also shrinks the training set, so we remove the same number of emails at random to prove the cause.</div></div>
+    <div class="card"><b class="t-amber">We verify exactly</b><div class="small" style="margin-top:6px">Every duplicate pair is confirmed with exact similarity, and the matcher is checked against brute force.</div></div>
   </div>
   <div class="spacer"></div>
-  <div class="card blue"><div class="fs-20"><b>Question:</b> if we remove leaked emails and always test on a corpus the model has never seen, how good are cheap detectors, and what do they cost?</div></div>""",
-"45 sec. Walk the timeline in one breath. Then the three changes, be open about the old numbers. Land on the question in the blue box.")
+  <div class="card blue"><div class="fs-20"><b>Question:</b> if we remove leaked emails and always test on a corpus the model has never seen, how good are cheap detectors, what do they cost, and how much good mail do they block?</div></div>""",
+"45 sec. Timeline in one breath, then the three corrections. Be open that we are not the first to test across corpora.")
 
 # 3 objectives
-slide(3, "Objectives", "Sinha", "Six objectives from the proposal",
+slide(3, "Objectives", "Sinha", "The six from the proposal, plus what review added",
 f"""  <table class="tight">
-    <tr><th class="l">#</th><th class="l">Objective</th><th class="l">What we delivered</th><th>Status</th></tr>
-    <tr><td>1</td><td class="l">Decontaminated benchmark</td><td class="l">9 sources, overlap measured at 3 levels, near duplicates removed</td><td class="ok">Done</td></tr>
-    <tr><td>2</td><td class="l">Leave-one-corpus-out</td><td class="l">6 folds, each run with raw and cleaned training data</td><td class="ok">Done</td></tr>
-    <tr><td>3</td><td class="l">One protocol, all families</td><td class="l">2 classical, DistilBERT, 6 small LLMs, 2 few-shot. Phishsense-1B not run</td><td class="part">Mostly</td></tr>
-    <tr><td>4</td><td class="l">Cost in dollars</td><td class="l">Real cost of every one of {n['llm_calls']:,} LLM calls, from OpenRouter</td><td class="ok">Done</td></tr>
-    <tr><td>5</td><td class="l">AI-written phishing</td><td class="l">E-PhishLLM (GPT-4o-mini emails) as a held-out shift test</td><td class="ok">Done</td></tr>
-    <tr><td>6</td><td class="l">One honest table</td><td class="l">F1 on unseen corpora with 95% bootstrap intervals, next to cost</td><td class="ok">Done</td></tr>
-  </table>
-  <div class="spacer"></div>
-  <div class="small">Phishsense-1B needs a HuggingFace access token. It is the first item for the next two weeks.</div>""",
-"30 sec. Do not read every row. Say: five of six fully done, one mostly, and say why Phishsense is missing.")
+    <tr><th class="l">#</th><th class="l">Objective</th><th class="l">Delivered</th><th>Status</th></tr>
+    <tr><td>1</td><td class="l">Decontaminated benchmark</td><td class="l">9 sources, 3 levels of matching, exact verification, matcher validated</td><td class="ok">Done</td></tr>
+    <tr><td>2</td><td class="l">Leave-one-corpus-out</td><td class="l">6 folds, raw, decontaminated, and a random-removal control</td><td class="ok">Done</td></tr>
+    <tr><td>3</td><td class="l">One protocol, all families</td><td class="l">classical, DistilBERT, 6 small LLMs, 3 published detectors, 2 commercial</td><td class="ok">Done</td></tr>
+    <tr><td>4</td><td class="l">Cost in dollars</td><td class="l">measured charge for every one of {n['llm_calls']:,} calls</td><td class="ok">Done</td></tr>
+    <tr><td>5</td><td class="l">AI-written phishing</td><td class="l">English, Italian, German, plus sanitised copies</td><td class="ok">Done</td></tr>
+    <tr><td>6</td><td class="l">One honest table</td><td class="l">F1, false alarms, cost, with paired intervals and significance tests</td><td class="ok">Done</td></tr>
+    <tr class="hl"><td>+</td><td class="l">Added after review</td><td class="l">label study, base-rate analysis, two-stage detectors, explanation quality</td><td class="ok">Done</td></tr>
+  </table>""",
+"30 sec. All six done. Point at the last row: review made the project bigger, not smaller.")
 
 # 4 methodology
-slide(4, "Methodology", "Sinha", "Six steps, one script each, all on a laptop",
+slide(4, "Methodology", "Sinha", "Six steps, and one control that decides the argument",
 f"""  <div class="pipe">
-    <div class="card blue"><div class="label t-blue">1 Collect</div><div class="small" style="margin-top:8px">9 public sources, subject + body, 10k cap per corpus</div></div>
+    <div class="card blue"><div class="label t-blue">1 Collect</div><div class="small" style="margin-top:8px">9 public sources</div></div>
     <div class="arrow">→</div>
-    <div class="card accent"><div class="label t-accent">2 Overlap</div><div class="small" style="margin-top:8px">exact, normalized, MinHash near duplicate</div></div>
+    <div class="card accent"><div class="label t-accent">2 Overlap</div><div class="small" style="margin-top:8px">MinHash, then exact Jaccard</div></div>
     <div class="arrow">→</div>
-    <div class="card accent"><div class="label t-accent">3 Decontaminate</div><div class="small" style="margin-top:8px">train on 5 corpora, drop copies of the 6th</div></div>
+    <div class="card accent"><div class="label t-accent">3 Decontaminate</div><div class="small" style="margin-top:8px">train on 5, test on the 6th</div></div>
     <div class="arrow">→</div>
-    <div class="card muted"><div class="label t-muted">4 Models</div><div class="small" style="margin-top:8px">TF-IDF, DistilBERT, 6 small LLMs</div></div>
+    <div class="card muted"><div class="label t-muted">4 Models</div><div class="small" style="margin-top:8px">11 detectors, same emails</div></div>
     <div class="arrow">→</div>
-    <div class="card amber"><div class="label t-amber">5 Shift test</div><div class="small" style="margin-top:8px">E-PhishLLM, Nazario, Nigerian</div></div>
+    <div class="card amber"><div class="label t-amber">5 Shift tests</div><div class="small" style="margin-top:8px">AI-written, sanitised, it/de</div></div>
     <div class="arrow">→</div>
-    <div class="card good"><div class="label t-good">6 Report</div><div class="small" style="margin-top:8px">F1 + 95% CI + USD per 1,000</div></div>
+    <div class="card good"><div class="label t-good">6 Report</div><div class="small" style="margin-top:8px">F1, false alarms, cost</div></div>
   </div>
-  <div class="grid2" style="margin-top:28px">
-    <div class="card"><b class="fs-18">Leave-one-corpus-out</b><div class="small" style="margin-top:6px">For each corpus T, train on the other five and test on all of T. Run twice: raw training data, and with every near duplicate of T removed. The gap is the inflation caused by leaked emails.</div></div>
-    <div class="card"><b class="fs-18">Same emails for everyone</b><div class="small" style="margin-top:6px">A fixed 300-email subset per test set. Every model, local or paid, is scored on exactly those emails, so the numbers are comparable.</div></div>
+  <div class="grid2" style="margin-top:26px">
+    <div class="card accent"><b class="fs-18 t-accent">The control that makes it evidence</b><div class="small" style="margin-top:6px">Removing duplicates also removes data. So we run a third setting that removes the <b>same number</b> of training emails at random. If that changes nothing, the drop is the duplicates.</div></div>
+    <div class="card"><b class="fs-18">Same emails for everyone</b><div class="small" style="margin-top:6px">A fixed 300-email subset per test set. Local, open and paid models are all scored on exactly those emails.</div></div>
   </div>""",
-"45 sec. Point at steps 2 and 3, those are ours. Explain raw vs clean in one sentence. Then hand over to Saimon.")
+"45 sec. Spend the time on the control box. That is the answer to the first question any examiner asks.")
 
 # 5 experimental details
 ds = {d["source"]: d for d in n["datasets"]}
 rows = "".join(
-    f'<tr><td class="l">{s}</td><td>{ds[s]["role"]}</td><td>{ds[s]["emails_after_cleaning"]:,}</td><td>{ds[s]["emails_used"]:,}</td><td>{ds[s]["eval_subset"]}</td></tr>'
-    for s in ["spamassassin", "ceas08", "trec07", "ling", "enron", "kaggle", "nazario", "nigerian", "ephishllm"])
-slide(5, "Experimental core details (from the notebook)", "Saimon", "What exactly we ran",
+    f'<tr><td class="l">{s}</td><td>{ds[s]["role"]}</td><td>{ds[s]["emails_used"]:,}</td><td>{ds[s]["eval_subset"]}</td></tr>'
+    for s in ["spamassassin", "ceas08", "trec07", "ling", "enron", "kaggle", "nazario", "nigerian",
+              "ephishllm", "ephishllm_it", "ephishllm_de"] if s in ds)
+slide(5, "Experimental core details (from the notebook)", "Sinha", "What exactly we ran",
 f"""  <div class="row" style="align-items:flex-start">
-    <table class="tight" style="flex:1.1">
-      <tr><th class="l">Source</th><th>Role</th><th>Cleaned</th><th>Used</th><th>Eval</th></tr>{rows}
+    <table class="tiny" style="flex:1">
+      <tr><th class="l">Source</th><th>Role</th><th>Used</th><th>Eval</th></tr>{rows}
     </table>
-    <div style="flex:1;display:flex;flex-direction:column;gap:10px">
-      <div class="card"><b class="t-blue">Classical</b><div class="small">TF-IDF 1-2 grams, 50k features, LogReg / Naive Bayes, CPU {n['logreg_cpu_sec_per_1000']} s per 1,000 emails</div></div>
-      <div class="card"><b class="t-good">DistilBERT</b><div class="small">1 epoch, 128 tokens, batch 16, lr 5e-5, 1,000 emails per corpus, laptop CPU</div></div>
-      <div class="card"><b class="t-accent">6 LLMs via OpenRouter</b><div class="small">Llama 1B/3B/8B, Qwen 7B, Gemma 12B, Phi-4 14B. Temperature 0, 5 output tokens, 1,500 chars. Few-shot: 4 examples from other corpora</div></div>
-      <div class="card"><b class="t-amber">Reproducible</b><div class="small">Seed 42 everywhere. 8 GB MacBook. Total API spend ${spent:.2f}</div></div>
+    <div style="flex:1.05;display:flex;flex-direction:column;gap:9px">
+      <div class="card"><b class="t-blue">Classical</b><div class="small">TF-IDF 1-2 grams, 50k features, LogReg / Naive Bayes, {n['logreg_cpu_sec_per_1000']} s per 1,000 emails</div></div>
+      <div class="card"><b class="t-good">DistilBERT</b><div class="small">1 epoch, 128 tokens, 1,000 emails per corpus, laptop CPU, raw and decontaminated</div></div>
+      <div class="card"><b class="t-accent">11 detectors through one protocol</b><div class="small">6 small open LLMs (1B to 14B), 3 published phishing models, Gemini-3.1-Flash-Lite and GPT-4o-mini. Temperature 0, 1,500 chars</div></div>
+      <div class="card"><b class="t-amber">Reproducible</b><div class="small">Seed 42, 8 GB MacBook, every raw answer saved, total API spend ${n['total_spend_usd']:.2f}</div></div>
     </div>
   </div>""",
-"50 sec. This is the notebook slide. Mention: all numbers on later slides are produced by these scripts, the notebook re-creates every table.")
+"45 sec. This is the notebook slide. Say: every table that follows is produced by these scripts from these files.")
 
 # 6 overlap
 slide(6, "Result 1 · Overlap between corpora", "Saimon", "The standard check finds almost none of it",
 f"""  <div class="row" style="align-items:stretch;flex:1">
-    <div style="flex:1;display:flex;flex-direction:column;gap:14px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:12px">
       <div class="small">SpamAssassin emails that also sit inside the Kaggle set</div>
       <div class="grid3">
         <div class="card muted"><div class="label t-muted">Exact text</div><div class="mid" style="margin-top:8px">{sa['exact_raw'][0]:,}</div><div class="small">{sa['exact_raw'][1]}%</div></div>
         <div class="card amber"><div class="label t-amber">No whitespace</div><div class="mid t-amber" style="margin-top:8px">{sa['exact_norm'][0]:,}</div><div class="small">{sa['exact_norm'][1]}%</div></div>
         <div class="card accent"><div class="label t-accent">Near duplicate</div><div class="mid t-accent" style="margin-top:8px">{sa['near'][0]:,}</div><div class="small">{sa['near'][1]}%</div></div>
       </div>
-      <div class="card"><div class="fs-18">Kaggle also holds <b class="t-accent">{n['ling_in_kaggle_near'][1]:.0f}%</b> of Ling and <b class="t-accent">{n['enron_in_kaggle_near'][1]:.0f}%</b> of Enron. More than half of Kaggle is Enron.</div></div>
-      <div class="small">Why exact matching fails: Kaggle deletes line breaks and glues words ("cream?Isn't"). We checked 400 of them by brute force: the matches are real.</div>
+      <div class="card"><div class="fs-18">{thr[('kaggle', 0.8)]['pct']:.0f}% of the Kaggle corpus has a near copy in another corpus. At the stricter 0.9 threshold it is still {thr[('kaggle', 0.9)]['pct']:.0f}%.</div></div>
+      <div class="card good"><div class="small"><b class="t-good">Verified.</b> Every pair is confirmed with exact similarity, not an estimate. Against brute force on 400 hard cases the matcher has precision {mv['precision']:.2f} and recall {mv['recall']:.2f}.</div></div>
+      <div class="small">Inside a single corpus, {min(within[s]['eval_with_near_dup_in_own_train_pct'] for s in SIX):.0f} to {max(within[s]['eval_with_near_dup_in_own_train_pct'] for s in SIX):.0f}% of its own test emails have a near copy in its training part.</div>
     </div>
-    <div class="fig" style="flex:0.95">{img('overlap_heatmap.png')}</div>
+    <div class="fig" style="flex:0.9">{img('overlap_heatmap.png')}</div>
   </div>""",
-"55 sec. Say the three numbers slowly: two, three thousand eight hundred, five thousand. The exact check is what most people would run and it finds two.")
+"55 sec. Say the three numbers slowly. Then the verification line: this is the part a reviewer attacks, and we checked it.")
 
-# 7 inflation
-slide(7, "Result 2 · Leakage inflates scores", "Saimon", "Remove the copies and the good transfer disappears",
+# 7 leakage + control
+slide(7, "Result 2 · Leakage inflates scores", "Saimon", "And the control shows it is the duplicates, not the data",
 f"""  <div class="row" style="align-items:stretch;flex:1">
-    <div style="flex:1;display:flex;flex-direction:column;gap:14px">
-      <div class="card accent"><div class="label t-accent">Kaggle → SpamAssassin, TF-IDF + LogReg</div>
-        <div style="display:flex;align-items:baseline;gap:18px;margin-top:8px"><div class="mid">{n['kaggle_to_sa']['raw']:.3f}</div><div class="t-muted fs-22">→</div><div class="mid t-accent">{n['kaggle_to_sa']['clean']:.3f}</div></div>
-        <div class="small">F1 with leaked emails, then after removing them</div></div>
+    <div style="flex:1.05;display:flex;flex-direction:column;gap:12px">
       <table class="tight">
-        <tr><th class="l">Held-out corpus</th><th>Raw</th><th>Clean</th><th>Drop</th><th>Removed</th></tr>
-        {''.join(f"<tr><td class='l'>{t}</td><td>{infl[t]['loco_raw']:.3f}</td><td>{infl[t]['loco_clean']:.3f}</td><td>{infl[t]['inflation']*100:.1f}</td><td>{int(infl[t]['removed']):,}</td></tr>" for t in ['spamassassin','ling','enron','kaggle','ceas08','trec07'])}
+        <tr><th class="l">Held-out corpus</th><th>Raw</th><th>Random removal</th><th>Decontaminated</th></tr>
+        {''.join(f"<tr{' class=hl' if t in ('spamassassin','ling') else ''}><td class='l'>{t}</td><td>{lf1(t,'loco_raw'):.3f}</td><td>{lf1(t,'loco_random'):.3f}</td><td>{lf1(t,'loco_clean'):.3f}</td></tr>" for t in SIX)}
       </table>
-      <div class="small">CEAS and TREC share almost nothing with the rest, and their scores do not move. That is the control.</div>
+      <div class="card accent"><div class="fs-20">Remove the same number of emails <b>at random</b>: nothing changes.<br>Remove the <b>duplicates</b>: up to 12 points disappear.</div></div>
+      <div class="small">Kaggle to SpamAssassin transfer, the suspicious result from July: {n['kaggle_to_sa']['raw']:.3f} before, {n['kaggle_to_sa']['clean']:.3f} after. CEAS and TREC, which share nothing, do not move at all.</div>
     </div>
     <div class="fig" style="flex:1">{img('incorpus_vs_unseen.png')}</div>
   </div>""",
-"55 sec. Kaggle to SpamAssassin was the suspicious 0.97 from July. Now it is measured. Point at CEAS and TREC: no overlap, no change. Hand over to Faria.")
+"60 sec. This is the strongest slide. Read the three columns across one row, then the red box. Then hand to Faria.")
 
-# 8 main table
-def tr(r):
-    ci = r["unseen_f1_ci"]
-    hl = ' class="hl"' if r is best else ""  # highlight the recommended model, not just the top row
-    cost = "local" if r["usd_per_1000"] == 0 else f"${r['usd_per_1000']:.3f}"
-    return (f"<tr{hl}><td class='l'>{r['model']}</td><td>{f3(r['unseen_f1_mean'])} <span class='small'>({ci})</span></td>"
-            f"<td>{f3(r['unseen_f1_worst'])}</td><td>{100*r['false_alarm_rate']:.0f}%</td><td>{f3(r['ai_phishing_f1'])}</td><td>{f3(r['nazario_recall'])}</td><td>{cost}</td></tr>")
-slide(8, "Result 3 · The table from the proposal, filled in", "Faria", "Unseen corpora, AI phishing and cost in one place",
-f"""  <table class="tight">
-    <tr><th class="l">Model</th><th>Unseen-corpus F1 (95% CI)</th><th>Worst corpus</th><th>False alarms</th><th>AI phishing F1</th><th>Nazario recall</th><th>$ / 1,000</th></tr>
-    {''.join(tr(r) for r in main)}
+# 8 labels
+slide(8, "Result 3 · What the benchmarks actually contain", "Saimon", "Most of the phishing in these corpora is not phishing",
+f"""  <div class="row" style="align-items:stretch;flex:1">
+    <div style="flex:1;display:flex;flex-direction:column;gap:14px">
+      <table class="tight">
+        <tr><th class="l">Corpus</th><th>Positives</th><th>Phishing</th><th>Spam</th></tr>
+        {''.join(f"<tr><td class='l'>{r['source']}</td><td>{int(r['n_positives'])}</td><td>{r['phishing_pct']:.0f}%</td><td>{r['spam_pct']:.0f}%</td></tr>" for r in comp)}
+      </table>
+      <div class="card amber"><div class="fs-20 t-amber" style="font-weight:700">Only {min(r['phishing_pct'] for r in comp):.0f} to {max(r['phishing_pct'] for r in comp):.0f}% of the "phishing" emails are phishing.</div>
+        <div class="small" style="margin-top:6px">The rest is ordinary bulk advertising. Two annotators, agreement {100*agree['agreement']:.0f}%.</div></div>
+      <div class="small">So a paper reporting "phishing detection" on these corpora is mostly reporting spam detection. Every model we tested is slightly better on the phishing part than on the spam part.</div>
+    </div>
+    <div class="card blue" style="flex:0.8;display:flex;flex-direction:column;justify-content:center">
+      <div class="label t-blue">Why this matters</div>
+      <div class="small" style="margin-top:10px;line-height:1.7">Nazario is real credential phishing and is the only corpus that is purely phishing. It is also the set where the classical models are weakest.<br><br>We keep the published labels, but we now know what they mean, and we report detection separately for the two kinds.</div>
+    </div>
+  </div>""",
+"45 sec. This surprises people. Say the headline number, then that we used two annotators rather than trusting one model.")
+
+# 9 main table
+def mrow(m, hl=False):
+    r = main.get(m)
+    if not r:
+        return ""
+    c = "local" if r["usd_per_1000"] == 0 else f"${r['usd_per_1000']:.3f}"
+    inc = f"{r['in_corpus_f1']:.3f}" if isinstance(r["in_corpus_f1"], (int, float)) and r["in_corpus_f1"] != "" else "&ndash;"
+    return (f"<tr{' class=hl' if hl else ''}><td class='l'>{m}</td><td>{inc}</td><td>{r['unseen_f1_mean']:.3f}</td>"
+            f"<td>{100*r['false_alarm_rate']:.0f}%</td><td>{r['ai_phishing_f1']:.3f}</td><td>{c}</td></tr>")
+
+
+order = [("Gemini-3.1-Flash-Lite", True), ("GPT-4o-mini", False), ("Qwen-2.5-7B", True), ("Llama-3.1-8B", False),
+         ("Gemma-3-12B", False), ("Llama-3.2-3B", False), ("Phi-4-14B", False), ("Llama-3.2-1B", False),
+         ("TF-IDF + LogReg", False), ("DistilBERT", False),
+         ("BERT-phishing (published)", False), ("Phishsense-1B (published)", False)]
+slide(9, "Result 4 · Every detector on the same emails", "Faria", "Unseen corpora, false alarms, AI phishing and cost",
+f"""  <table class="tiny">
+    <tr><th class="l">Model</th><th>In-corpus F1</th><th>Unseen-corpus F1</th><th>False alarms</th><th>AI phishing F1</th><th>$ / 1,000</th></tr>
+    {''.join(mrow(m, hl) for m, hl in order)}
   </table>
   <div class="spacer"></div>
-  <div class="small">All scores on the same held-out emails. Trained models use decontaminated data. LLMs never saw any of our data. False alarms = share of legitimate mail flagged.</div>""",
-"60 sec. Read the highlighted Qwen row, then Gemma (best on AI phishing, but 25% false alarms), then DistilBERT (best in-corpus, worst on AI phishing). Point at the cost column.")
+  <div class="small">Trained models use decontaminated data. The published detectors were trained on the same corpora we test on, which is why their unseen-corpus column and their AI-phishing column disagree so strongly.</div>""",
+"60 sec. Three rows only: Gemini (best, paid), Qwen (best open), and a published detector (high on our corpora, low on AI mail).")
 
-# 9 takeaways
-slide(9, "Result 4 · What it means", "Faria", "No single winner: pick the trade-off you can live with",
+# 10 AI phishing
+pair_rows = [r for r in n["placeholder_effect"] if r["test_set"] == "ephishllm paired"]
+pairm = {r["model"]: r for r in pair_rows}
+
+
+def phrow(m):
+    a_, b_ = ph.get(m), pairm.get(m)
+    if not a_:
+        return ""
+    paired = f"{b_['gap']:+.2f}" if b_ else "&ndash;"
+    return (f"<tr><td class='l'>{m}</td><td>{a_['recall_with_placeholder']:.2f}</td>"
+            f"<td>{a_['recall_without']:.2f}</td><td class='t-amber'>{a_['gap']:+.2f}</td>"
+            f"<td class='t-good'>{paired}</td></tr>")
+
+
+slide(10, "Result 5 · A token that looked like a shortcut", "Faria", "We checked our own good result, twice",
 f"""  <div class="row" style="align-items:stretch;flex:1">
-    <div style="flex:1;display:flex;flex-direction:column;gap:10px">
-      <div class="card good" style="padding:11px 18px"><b class="t-good fs-18">1. Best balance: {best['model']} zero-shot</b><div class="small" style="margin-top:3px">{f3(best['unseen_f1_mean'])} F1 on unseen corpora, {100*best['false_alarm_rate']:.0f}% false alarms, {f3(best['ai_phishing_f1'])} on AI phishing, ${best['usd_per_1000']:.3f} per 1,000 emails.</div></div>
-      <div class="card amber" style="padding:11px 18px"><b class="t-amber fs-18">2. {gm['model']} catches more, flags more</b><div class="small" style="margin-top:3px">{f3(gm['ai_phishing_f1'])} on AI phishing, but {100*gm['false_alarm_rate']:.0f}% of legitimate mail flagged. Good for review queues, not for blocking.</div></div>
-      <div class="card accent" style="padding:11px 18px"><b class="t-accent fs-18">3. Few-shot helps old mail, hurts AI phishing</b><div class="small" style="margin-top:3px">Qwen on AI phishing: {f3(best['ai_phishing_f1'])} to {f3(qfs['ai_phishing_f1'])} with 4 old examples. They anchor it to old spam.</div></div>
-      <div class="card blue" style="padding:11px 18px"><b class="t-blue fs-18">4. The usual metric picks the wrong model</b><div class="small" style="margin-top:3px">DistilBERT: best in-corpus F1 ({f3(dbm['in_corpus_f1'])}), weakest trained model on AI phishing ({f3(dbm['ai_phishing_f1'])}).</div></div>
+    <div style="flex:1.15;display:flex;flex-direction:column;gap:11px">
+      <div class="card amber" style="padding:11px 16px"><div class="small"><b class="t-amber">The worry.</b> The AI corpus writes links as the token <code>&lt;&lt;link&gt;&gt;</code>: in 94 of 150 phishing emails, in none of the legitimate ones. If models react to the token, our AI-phishing numbers mean nothing.</div></div>
+      <table class="tight">
+        <tr><th class="l">Recall on AI phishing</th><th>With token</th><th>Without</th><th>Split gap</th><th>Paired gap</th></tr>
+        {phrow('Qwen-2.5-7B')}{phrow('Llama-3.1-8B')}{phrow('Gemma-3-12B')}{phrow('TF-IDF + LogReg')}
+      </table>
+      <div class="card good" style="padding:11px 16px"><div class="small"><b class="t-good">Two tests, two answers.</b> Comparing emails that have the token with emails that do not suggests it is worth {sum(r['gap'] for r in ph_rows)/len(ph_rows)*100:.0f} points. But removing the token from the <b>same</b> emails changes recall by {sum(r['gap'] for r in pair_rows)/max(1,len(pair_rows))*100:.1f} points.</div></div>
+      <div class="small">The first test was confounded: emails with links are simply easier than text-only business-email-compromise lures. The result stands.</div>
     </div>
-    <div class="fig" style="flex:0.95">{img('f1_vs_cost.png')}</div>
+    <div class="card blue" style="flex:0.7;display:flex;flex-direction:column;justify-content:center">
+      <div class="label t-blue">The lesson</div>
+      <div class="small" style="margin-top:10px;line-height:1.7">When you suspect a shortcut, change that one thing on the same data.<br><br>The quick comparison would have made us report a finding that is not there.</div>
+    </div>
   </div>""",
-"60 sec. Four points, one sentence each. Spend the time on 2 and 3. Mention Phi-4 only if asked: it ignored the one-word format in a third of emails.")
+"55 sec. Tell it as a story: we suspected our own good number, ran the obvious test, it said we were right to worry, then the proper paired test said otherwise. Report both.")
 
-# 10 limitations
-slide(10, "Limitations", "Faria", "What this study does not show",
-"""  <div class="grid2">
-    <div class="card"><b class="fs-18">Labels are mixed</b><div class="small" style="margin-top:6px">Four corpora count ordinary spam as positive. We keep the published labels and report phishing-only recall separately.</div></div>
-    <div class="card"><b class="fs-18">Small evaluation sets</b><div class="small" style="margin-top:6px">300 emails per test set keeps the cost low. The 95% intervals are about ±0.01 to ±0.03.</div></div>
-    <div class="card"><b class="fs-18">LLM training data is unknown</b><div class="small" style="margin-top:6px">Old public corpora may be in the LLMs' pre-training data. E-PhishLLM is newer, but we cannot rule it out.</div></div>
-    <div class="card"><b class="fs-18">Text only, English only</b><div class="small" style="margin-top:6px">No headers, URLs or attachments. The Italian and German part of E-PhishLLM is unused.</div></div>
-    <div class="card"><b class="fs-18">Light DistilBERT training</b><div class="small" style="margin-top:6px">1,000 emails per corpus and one epoch, to fit an 8 GB laptop.</div></div>
-    <div class="card"><b class="fs-18">One prompt, one run</b><div class="small" style="margin-top:6px">No prompt search. Providers can change a model behind the same name.</div></div>
+# 11 operating points
+def brow(m):
+    r = base.get(m)
+    return (f"<tr><td class='l'>{m}</td><td>{r['recall']:.2f}</td><td>{100*r['false_alarm']:.0f}%</td>"
+            f"<td>{r['f1@0.05']:.3f}</td><td>{r['false_alerts_per_1000@0.05']:.0f}</td></tr>") if r else ""
+
+
+conf = next((c for c in casc if c["stage1"] == "TF-IDF + LogReg" and c["stage2"] == "Qwen-2.5-7B" and c["policy"] == "confirm"), None)
+resc = next((c for c in casc if c["stage1"] == "Qwen-2.5-7B" and c["stage2"] == "Gemma-3-12B" and c["policy"] == "rescue"), None)
+slide(11, "Result 6 · Operating points", "Faria", "A balanced test set is not a mailbox",
+f"""  <div class="row" style="align-items:stretch;flex:1">
+    <div style="flex:1.1;display:flex;flex-direction:column;gap:12px">
+      <div class="small">Recomputed for a mailbox where 5% of mail is phishing</div>
+      <table class="tight">
+        <tr><th class="l">Model</th><th>Recall</th><th>False alarms</th><th>F1 at 5%</th><th>Wrongly flagged per 1,000</th></tr>
+        {brow('Gemini-3.1-Flash-Lite')}{brow('Qwen-2.5-7B')}{brow('TF-IDF + LogReg')}{brow('Gemma-3-12B')}
+      </table>
+      <div class="small">Gemma looked best on AI phishing. In a real inbox it would flag {base['Gemma-3-12B']['false_alerts_per_1000@0.05']:.0f} good emails in every 1,000.</div>
+    </div>
+    <div style="flex:0.95;display:flex;flex-direction:column;gap:12px">
+      <div class="card good"><div class="label t-good">Cheap two-stage detector</div>
+        <div class="fs-20" style="margin-top:8px">TF-IDF first, LLM only on what it flags</div>
+        <div class="small" style="margin-top:6px">F1 {conf['unseen_f1']:.3f}, false alarms {100*conf['false_alarm']:.1f}%, <b>${conf['usd_per_1000']:.4f} per 1,000</b>, about half the cost of the LLM alone and fewer false alarms than either part.</div></div>
+      <div class="card amber"><div class="label t-amber">Recall-first version</div>
+        <div class="small" style="margin-top:8px">Let Gemma re-check what Qwen cleared: AI-phishing recall {resc['ai_phishing_recall']:.2f}, but {100*resc['false_alarm']:.0f}% false alarms. That is a review queue, not a blocker.</div></div>
+    </div>
   </div>""",
-"40 sec. Say the first three clearly. The teacher will ask about LLM pre-training contamination, so name it before they do.")
+"55 sec. The point: the ranking changes with the base rate, and combining two cheap models beats either one.")
 
-# 11 next two weeks
-slide(11, "Scope of improvements within 2 weeks", "Faria", "What we can finish before the final paper",
-"""  <div class="tl">
-    <div class="card blue"><div class="date">DAYS 1 TO 3</div><b class="fs-18">Phishsense-1B</b><div class="small" style="margin-top:6px">Get a HuggingFace token, run it locally on the same 2,400 emails. It is the model that fell from 97.5% to 70%.</div></div>
-    <div class="card accent"><div class="date">DAYS 4 TO 6</div><b class="fs-18">Phishing-only labels</b><div class="small" style="margin-top:6px">Relabel spam vs phishing on a sample and rerun, to close the label gap.</div></div>
-    <div class="card amber"><div class="date">DAYS 7 TO 9</div><b class="fs-18">Bigger test sets</b><div class="small" style="margin-top:6px">1,000 emails per set for the top 3 models. Under $0.50 more.</div></div>
-    <div class="card good"><div class="date">DAYS 10 TO 14</div><b class="fs-18">Multilingual + write-up</b><div class="small" style="margin-top:6px">Italian and German E-PhishLLM, stronger DistilBERT, final paper.</div></div>
+# 12 explanations + significance
+q = expl.get("qwen/qwen-2.5-7b-instruct", {})
+gm = expl.get("google/gemma-3-12b-it", {})
+slide(12, "Result 7 · Are the reasons any good?", "Faria", "Right answers come with real reasons, wrong ones do not",
+f"""  <div class="grid2">
+    <div class="card good"><div class="label t-good">When the verdict is correct</div>
+      <div class="big t-good" style="margin-top:10px">{100*q.get('grounded',0):.0f}%</div>
+      <div class="small">of reasons point at something that is really in the email (Qwen; Gemma {100*gm.get('grounded',0):.0f}%)</div></div>
+    <div class="card accent"><div class="label t-accent">When the verdict is wrong</div>
+      <div class="big t-accent" style="margin-top:10px">{100*(q.get('grounded_when_wrong',0)+gm.get('grounded_when_wrong',0))/2:.0f}%</div>
+      <div class="small">a wrong answer usually comes with an invented reason</div></div>
   </div>
   <div class="spacer"></div>
-  <div class="small">Each item reuses the existing scripts. The budget left is well over one dollar.</div>""",
-"30 sec. Four blocks, left to right. Stress that each one is small because the pipeline already exists.")
+  <div class="card"><div class="small"><b>Also measured:</b> McNemar tests on the paired predictions. Qwen beats the classical models and DistilBERT on the six unseen corpora (p &lt; 0.001). Few-shot examples from old corpora do <b>not</b> significantly help there (p = 0.22) but significantly hurt on AI-written mail (p &lt; 0.001). Swapping in AI-written examples recovers most of that loss, which is the controlled version of the claim.</div></div>
+  <div class="small" style="margin-top:12px">This matters for deployment: showing a model's explanation to a user is safe only if the verdict is checked first.</div>""",
+"45 sec. Two numbers and the significance line. Do not read the whole box.")
 
-# 12 links
+# 13 takeaways
+slide(13, "What it means", "Faria", "Four things we would tell another team",
+f"""  <div class="grid2">
+    <div class="card accent"><b class="t-accent fs-18">1. Check overlap before claiming generalisation</b><div class="small" style="margin-top:6px">Five minutes of near-duplicate matching on a laptop. Exact matching finds {sa['exact_raw'][0]} of {sa['near'][0]:,} shared emails.</div></div>
+    <div class="card good"><b class="t-good fs-18">2. Cheap detectors are usable, in the right order</b><div class="small" style="margin-top:6px">TF-IDF in front of Qwen-2.5-7B: F1 {conf['unseen_f1']:.3f} at {100*conf['false_alarm']:.1f}% false alarms for ${conf['usd_per_1000']:.4f} per 1,000. A paid model is still better on every axis.</div></div>
+    <div class="card blue"><b class="t-blue fs-18">3. Report false alarms and the base rate</b><div class="small" style="margin-top:6px">At 5% phishing the ranking changes. One F1 number cannot tell you what a detector does to an inbox.</div></div>
+    <div class="card amber"><b class="t-amber fs-18">4. Be suspicious of your own good numbers</b><div class="small" style="margin-top:6px">Our AI-phishing result was partly a placeholder token. We found it by checking, and we report both versions.</div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="card" style="text-align:center"><div class="fs-24" style="font-weight:700">High accuracy on one dataset is easy. <span class="t-accent">Honest evaluation is the hard part.</span></div></div>""",
+"40 sec. One sentence each. Land on the closing line but do not finish yet, limitations come next.")
+
+# 14 limitations
+slide(14, "Limitations", "Faria", "What this study does not show",
+"""  <div class="grid2">
+    <div class="card"><b class="fs-18">We are not first to test across corpora</b><div class="small" style="margin-top:6px">E-PhishGen (2025) and Bhuiyan (2026) did. Ours adds decontamination, cost and false alarms.</div></div>
+    <div class="card"><b class="fs-18">300 emails per test set</b><div class="small" style="margin-top:6px">Interval about ±0.015, so small differences are not meaningful. We report intervals and significance tests.</div></div>
+    <div class="card"><b class="fs-18">Our annotator is a model</b><div class="small" style="margin-top:6px">Two models, 86% agreement on a shared sample, but not hand-labelled by us.</div></div>
+    <div class="card"><b class="fs-18">LLM pre-training is unknown</b><div class="small" style="margin-top:6px">The old corpora may be inside these models already. The 2025 AI corpus is the cleanest test we have.</div></div>
+    <div class="card"><b class="fs-18">Different input budgets</b><div class="small" style="margin-top:6px">TF-IDF sees 20,000 characters, LLMs 1,500, DistilBERT 128 tokens. DistilBERT's row is a lower bound.</div></div>
+    <div class="card"><b class="fs-18">One prompt, one run</b><div class="small" style="margin-top:6px">No prompt search, and providers can change a model behind the same name.</div></div>
+  </div>""",
+"35 sec. Say the first three clearly. Owning these is what makes the rest believable.")
+
+# 15 next two weeks
+slide(15, "Scope of improvements within 2 weeks", "Faria", "What we can finish next",
+"""  <div class="tl">
+    <div class="card blue"><div class="date">DAYS 1 TO 4</div><b class="fs-18">Hand-labelled subset</b><div class="small" style="margin-top:6px">The three of us label 300 positives as phishing or spam, to replace the model annotator on the headline claim.</div></div>
+    <div class="card accent"><div class="date">DAYS 5 TO 8</div><b class="fs-18">Threshold calibration</b><div class="small" style="margin-top:6px">Ask each LLM for a confidence, then set the operating point per corpus, following the recalibration result of Gutierrez et al.</div></div>
+    <div class="card amber"><div class="date">DAYS 9 TO 11</div><b class="fs-18">Bigger test sets</b><div class="small" style="margin-top:6px">1,000 emails per set for the top three models to tighten the intervals. Under $1 more.</div></div>
+    <div class="card good"><div class="date">DAYS 12 TO 14</div><b class="fs-18">Write-up</b><div class="small" style="margin-top:6px">Final paper, a short artifact README, and the deduplication script packaged so other groups can run it on their own corpora.</div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="small">Everything reuses the existing scripts. Budget left: about $3 of the $5.</div>""",
+"30 sec. Four blocks. Stress that the first one replaces a model with human labels.")
+
+# 16 links
 slides.append(f"""
 <section class="slide">
   <div class="kicker">Source code</div>
@@ -263,19 +378,24 @@ slides.append(f"""
   <h1>Everything is public and re-runnable</h1>
   <div class="grid2">
     <div class="card blue"><div class="label t-blue">GitHub</div><div class="fs-20" style="margin-top:8px;word-break:break-all"><a href="{REPO}">{REPO.replace('https://','')}</a></div>
-      <div class="small" style="margin-top:6px">code, results, paper, research log</div></div>
+      <div class="small" style="margin-top:6px">code, every raw model answer, results, paper, research log, team guide</div></div>
     <div class="card accent"><div class="label t-accent">Colab notebook</div><div class="fs-18" style="margin-top:8px;word-break:break-all"><a href="{COLAB}">notebooks/phishing_llm_cross_corpus.ipynb</a></div>
-      <div class="small" style="margin-top:6px">loads every result in seconds, or re-runs all six steps</div></div>
+      <div class="small" style="margin-top:6px">loads every result in seconds, or reruns all the steps</div></div>
   </div>
   <div class="spacer"></div>
-  <div class="card" style="text-align:center"><div class="fs-26" style="font-weight:700">High accuracy on one dataset is easy. <span class="t-accent">Honest evaluation is the hard part.</span></div></div>
+  <div class="grid3">
+    <div class="card"><div class="label t-muted">Total spend</div><div class="mid" style="margin-top:6px">${n['total_spend_usd']:.2f}</div><div class="small">of a $5 budget</div></div>
+    <div class="card"><div class="label t-muted">Model calls</div><div class="mid" style="margin-top:6px">{n['llm_calls']:,}</div><div class="small">all answers saved</div></div>
+    <div class="card"><div class="label t-muted">Hardware</div><div class="mid" style="margin-top:6px">1 laptop</div><div class="small">8 GB, no GPU rental</div></div>
+  </div>
   <div class="spacer"></div>
   <div class="small" style="text-align:center">Thank you. Questions?</div>
-  <div class="num">12</div>
-  <div class="note">20 sec. Read the links, then the closing line slowly, then stop.</div>
+  <div class="num">16</div>
+  <div class="note">20 sec. Read the links, then the three numbers, then stop.</div>
 </section>""")
 
 html = head + "\n".join(slides) + "\n\n</div></div>\n" + footer
-html = html.replace("else if (e.key==='0') go(9);", "else if (e.key==='0') go(9);\n  else if (e.key==='-') go(10);\n  else if (e.key==='=') go(11);")
+html = html.replace("else if (e.key==='0') go(9);",
+                    "else if (e.key==='0') go(9);\n  else if (e.key==='-') go(10);\n  else if (e.key==='=') go(11);")
 open(os.path.join(HERE, "final_deck.html"), "w").write(html)
 print("final_deck.html written,", len(slides), "slides")

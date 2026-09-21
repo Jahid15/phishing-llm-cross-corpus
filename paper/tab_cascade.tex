@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\caption{Two-stage detectors built from models we already measured, with no new calls. ``confirm'' sends only the mail stage 1 flagged to stage 2 and needs both to agree; ``rescue'' sends only the mail stage 1 cleared and accepts either verdict. ``To stage 2'' is the share of mail that reaches the second model, which is what makes the cost lower than running that model on everything.}
+\label{tab:cascade}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrrr}
+\toprule
+Pipeline & Policy & Unseen F1 & FA (\%) & AI phish & To stage 2 (\%) & USD/1k \\
+\midrule
+TF-IDF + LogReg $\rightarrow$ Gemma-3-12B & confirm & 0.914 & 4.7 & 0.750 & 50 & 0.0083 \\
+TF-IDF + LogReg $\rightarrow$ Gemma-3-12B & rescue & 0.869 & 30.0 & 0.836 & 50 & 0.0084 \\
+TF-IDF + LogReg $\rightarrow$ Qwen-2.5-7B & confirm & 0.911 & 1.1 & 0.678 & 50 & 0.0161 \\
+TF-IDF + LogReg $\rightarrow$ Qwen-2.5-7B & rescue & 0.916 & 11.4 & 0.753 & 50 & 0.0164 \\
+Llama-3.1-8B $\rightarrow$ Qwen-2.5-7B & rescue & 0.894 & 21.8 & 0.870 & 42 & 0.0256 \\
+Gemma-3-12B $\rightarrow$ Qwen-2.5-7B & rescue & 0.882 & 25.4 & 0.955 & 39 & 0.0292 \\
+Llama-3.1-8B $\rightarrow$ Qwen-2.5-7B & confirm & 0.914 & 2.7 & 0.760 & 58 & 0.0309 \\
+Gemma-3-12B $\rightarrow$ Qwen-2.5-7B & confirm & 0.929 & 2.7 & 0.819 & 61 & 0.0366 \\
+Qwen-2.5-7B $\rightarrow$ Gemma-3-12B & confirm & 0.929 & 2.7 & 0.819 & 46 & 0.0402 \\
+Qwen-2.5-7B $\rightarrow$ Gemma-3-12B & rescue & 0.882 & 25.4 & 0.955 & 54 & 0.0415 \\
+\bottomrule
+\end{tabular}
+\end{table*}

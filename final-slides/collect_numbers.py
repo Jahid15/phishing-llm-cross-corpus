@@ -41,6 +41,13 @@ n["llm_calls"] = int(cost.calls.sum())
 disc = os.path.join(R, "llm_raw_discarded")
 n["discarded_usd"] = round(sum(pd.read_csv(os.path.join(disc, f)).cost_usd.sum() for f in os.listdir(disc)), 4) if os.path.isdir(disc) else 0.0
 
+for extra in ["within_corpus_dup", "overlap_thresholds", "label_study_summary", "placeholder_effect",
+              "base_rate", "cascade", "significance", "explanations_summary",
+              "matcher_validation_summary", "classical_loco"]:
+    f = os.path.join(R, extra + ".csv")
+    if os.path.exists(f):
+        n[extra] = pd.read_csv(f).fillna("").to_dict("records")
+
 db = os.path.join(R, "distilbert_timing.csv")
 if os.path.exists(db):
     t = pd.read_csv(db)
@@ -48,6 +55,9 @@ if os.path.exists(db):
     n["distilbert_infer_sec_per_1000"] = round(float(t.infer_sec_per_1000.mean()), 1)
 
 cl = pd.read_csv(os.path.join(R, "classical_loco.csv"))
+import json as _j
+spend = os.path.join(R, "llm_spend.json")
+n["total_spend_usd"] = round(_j.load(open(spend))["total_usd"], 2) if os.path.exists(spend) else 0.0
 n["logreg_cpu_sec_per_1000"] = round(float(cl[(cl.model == "logreg") & (cl.setting == "loco_clean")].cpu_sec_per_1000.mean()), 2)
 
 json.dump(n, open(os.path.join(os.path.dirname(__file__), "numbers.json"), "w"), indent=1, default=float, allow_nan=False)

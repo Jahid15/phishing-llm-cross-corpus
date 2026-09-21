@@ -30,6 +30,14 @@ notebook only loads the saved results, so it runs in seconds. Set
 | 4 | `04_distilbert_loco.py` | fine-tuned DistilBERT, same protocol |
 | 5 | `05_llm_eval.py` | six small open LLMs through OpenRouter, measured cost |
 | 6 | `06_analysis.py` | final table, confidence intervals, figures |
+| 7 | `07_cascade.py` | two-stage detectors built from saved predictions |
+| 8 | `08_significance.py` | McNemar tests between model pairs |
+| 9 | `09_placeholder.py` | the give-away token in the AI-written corpus |
+| 12 | `12_offtheshelf.py` | published phishing detectors, including Phishsense |
+| 13 | `13_baserate.py` | precision at a realistic amount of phishing |
+| 14 | `14_label_study.py` | spam versus phishing annotation |
+| 15 | `15_explanations.py` | explanation quality |
+| 16 | `16_validate_matcher.py` | brute-force validation of the matcher |
 """)
 
 code("""
@@ -146,10 +154,75 @@ display(Image(R + "figures/per_corpus_f1.png", width=560))
 display(Image(R + "figures/f1_vs_cost.png", width=560))
 """)
 md("""
+## Step 7. Is it the duplicates, or just less data?
+
+Decontamination also shrinks the training set. The `loco_random` setting removes
+the same number of training emails at random instead, so the two effects can be
+told apart.
+""")
+code("""
+cl = pd.read_csv(R + "classical_loco.csv")
+lr = cl[cl.model == "logreg"]
+six = ["spamassassin", "ceas08", "trec07", "ling", "enron", "kaggle"]
+lr.pivot_table(index="test", columns="setting", values="f1").loc[six][
+    ["in_corpus_split", "loco_raw", "loco_random", "loco_clean"]].round(3)
+""")
+
+md("""
+## Step 8. What the corpora actually contain
+
+An LLM annotator sorted every positive evaluation email into phishing or spam,
+with a second annotator on 300 of them for agreement.
+""")
+code("""
+ls = pd.read_csv(R + "label_study_summary.csv")
+display(ls[ls.row == "composition"][["source", "n_positives", "phishing_pct", "spam_pct"]])
+display(ls[ls.row == "agreement"][["n", "agreement", "kappa"]])
+""")
+
+md("""
+## Step 9. AI-written phishing and the give-away token
+
+E-PhishGen writes phishing links as the literal token `<<link>>`, which appears
+only in phishing emails. Recall is compared on phishing emails with and without
+it, and the test set is rebuilt with the token removed and replaced.
+""")
+code("""
+pd.read_csv(R + "placeholder_effect.csv").query("test_set == 'ephishllm'")[
+    ["model", "recall_with_placeholder", "recall_without", "gap"]]
+""")
+
+md("""
+## Step 10. Operating points
+
+Balanced test sets are not mailboxes. Precision is recomputed at a 5% phishing
+rate, and two-stage detectors are built from predictions we already have.
+""")
+code("""
+display(pd.read_csv(R + "base_rate.csv")[
+    ["model", "recall", "false_alarm", "precision@0.05", "f1@0.05", "false_alerts_per_1000@0.05"]].head(8))
+display(pd.read_csv(R + "cascade.csv").head(6))
+""")
+
+md("""
+## Step 11. Are the differences real?
+
+McNemar tests on the paired predictions, and the paired bootstrap difference
+for the comparisons the paper makes.
+""")
+code("""
+display(pd.read_csv(R + "significance.csv").head(8))
+import os
+if os.path.exists(R + "paired_differences.csv"):
+    display(pd.read_csv(R + "paired_differences.csv"))
+""")
+
+md("""
 ## What to take away
 
-See `paper/paper.pdf` for the discussion and `RESEARCH_LOG.md` for the full
-story of how the project developed.
+See `paper/main.pdf` for the discussion, `TEAM_GUIDE.md` for a full explanation
+of every decision, and `RESEARCH_LOG.md` for the story of how the project
+developed, including the mistakes.
 """)
 
 nb["cells"] = C

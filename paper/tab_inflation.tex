@@ -1,18 +1,18 @@
 \begin{table}[t]
-\caption{Leave-one-corpus-out F1 of TF-IDF + Logistic Regression on the full held-out corpus. ``Removed'' is the number of training emails with a near duplicate in the test corpus. $\Delta$ is raw minus clean, in F1 points, for LogReg and Naive Bayes.}
+\caption{Leave-one-corpus-out F1 of TF-IDF with logistic regression. ``Removed'' is the number of training emails that have a near duplicate in the held-out corpus. ``Random'' is the control that removes the same number of training emails at random. $\Delta$ is raw minus clean, in F1 points.}
 \label{tab:inflation}
 \centering\footnotesize
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2pt}
 \begin{tabular}{lrrrrrr}
 \toprule
-Held out & Removed & In-corpus & Raw & Clean & $\Delta$ LR & $\Delta$ NB \\
+Held out & Removed & In-corp. & Raw & Random & Clean & $\Delta$ \\
 \midrule
-SpamAssassin & 3,165 & 0.966 & 0.947 & 0.847 & +10.0 & +5.3 \\
-Ling-Spam & 1,444 & 0.930 & 0.962 & 0.847 & +11.5 & +4.5 \\
-Enron & 6,091 & 0.981 & 0.972 & 0.919 & +5.4 & +5.4 \\
-Kaggle & 11,018 & 0.965 & 0.976 & 0.928 & +4.8 & +2.1 \\
-CEAS-08 & 13 & 0.986 & 0.833 & 0.832 & +0.1 & +0.0 \\
-TREC-07 & 7 & 0.985 & 0.871 & 0.871 & +0.0 & +0.1 \\
+SpamAssassin & 3,198 & 0.966 & 0.947 & 0.947 & 0.840 & +10.8 \\
+CEAS-08 & 17 & 0.986 & 0.833 & 0.833 & 0.832 & +0.1 \\
+TREC-07 & 9 & 0.985 & 0.871 & 0.871 & 0.871 & +0.0 \\
+Ling-Spam & 1,460 & 0.930 & 0.962 & 0.960 & 0.841 & +12.1 \\
+Enron & 6,371 & 0.981 & 0.972 & 0.970 & 0.911 & +6.1 \\
+Kaggle & 11,206 & 0.965 & 0.976 & 0.972 & 0.927 & +4.9 \\
 \bottomrule
 \end{tabular}
 \end{table}

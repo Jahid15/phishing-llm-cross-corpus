@@ -1,0 +1,58 @@
+{
+ "02_overlap": {
+  "finished": "2026-09-20 23:47:41",
+  "note": "exact jaccard, within-corpus, thresholds"
+ },
+ "03_classical": {
+  "finished": "2026-09-21 00:14:11",
+  "note": "26.5 min"
+ },
+ "04_distilbert": {
+  "finished": "2026-09-21 08:33:57",
+  "note": "8.4 min"
+ },
+ "07_cascade": {
+  "finished": "2026-09-21 12:10:14",
+  "note": "10 combinations"
+ },
+ "08_significance": {
+  "finished": "2026-09-21 12:10:16",
+  "note": "18 tests"
+ },
+ "09_placeholder": {
+  "finished": "2026-09-21 12:11:04",
+  "note": "split gap 0.16, paired gap 0.009"
+ },
+ "10_variants": {
+  "finished": "2026-09-20 23:33:28",
+  "note": "sanitised AI-phishing sets built"
+ },
+ "11_reparse": {
+  "finished": "2026-09-21 08:59:45",
+  "note": "308 predictions corrected"
+ },
+ "12_offtheshelf": {
+  "finished": "2026-09-21 09:36:40",
+  "note": "31 model/test-set files"
+ },
+ "13_baserate": {
+  "finished": "2026-09-21 12:10:19",
+  "note": "prevalence sensitivity computed"
+ },
+ "14_label_study": {
+  "finished": "2026-09-20 23:50:23",
+  "note": "agreement 0.86, kappa 0.35"
+ },
+ "15_explanations": {
+  "finished": "2026-09-20 23:54:03",
+  "note": "200 explanations judged"
+ },
+ "16_validate_matcher": {
+  "finished": "2026-09-20 23:51:08",
+  "note": "precision 1.00, recall 1.00"
+ },
+ "17_threshold_check": {
+  "finished": "2026-09-21 09:40:07",
+  "note": "ModernBERT at three thresholds"
+ }
+}

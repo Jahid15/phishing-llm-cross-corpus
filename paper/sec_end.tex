@@ -1,68 +1,102 @@
 \section{Discussion}
 
-\textit{Check overlap before claiming generalization.} Our clearest finding is
-about the benchmarks, not the models. If a paper trains on the Kaggle set and
-tests on SpamAssassin, most of the test set is already in the training data.
-Exact-match deduplication does not catch it, because the aggregate changed the
-line breaks. A near-duplicate pass takes about five minutes on a laptop for
-165{,}000 emails, and it should come before any cross-dataset claim.
+\textit{Measure overlap before claiming generalization.} The clearest finding
+here is about the benchmarks rather than the models. A paper that trains on the
+Kaggle aggregate and tests on SpamAssassin is testing mostly on its own
+training data, and exact-match deduplication does not reveal it because the
+aggregate changed the line breaks. A near-duplicate pass over 170{,}000 emails
+took five minutes on a laptop in our run, so there is no practical reason to
+skip it before a cross-dataset claim. Our random-removal control also shows
+that the effect is leakage and not the smaller training set, which is the first
+question a careful reader asks.
 
-\textit{In-corpus scores are not deployment scores.} The 97 to 99\% in the
-literature is real, but it answers the question ``how well does the model
-recognise more mail from the same collection''. A mail server does not get
-mail from the training collection. On unseen corpora the same TF-IDF model
-drops by 4 to 15 points, and on AI-written phishing by about 30.
+\textit{In-corpus scores answer a different question.} The 97 to 99\% in the
+literature is real, but it says how well a model recognises more mail from the
+same collection. A mail server does not receive mail from the training
+collection. On unseen corpora the same model loses several points; on
+AI-written mail it loses many more; and the model with the best in-corpus score
+in our table is among the weakest on AI-written phishing.
+
+\textit{Know what the positive class is.} Only a fifth of the positive emails
+in these corpora are phishing. Work that reports "phishing detection" on them
+is largely reporting spam detection. This does not invalidate the corpora, but
+a paper should either say which it means or, as we did, measure the split.
+
+\textit{Choose an operating point, not a leaderboard position.} At the balanced
+prevalence used in benchmarks, several models look similar. At a realistic
+phishing rate the false alarm rate dominates, and models that share an F1
+differ by an order of magnitude in how much legitimate mail they would flag.
+The two-stage detectors show a more practical way to use a cheap model: a free
+classical filter in front of an LLM cuts both the cost and the false alarms,
+and the reverse order is the right shape for a quarantine queue that a person
+reviews. Conformal deferral~\cite{triage} is the natural next step.
 
 \textit{What we would deploy.} For an organisation with no GPU and a small
-budget, zero-shot Qwen-2.5-7B is the best balance we found: the highest
-unseen-corpus F1 among zero-shot models, about 3\% false alarms, good
-AI-phishing detection, and about three cents per thousand emails. Gemma-3-12B
-catches more AI-written phishing but flags about a quarter of legitimate mail,
-so it fits a second-opinion role (for example, deciding what goes to a
-quarantine folder for human review) better than automatic blocking. TF-IDF
-remains a useful, free first filter for bulk spam, but it should not be
-trusted on modern phishing. Few-shot prompting needs care: examples must look
-like the mail the system will actually see, or they make it worse.
+budget, a TF-IDF filter in front of zero-shot Qwen-2.5-7B is the best
+combination we measured: it is the cheapest configuration in our tables and has
+the lowest false alarm rate. If the budget allows a commercial API,
+Gemini-3.1-Flash-Lite was better than every open model on every axis we
+measured, which is an honest result even though it is not the one we hoped for.
+Gemma-3-12B should be used only where a person reviews the output.
 
-\textit{Output format is part of the model's quality.} Phi-4's score is low
-partly because it did not follow the one-word format. In a real pipeline an
-answer that cannot be parsed is a missed detection, so format following
-matters as much as reasoning ability.
+\textit{Test the shortcut you suspect, on the same emails.} The AI-written
+corpus writes links as a placeholder that appears almost only in phishing mail,
+and the obvious comparison, splitting the phishing emails by whether they carry
+it, says the token is worth a large amount of recall. That comparison is
+confounded, because the two halves are different kinds of attack. Removing the
+token from the same emails moves the verdicts by almost nothing. We report both
+because the quick test pointed the wrong way, and a reader who only ran it
+would have drawn the opposite conclusion about this corpus.
 
 \section{Limitations}
 
 \begin{itemize}
-\item \textit{Labels.} Four of the six training corpora count ordinary spam as
-positive. We keep the published labels and report phishing-only recall on
-Nazario separately, but a clean phishing versus spam relabelling is still
-missing.
-\item \textit{Sample size.} Each test set has 300 emails (150 for the
-one-class sets), which keeps cost low. The 95\% intervals of the mean F1 are
-about $\pm$0.01 to $\pm$0.03, so smaller differences are not meaningful.
-\item \textit{LLM pre-training.} The old public corpora may be part of the
-LLMs' pre-training data. E-PhishLLM was released in 2025, after most of these
-models, which makes it the most trustworthy test for them.
-\item \textit{Scope.} Text only, English only, one prompt, one run per model.
-Headers, URLs and attachments are ignored. OpenRouter providers can change the
-model behind a name without notice.
-\item \textit{DistilBERT} is trained lightly (1{,}000 emails per corpus, one
-epoch) to fit an 8\,GB laptop, so it is a lower bound for fine-tuned encoders.
-\item \textit{Phishsense-1B}, which we planned to include, needs a
-HuggingFace access token and was not run.
+\item \textit{Labels.} Four corpora count ordinary spam as positive. We measure
+the split with an LLM annotator and a second annotator for agreement, but the
+underlying labels stay as published, and the annotator is itself a model.
+\item \textit{Sample size.} Each test set has 300 emails, 150 for the one-class
+sets. The bootstrap interval on the mean F1 is about $\pm$0.015; the
+leave-one-corpus-out jackknife is wider and is the number to read when asking
+about a new corpus.
+\item \textit{Input budgets differ by model family.} TF-IDF sees 20{,}000
+characters, the LLMs 1{,}500, DistilBERT 128 word pieces. DistilBERT is
+therefore the most truncated model and its row should be read as a lower bound.
+\item \textit{Training budgets differ.} DistilBERT trains on about 5{,}000
+emails per fold against 40{,}000 for the classical models, to fit the laptop.
+\item \textit{LLM pre-training.} The legacy corpora may be inside the LLMs'
+pre-training data~\cite{contamsurvey}. E-PhishLLM was released in 2025, after
+most of these models, which makes it the most trustworthy of our tests, and the
+published detectors we ran are contaminated by construction.
+\item \textit{Providers.} OpenRouter routes each model to a provider of its
+choosing, so a small part of the cost and a small part of the behaviour is
+routing rather than the model.
+\item \textit{Scope.} Text only, one prompt per model, one run. Headers, URLs
+and attachments are ignored, and the Kaggle corpus has no subject line at all,
+which is an unmeasured difference between it and the others.
+\item \textit{Phishsense-1B} is evaluated through an ungated third-party merge
+and with our own prompt, because the original repository and its prompt
+template are gated. Its numbers may understate the released model.
 \end{itemize}
 
 \section{Conclusion}
 
-Public phishing corpora overlap heavily, mostly in ways that exact matching
-cannot see. The Kaggle set contains most of SpamAssassin and Ling-Spam and a
-third of Enron. Removing these copies lowers cross-corpus F1 by up to 30
-points for a single pair and up to 11.5 points in leave-one-corpus-out
-testing. On honest, unseen test data, a small open LLM used zero-shot is as
-robust as trained models on old mail and much better on AI-written phishing,
-for a few cents per thousand emails. The models differ mostly in how they
-trade missed phishing against false alarms, which a single F1 score hides. High accuracy on one dataset is easy.
-Honest evaluation is the hard part. All code, results and a Colab notebook are
-public so that others can check and extend this work.
+Public phishing corpora overlap heavily, and in a way that exact matching
+cannot see: most of the Kaggle aggregate has a near duplicate in another public
+corpus. Removing those duplicates lowers cross-corpus F1 by up to 30 points for
+a single pair, while removing the same number of emails at random changes
+nothing. On decontaminated, unseen data a small open LLM used zero-shot is as
+good as a trained classical model and much better on AI-written phishing, for a
+few cents per thousand emails, though a current commercial model is still
+ahead of all of them. Which model is best depends on the operating point: at a
+realistic phishing rate the false alarm rate decides, and a free classical
+filter in front of a small LLM beats either part alone on both cost and false
+alarms. Finally, the corpora themselves deserve more scepticism than they
+usually get: four fifths of their positive emails are spam rather than
+phishing, and a corpus feature that looks like a shortcut needs a paired test
+before it is believed, in either direction.
+High accuracy on one dataset is easy. Honest evaluation is the hard part. All
+code, raw model answers and results are public so that others can check and
+extend this work.
 
 \section*{Acknowledgment}
 We thank our Computer Security course instructor at United International

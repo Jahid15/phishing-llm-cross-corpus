@@ -1,0 +1,15 @@
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+microsoft/phi-4 long ceas08: 300 emails, total spend $1.2579
+microsoft/phi-4 long trec07: 300 emails, total spend $1.3290
+microsoft/phi-4 long ling: 300 emails, total spend $1.4051
+microsoft/phi-4 long enron: 300 emails, total spend $1.4749
+microsoft/phi-4 long kaggle: 300 emails, total spend $1.4834
+microsoft/phi-4 long nazario: 150 emails, total spend $1.4872
+microsoft/phi-4 long nigerian: 150 emails, total spend $1.4927
+microsoft/phi-4 long ephishllm: 300 emails, total spend $1.4993
+microsoft/phi-4 long ephishllm_it: 300 emails, total spend $1.5066
+microsoft/phi-4 long ephishllm_de: 300 emails, total spend $1.5139
+microsoft/phi-4 long ephishllm_nolink: 300 emails, total spend $1.5206
+microsoft/phi-4 long ephishllm_url: 300 emails, total spend $1.5273
+done. total spend $1.5273

@@ -1,0 +1,41 @@
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+google/gemini-3.1-flash-lite: annotating 900 emails
+  retry 1 google/gemini-3.1-flash-lite 'choices'
+  retry 1 google/gemini-3.1-flash-lite 'choices'
+  retry 2 google/gemini-3.1-flash-lite 'choices'
+  retry 2 google/gemini-3.1-flash-lite 'choices'
+  retry 1 google/gemini-3.1-flash-lite 'choices'
+  retry 2 google/gemini-3.1-flash-lite 'choices'
+  retry 3 google/gemini-3.1-flash-lite 'choices'
+  retry 3 google/gemini-3.1-flash-lite 'choices'
+  retry 4 google/gemini-3.1-flash-lite 'choices'
+  retry 4 google/gemini-3.1-flash-lite 'choices'
+openai/gpt-4o-mini: annotating 300 emails
+
+annotator agreement on 300 emails: 0.860, kappa 0.351
+           row       source  n_positives  phishing_pct  spam_pct  unclear_pct                    model    setting  n_phishing  n_spam  recall_phishing  recall_spam   gap     n  agreement  kappa
+   composition spamassassin        150.0          18.7      81.3          0.0                      NaN        NaN         NaN     NaN              NaN          NaN   NaN   NaN        NaN    NaN
+   composition       ceas08        150.0          14.7      85.3          0.0                      NaN        NaN         NaN     NaN              NaN          NaN   NaN   NaN        NaN    NaN
+   composition       trec07        150.0          24.7      75.3          0.0                      NaN        NaN         NaN     NaN              NaN          NaN   NaN   NaN        NaN    NaN
+   composition         ling        150.0          19.3      79.3          1.3                      NaN        NaN         NaN     NaN              NaN          NaN   NaN   NaN        NaN    NaN
+   composition        enron        150.0          21.3      78.7          0.0                      NaN        NaN         NaN     NaN              NaN          NaN   NaN   NaN        NaN    NaN
+   composition       kaggle        150.0          25.3      74.7          0.0                      NaN        NaN         NaN     NaN              NaN          NaN   NaN   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN               DistilBERT loco_clean       186.0   712.0            0.892        0.847 0.046   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN              GPT-4o-mini   llm_zero       186.0   712.0            0.995        0.933 0.062   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN    Gemini-3.1-Flash-Lite   llm_zero       186.0   712.0            0.995        0.926 0.069   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN              Gemma-3-12B   llm_zero       186.0   712.0            0.995        0.972 0.023   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN             Llama-3.1-8B   llm_zero       186.0   712.0            0.984        0.940 0.044   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN             Llama-3.2-1B   llm_zero       186.0   712.0            0.801        0.728 0.074   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN             Llama-3.2-3B   llm_zero       186.0   712.0            0.892        0.747 0.145   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN    Llama-3.2-3B few-shot    llm_few       186.0   712.0            0.919        0.824 0.095   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN Llama-3.2-3B few-shot AI llm_few_ai       186.0   712.0            0.973        0.889 0.084   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN                Phi-4-14B   llm_zero       186.0   712.0            0.742        0.732 0.010   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN        Phi-4-14B relaxed   llm_long        28.0   122.0            0.929        0.918 0.011   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN              Qwen-2.5-7B   llm_zero       186.0   712.0            0.968        0.874 0.094   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN     Qwen-2.5-7B few-shot    llm_few       186.0   712.0            0.978        0.910 0.068   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN  Qwen-2.5-7B few-shot AI llm_few_ai       186.0   712.0            0.978        0.952 0.026   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN          TF-IDF + LogReg loco_clean       186.0   712.0            0.941        0.889 0.052   NaN        NaN    NaN
+recall_by_kind          NaN          NaN           NaN       NaN          NaN              TF-IDF + NB loco_clean       186.0   712.0            0.919        0.854 0.065   NaN        NaN    NaN
+     agreement          NaN          NaN           NaN       NaN          NaN                      NaN        NaN         NaN     NaN              NaN          NaN   NaN 300.0       0.86  0.351
+[progress] 14_label_study done. agreement 0.86, kappa 0.35

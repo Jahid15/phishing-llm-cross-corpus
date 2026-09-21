@@ -1,0 +1,2 @@
+setting,test,train_size,train_sec,infer_sec_per_1000,device
+loco_raw,kaggle,5000,596.5,24.31,cpu

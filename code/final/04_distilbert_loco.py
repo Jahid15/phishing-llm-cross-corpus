@@ -1,6 +1,8 @@
 """
 Step 4. Fine-tuned DistilBERT under the same leave-one-corpus-out protocol.
-Only the decontaminated (clean) setting is run, because that is the honest one.
+Both settings are run: with the training data as it is (loco_raw) and after
+removing near duplicates of the test corpus (loco_clean), so the leakage
+inflation is measured for a neural model too, not only for TF-IDF.
 
 To fit an 8 GB laptop we train on a stratified sample of 1,000 emails per
 training corpus (about 5,000 per fold), 1 epoch, 128 tokens, batch 16.
@@ -9,7 +11,8 @@ an 8 GB laptop could give next to the other jobs.
 
 Folds
   in_corpus  : 2,000 emails of T (never the evaluation emails), test on T
-  loco_clean : five other corpora minus near duplicates of T, test on T
+  loco_raw   : the five other corpora as they are, test on T
+  loco_clean : the same five corpora minus near duplicates of T, test on T
   ALL        : all six corpora minus near duplicates of any extra test set,
                tested on nazario, nigerian and ephishllm
 All tests use the shared evaluation subsets (300 or 150 emails).
@@ -25,7 +28,8 @@ import torch
 from torch.utils.data import DataLoader
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, get_linear_schedule_with_warmup
 
-from common import DATA_DIR, EXTRA_TESTS, RESULTS_DIR, SEED, TRAIN_CORPORA, load, load_eval
+from common import (DATA_DIR, EXTRA_TESTS, RESULTS_DIR, SEED, TRAIN_CORPORA,
+                    VARIANT_TESTS, load, load_eval)
 
 MODEL = "distilbert-base-uncased"
 PER_CORPUS = 1000
@@ -99,7 +103,7 @@ def free():
 
 def main():
     data = {c: lean(load(c)) for c in TRAIN_CORPORA}
-    evals = {c: load_eval(c) for c in TRAIN_CORPORA + EXTRA_TESTS}
+    evals = {c: load_eval(c) for c in TRAIN_CORPORA + EXTRA_TESTS + VARIANT_TESTS}
     links = pd.read_csv(os.path.join(DATA_DIR, "near_dup_links.csv"))
     pred_rows, timing = [], []
 
@@ -131,18 +135,21 @@ def main():
             tr = sample(pool, IN_CORPUS_N)
             t0 = time.time(); m = train(tr); record(m, "in_corpus", t, len(tr), time.time() - t0); m = None; free()
 
-        # leave one corpus out, clean
-        if not done("loco_clean", t):
-            bad = set(links.loc[links.dup_in == t, "id"])
-            tr = pd.concat([sample(data[c][~data[c].id.isin(bad)], PER_CORPUS)
-                            for c in TRAIN_CORPORA if c != t])
-            t0 = time.time(); m = train(tr); record(m, "loco_clean", t, len(tr), time.time() - t0); m = None; free()
+        # leave one corpus out, with and without the duplicates
+        bad = set(links.loc[links.dup_in == t, "id"])
+        for setting in ["loco_clean", "loco_raw"]:
+            if done(setting, t):
+                continue
+            keep = (lambda df: df[~df.id.isin(bad)]) if setting == "loco_clean" else (lambda df: df)
+            tr = pd.concat([sample(keep(data[c]), PER_CORPUS) for c in TRAIN_CORPORA if c != t])
+            t0 = time.time(); m = train(tr); record(m, setting, t, len(tr), time.time() - t0); m = None; free()
 
-    if not all(done("loco_clean", x) for x in EXTRA_TESTS):
+    extra = EXTRA_TESTS + VARIANT_TESTS
+    if not all(done("loco_clean", x) for x in extra):
         bad = set(links.loc[links.dup_in.isin(EXTRA_TESTS), "id"])
         tr = pd.concat([sample(data[c][~data[c].id.isin(bad)], PER_CORPUS) for c in TRAIN_CORPORA])
         t0 = time.time(); m = train(tr); sec = time.time() - t0
-        for test in EXTRA_TESTS:
+        for test in extra:
             record(m, "loco_clean", test, len(tr), sec)
         m = None; free()
 

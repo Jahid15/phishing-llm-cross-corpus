@@ -1,0 +1,11 @@
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+phishsense ephishllm: acc 0.840 (624 s per 1000)
+phishsense nazario: acc 1.000 (1161 s per 1000)
+phishsense ephishllm_nolink: acc 0.837 (1078 s per 1000)
+phishsense kaggle: acc 0.973 (1429 s per 1000)
+phishsense trec07: acc 0.940 (1452 s per 1000)
+phishsense ling: acc 0.993 (1567 s per 1000)
+phishsense enron: acc 0.967 (1318 s per 1000)
+[progress] 12_offtheshelf done. 31 model/test-set files

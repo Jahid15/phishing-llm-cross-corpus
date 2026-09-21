@@ -1,0 +1,11 @@
+stage1,stage2,policy,unseen_f1,unseen_recall,false_alarm,ai_phishing_f1,ai_phishing_recall,share_to_stage2,usd_per_1000
+Gemma-3-12B,Qwen-2.5-7B,confirm,0.929,0.891,0.027,0.819,0.693,0.614,0.0366
+Qwen-2.5-7B,Gemma-3-12B,confirm,0.929,0.891,0.027,0.819,0.693,0.462,0.0402
+Llama-3.1-8B,Qwen-2.5-7B,confirm,0.914,0.866,0.027,0.76,0.613,0.581,0.0309
+TF-IDF + LogReg,Gemma-3-12B,confirm,0.914,0.884,0.047,0.75,0.62,0.497,0.0083
+TF-IDF + LogReg,Qwen-2.5-7B,confirm,0.911,0.848,0.011,0.678,0.513,0.497,0.0161
+TF-IDF + LogReg,Qwen-2.5-7B,rescue,0.916,0.943,0.114,0.753,0.813,0.503,0.0164
+Llama-3.1-8B,Qwen-2.5-7B,rescue,0.894,0.976,0.218,0.87,0.78,0.419,0.0256
+Gemma-3-12B,Qwen-2.5-7B,rescue,0.882,0.979,0.254,0.955,0.987,0.386,0.0292
+Qwen-2.5-7B,Gemma-3-12B,rescue,0.882,0.979,0.254,0.955,0.987,0.538,0.0415
+TF-IDF + LogReg,Gemma-3-12B,rescue,0.869,0.99,0.3,0.836,1.0,0.503,0.0084

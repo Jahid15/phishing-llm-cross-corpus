@@ -1,0 +1,24 @@
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+[{'test_set': 'spamassassin', 'threshold': 0.5, 'recall': 0.753, 'precision': 0.966, 'f1': 0.846, 'false_alarm': 0.027, 'mean_phishing_prob': 0.379}, {'test_set': 'spamassassin', 'threshold': 0.37, 'recall': 0.787, 'precision': 0.952, 'f1': 0.861, 'false_alarm': 0.04, 'mean_phishing_prob': 0.379}, {'test_set': 'spamassassin', 'threshold': 0.2, 'recall': 0.887, 'precision': 0.93, 'f1': 0.908, 'false_alarm': 0.067, 'mean_phishing_prob': 0.379}]
+[{'test_set': 'nazario', 'threshold': 0.5, 'recall': 0.513, 'precision': 1.0, 'f1': 0.678, 'false_alarm': 0.0, 'mean_phishing_prob': 0.512}, {'test_set': 'nazario', 'threshold': 0.37, 'recall': 0.593, 'precision': 1.0, 'f1': 0.745, 'false_alarm': 0.0, 'mean_phishing_prob': 0.512}, {'test_set': 'nazario', 'threshold': 0.2, 'recall': 0.753, 'precision': 1.0, 'f1': 0.859, 'false_alarm': 0.0, 'mean_phishing_prob': 0.512}]
+[{'test_set': 'ephishllm', 'threshold': 0.5, 'recall': 0.087, 'precision': 0.52, 'f1': 0.149, 'false_alarm': 0.08, 'mean_phishing_prob': 0.167}, {'test_set': 'ephishllm', 'threshold': 0.37, 'recall': 0.113, 'precision': 0.415, 'f1': 0.178, 'false_alarm': 0.16, 'mean_phishing_prob': 0.167}, {'test_set': 'ephishllm', 'threshold': 0.2, 'recall': 0.22, 'precision': 0.402, 'f1': 0.284, 'false_alarm': 0.327, 'mean_phishing_prob': 0.167}]
+[{'test_set': 'ephishllm_nolink', 'threshold': 0.5, 'recall': 0.12, 'precision': 0.6, 'f1': 0.2, 'false_alarm': 0.08, 'mean_phishing_prob': 0.182}, {'test_set': 'ephishllm_nolink', 'threshold': 0.37, 'recall': 0.153, 'precision': 0.489, 'f1': 0.234, 'false_alarm': 0.16, 'mean_phishing_prob': 0.182}, {'test_set': 'ephishllm_nolink', 'threshold': 0.2, 'recall': 0.273, 'precision': 0.451, 'f1': 0.34, 'false_alarm': 0.333, 'mean_phishing_prob': 0.182}]
+[{'test_set': 'ephishllm_it', 'threshold': 0.5, 'recall': 0.993, 'precision': 0.5, 'f1': 0.665, 'false_alarm': 0.993, 'mean_phishing_prob': 0.941}, {'test_set': 'ephishllm_it', 'threshold': 0.37, 'recall': 0.993, 'precision': 0.5, 'f1': 0.665, 'false_alarm': 0.993, 'mean_phishing_prob': 0.941}, {'test_set': 'ephishllm_it', 'threshold': 0.2, 'recall': 1.0, 'precision': 0.5, 'f1': 0.667, 'false_alarm': 1.0, 'mean_phishing_prob': 0.941}]
+        test_set  threshold  recall  precision    f1  false_alarm  mean_phishing_prob
+    spamassassin       0.50   0.753      0.966 0.846        0.027               0.379
+    spamassassin       0.37   0.787      0.952 0.861        0.040               0.379
+    spamassassin       0.20   0.887      0.930 0.908        0.067               0.379
+         nazario       0.50   0.513      1.000 0.678        0.000               0.512
+         nazario       0.37   0.593      1.000 0.745        0.000               0.512
+         nazario       0.20   0.753      1.000 0.859        0.000               0.512
+       ephishllm       0.50   0.087      0.520 0.149        0.080               0.167
+       ephishllm       0.37   0.113      0.415 0.178        0.160               0.167
+       ephishllm       0.20   0.220      0.402 0.284        0.327               0.167
+ephishllm_nolink       0.50   0.120      0.600 0.200        0.080               0.182
+ephishllm_nolink       0.37   0.153      0.489 0.234        0.160               0.182
+ephishllm_nolink       0.20   0.273      0.451 0.340        0.333               0.182
+    ephishllm_it       0.50   0.993      0.500 0.665        0.993               0.941
+    ephishllm_it       0.37   0.993      0.500 0.665        0.993               0.941
+    ephishllm_it       0.20   1.000      0.500 0.667        1.000               0.941
+[progress] 17_threshold_check done. ModernBERT at three thresholds

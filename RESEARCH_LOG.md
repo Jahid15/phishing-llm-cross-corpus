@@ -306,3 +306,187 @@ slides can be rebuilt with `python code/final/06_analysis.py`, then
 `paper/make_tables.py`, `paper/fill_numbers.py`, `final-slides/collect_numbers.py`,
 `final-slides/build_deck.py` and `node final-slides/build_pptx.js`, without
 calling any API again.
+
+---
+
+# Round 2: completing the study (20 to 21 September 2026)
+
+After the first version was published we went back over the work with three
+questions: what does the 2025 and 2026 literature already do, what is wrong
+with our own method, and what is still missing from the proposal. We used three
+independent reviewers (separate agents with no knowledge of each other's
+findings) for the literature, the methodology and the available models and
+corpora, then worked through what they found.
+
+## Step 17. What the literature already does, and what is left for us
+
+Two papers turned out to do a large part of what we had claimed as new.
+E-PhishGen (AISec 2025) already evaluates classical models, DistilBERT and
+several LLMs with a leave-one-dataset-out protocol over eight corpora. Bhuiyan
+and Bhuiyan (Big Data and Cognitive Computing, 2026) already study cross-corpus
+fragility and artifact learning over six corpora.
+
+We narrowed the claim rather than defending a wrong one. What neither of them
+does, and what we keep: measuring the near-duplicate overlap between the
+corpora and removing it before testing, a control that shows the drop is not
+just a smaller training set, the cost in dollars, the false alarm rate on
+legitimate mail, and the operating-point analysis. The related work section now
+cites both papers prominently and says exactly this.
+
+## Step 18. What was wrong with our own method
+
+The methodology review found five things that mattered. All are now fixed.
+
+1. In-corpus F1 was measured differently for different model families (an 80/20
+   split at natural class balance for the classical models, the balanced
+   evaluation subset for DistilBERT), and we had compared them anyway. Both are
+   now measured the same way, on the shared evaluation subset, and the old
+   80/20 number is kept separately for the leakage table.
+2. The leakage claim was confounded with training-set size, because
+   decontamination also removes data. We added a control that removes the same
+   number of training emails at random. It changes the score by at most 0.004
+   while decontamination changes it by 0.057 on average, so the cause is which
+   emails are removed, not how many. This is now the strongest single piece of
+   evidence in the paper.
+3. Near duplicates inside a corpus were never measured. They are now: 9 to 19
+   percent of each corpus's own evaluation emails have a near copy in the part
+   of the corpus a model trains on, which makes ordinary in-corpus scores
+   optimistic before any cross-corpus question is asked.
+4. The bootstrap intervals were not paired across models and used a shared
+   random generator, so they were not reproducible and could not support
+   comparisons. They are now paired on identical resample positions, we report
+   the interval of the difference for the comparisons we make, and we added a
+   leave-one-corpus-out jackknife, which is the honest interval for "a corpus
+   we have never seen".
+5. Near-duplicate decisions used the MinHash estimate, which has a standard
+   error of about 0.035 at our threshold. Every candidate pair is now verified
+   with the exact Jaccard similarity, and the matcher itself is validated
+   against brute force in a committed script (precision 1.00, recall 1.00 on
+   400 hard cases). The numbers went up slightly rather than down.
+
+## Step 19. A parsing bug that would have produced a fake result
+
+The first frontier run (Gemini-3.1-Flash-Lite) came back with 2,399 of 2,400
+answers unparsed. The model had answered "ph" or "leg": the provider cuts the
+reply to one token, and our parser looked for the whole words. Left alone, the
+model would have appeared to call every email legitimate.
+
+Because we save the raw text of every answer, the fix cost nothing: we improved
+the parser to accept a prefix (and to read negations such as "not phishing"
+correctly) and re-read the stored answers with `11_reparse.py`. 2,399
+predictions were corrected and no other model's results changed. Saving raw
+answers is the practice that made this recoverable.
+
+## Step 20. New experiments
+
+| What | Why | Result |
+|---|---|---|
+| Frontier reference (Gemini-3.1-Flash-Lite, GPT-4o-mini) | how far are cheap models from a current paid model | Gemini is ahead of every open model on every axis we measure |
+| Published phishing detectors (BERT, ModernBERT, Phishsense-1B through an ungated mirror) | their model cards name the corpora we test on, so contamination should be visible in released artefacts | see the results table |
+| Few-shot source ablation (old corpora, AI-written, mixed) | test our claim that the examples, not few-shot itself, cause the drop on AI mail | swapping in AI-written examples recovers most of the AI-phishing score |
+| Italian and German E-PhishLLM | our English-only limitation becomes a measurement | scores drop, an English prompt does not transfer for free |
+| Placeholder study and sanitised copies | the corpus writes links as `<<link>>`, only in phishing mail | worth about 18 points of recall on average; Gemma is almost unaffected |
+| Spam versus phishing annotation with two annotators | gap 4 from the proposal | only 15 to 25 percent of the positives are phishing |
+| Base-rate analysis | balanced test sets are not a mailbox | at 5 percent phishing the ranking changes and false alarms dominate |
+| Two-stage detectors from saved predictions | what an organisation would actually build | TF-IDF in front of an LLM halves the cost and lowers false alarms |
+| Explanation quality with an LLM judge | objective 5 of the proposal | reasons are grounded about 9 times in 10 when the verdict is right, about half the time when it is wrong |
+| McNemar tests | are the differences real | Qwen beats the classical models and DistilBERT; few-shot gains on old corpora are not significant, its AI-phishing loss is |
+
+## Step 21. Things we tried and dropped
+
+- Phi-4 with a larger output budget was first discarded because a quick reading
+  suggested the model refuses. The methodology review showed the discarded file
+  contradicted that, so it was rerun properly and is reported.
+- The first rewrite of the overlap script held every email's shingle set in
+  memory at once, which would have needed roughly 20 GB. It now builds
+  signatures one email at a time and recomputes only candidate pairs.
+- Running DistilBERT on the Apple GPU: it needed more than 3 GB of GPU memory
+  and competed with the other jobs, so the final runs use the CPU at 128 tokens.
+
+## Step 22. Bugs found while finishing, and what they teach
+
+Four bugs surfaced in the last stretch. All are fixed, and all are the kind
+that would have produced a wrong number in a paper rather than a crash.
+
+1. **The Gemini parser.** Covered in step 19: 2,399 valid answers were being
+   read as "legitimate" because the provider truncated the reply to one token.
+   Saving raw answers made it free to fix.
+2. **A published model that speaks a different language.** Phishsense-1B
+   answers TRUE or FALSE, as its documentation says, not "phishing" or
+   "legitimate". Our parser scored all of its answers as negative, which made
+   it look like a model that never flags anything (exactly 0.500 accuracy on a
+   balanced set). Once the parser accepted TRUE and FALSE its scores became
+   0.96 on SpamAssassin and 0.84 on AI-written phishing. A score of exactly
+   0.500 on a balanced set is always worth investigating.
+3. **A resume key that was not unique.** Our sanitised copies of the
+   AI-written test set reuse the ids of the original emails, and the LLM cache
+   was keyed on the id alone, so those sets were skipped as "already done" and
+   silently produced no rows. The key is now the pair (test set, id).
+4. **A crash that idled the machine for hours.** A variable introduced during
+   the rewrite of the DistilBERT script was defined in one branch and used in
+   another, so the last fold failed at two in the morning and the queue behind
+   it did nothing until we looked. The lesson for the next long run: have the
+   runner print a heartbeat, and check on a long job rather than assuming it is
+   still working.
+
+## Step 23. Fairness checks on the published detectors
+
+Two of the three released detectors score near the top of our table on the
+legacy corpora and fail on AI-written phishing (F1 0.47 and 0.15). Before
+reporting that we checked two alternative explanations.
+
+- *Is it the decision threshold?* The ModernBERT card recommends 0.37 rather
+  than the default. We reran it at 0.5, 0.37 and 0.2. Recall on AI-written
+  phishing goes from 0.09 to 0.11 to 0.22 while the false alarm rate on the
+  same set goes from 8 to 33 percent. Lowering the threshold moves the failure,
+  it does not remove it.
+- *Is it a property of released models in general?* No. Phishsense-1B, which is
+  a LoRA-tuned causal model rather than an encoder classifier, reaches 0.84 on
+  the same AI-written set. We say so in the paper.
+
+## Step 24. Final numbers
+
+Everything in the paper, the slides and the team guide is generated from
+`results/final/` by scripts, so the three documents cannot disagree. The
+headline results after all the corrections:
+
+- Near duplicates: 87 percent of SpamAssassin, 91 percent of Ling-Spam and 36
+  percent of Enron sit inside the Kaggle set; an exact check finds 2 of the
+  SpamAssassin copies. Stable at Jaccard 0.9 and at 5,000 characters, and the
+  matcher matches brute force exactly on 400 hard cases.
+- Leakage: removing the duplicates costs up to 12 F1 points in
+  leave-one-corpus-out; removing the same number of emails at random costs at
+  most 0.4 points.
+- Labels: 15 to 25 percent of the positive emails are phishing, the rest spam.
+- Models: Gemini-3.1-Flash-Lite 0.959 unseen F1 at 1.7 percent false alarms,
+  zero-shot Qwen-2.5-7B 0.928 at 3.0 percent for about 3 cents per 1,000
+  emails, TF-IDF 0.899 at 9.6 percent for nothing.
+- Published detectors: BERT-phishing tops the unseen-corpus column at 0.962 and
+  scores 0.470 on AI-written phishing; ModernBERT 0.892 and 0.149;
+  Phishsense-1B 0.947 and 0.839.
+- Operating points: at a 5 percent phishing rate the ranking changes, and a
+  TF-IDF filter in front of Qwen gives F1 0.911 at 1.1 percent false alarms for
+  0.016 dollars per 1,000 emails.
+- Total API spend for the whole project: under 2 dollars.
+
+## Step 25. A finding we had to withdraw
+
+Earlier in this round we reported that the `<<link>>` placeholder in the
+AI-written corpus was worth about 18 points of recall, and we put it in the
+slides as a caution about synthetic benchmarks. When the sanitised copies of
+the test set were finally evaluated by all the models, the picture changed.
+
+- Split comparison (emails that carry the token against emails that do not):
+  a gap of about 16 points.
+- Paired comparison (the same emails, with the token removed): a gap of
+  0.9 points, and at most 2 points for any single model.
+
+The first comparison is confounded. Emails that contain a link placeholder are
+link-based lures; the ones without are business email compromise and similar
+text-only attacks, which are harder for every detector. So the token is not
+what the models were reacting to, and our AI-phishing numbers stand.
+
+We kept both results in the paper. The quick test pointed the wrong way, and a
+reader who ran only that test would have drawn the opposite conclusion. The
+rule we take from it: when you suspect a shortcut, change that one thing on the
+same data rather than comparing two groups that differ in other ways.

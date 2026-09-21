@@ -1,0 +1,19 @@
+/Users/sinha/Downloads/uiu/cn/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+google/gemini-3.1-flash-lite zero spamassassin: 300 emails, total spend $0.5529
+google/gemini-3.1-flash-lite zero ceas08: 300 emails, total spend $0.5995
+google/gemini-3.1-flash-lite zero trec07: 300 emails, total spend $0.6714
+  retry 1 google/gemini-3.1-flash-lite 'choices'
+  retry 2 google/gemini-3.1-flash-lite 'choices'
+  retry 1 google/gemini-3.1-flash-lite 'choices'
+  retry 2 google/gemini-3.1-flash-lite 'choices'
+  retry 3 google/gemini-3.1-flash-lite 'choices'
+  retry 3 google/gemini-3.1-flash-lite 'choices'
+  retry 4 google/gemini-3.1-flash-lite 'choices'
+  retry 4 google/gemini-3.1-flash-lite 'choices'
+google/gemini-3.1-flash-lite zero ling: 300 emails, total spend $0.7442
+google/gemini-3.1-flash-lite zero enron: 300 emails, total spend $0.8068
+google/gemini-3.1-flash-lite zero kaggle: 300 emails, total spend $0.8417
+google/gemini-3.1-flash-lite zero nazario: 150 emails, total spend $0.8629
+google/gemini-3.1-flash-lite zero nigerian: 150 emails, total spend $0.8901
+google/gemini-3.1-flash-lite zero ephishllm: 300 emails, total spend $0.9269
