@@ -1,4 +1,4 @@
-"""Writes speaker_script.md for the current deck, with numbers from numbers.json."""
+"""Writes speaker_script.md for the 14 slide deck, English and Bangla, from numbers.json."""
 import json
 import os
 
@@ -18,234 +18,321 @@ conf = next(c for c in casc if c["stage1"] == "TF-IDF + LogReg" and c["stage2"] 
 lf = lambda t, s: loco[("logreg", t, s)]["f1"]
 split_gap = sum(r["gap"] for r in ph.values()) / len(ph) * 100
 paired_gap = sum(r["gap"] for r in pair) / max(1, len(pair)) * 100
+G, Q, B = main["Gemini-3.1-Flash-Lite"], main["Qwen-2.5-7B"], main["BERT-phishing (published)"]
+GM = main["Gemma-3-12B"]
 
-doc = f"""# Final Update: speaker script
+doc = f"""# Presentation script, 14 slides, about 9 minutes 45
 
-16 slides, about 10 minutes. Sinha slides 1 to 5, Saimon 6 to 8, Faria 9 to 16.
-Press `N` in the deck for the timing notes. Every number here comes from
-`results/final/`; if the slide and this script ever differ, trust the slide.
+| Who | Slides | Time |
+|---|---|---|
+| Sinha | 1 to 5 | 2:50 |
+| Saimon | 6 to 9 | 3:20 |
+| Faria | 10 to 14 | 3:35 |
 
----
+প্রতিটা slide এ তিনটা জিনিস আছে: **কী বলবে (English)**, **কী বলবে (বাংলা)**, আর
+**কীভাবে বলবে**. দুইটা ভাষার যেকোনো একটা বলো, মিশিয়ে বললেও সমস্যা নেই. সংখ্যাগুলো
+`results/final/` থেকে আসা, তাই slide আর script সবসময় মিলবে.
 
-## Sinha
-
-### 1. Title (15 sec)
-
-EN: Good morning. We are Group 18. In the proposal we showed you an empty table
-and said the question marks were the project. Today it is filled in, and a few
-things in it surprised us.
-
-BN: সবাইকে শুভেচ্ছা। আমরা Group 18। Proposal এ একটা খালি table দেখিয়ে বলেছিলাম,
-প্রশ্নবোধক চিহ্নগুলোই আমাদের project। আজ সেটা পূরণ করা, আর কিছু ফলাফল আমাদের নিজেদেরই অবাক করেছে।
-
-### 2. Where we started (45 sec)
-
-EN: In July we reproduced the literature with a method older than deep learning
-and got the same 97 to 99 percent. Then we trained on one corpus and tested on
-another, and F1 fell from 0.99 to 0.30. Since the proposal we corrected three
-things. We are not the first to test across corpora, two 2025 and 2026 papers
-did that; ours is what they skip. We added a control, because removing
-duplicates also removes data. And we now verify every duplicate pair exactly
-instead of trusting an estimate.
-
-BN: জুলাইতে আমরা deep learning এরও পুরনো একটা পদ্ধতি দিয়ে সেই ৯৭ থেকে ৯৯ percent
-পেয়েছিলাম। তারপর এক corpus এ train করে অন্যটায় test করলাম, F1 ০.৯৯ থেকে ০.৩০ এ নামল।
-Proposal এর পর তিনটা জিনিস ঠিক করেছি। আমরা প্রথম না, ২০২৫ ও ২০২৬ এর দুইটা paper আগেই
-cross-corpus test করেছে; আমাদের কাজ ওরা যেটা বাদ দিয়েছে সেটা। আমরা একটা control যোগ
-করেছি, কারণ duplicate সরালে data ও কমে যায়। আর প্রতিটা duplicate জোড়া এখন আন্দাজ নয়,
-হিসাব করে যাচাই করা।
-
-### 3. Objectives (30 sec)
-
-EN: All six objectives from the proposal are done, and review added four more:
-a label study, a base-rate analysis, two-stage detectors, and explanation
-quality.
-
-BN: Proposal এর ছয়টা objective ই শেষ, আর review এর পর আরো চারটা যোগ হয়েছে: label
-study, base-rate বিশ্লেষণ, দুই ধাপের detector, আর explanation এর মান যাচাই।
-
-### 4. Methodology (45 sec)
-
-EN: Six steps. The one to look at is the control. Decontamination removes
-training emails, so on its own a drop could just mean less data. We therefore
-run a third setting that removes the same number of emails at random. If that
-changes nothing, the cause is the duplicates.
-
-BN: ছয়টা ধাপ। যেটা খেয়াল করবেন সেটা হলো control। Decontamination training email
-সরিয়ে দেয়, তাই score কমলে সেটা শুধু কম data র কারণেও হতে পারত। তাই তৃতীয় একটা setting
-এ আমরা সমান সংখ্যক email এলোমেলোভাবে সরাই। সেখানে কিছু না বদলালে বুঝতে হবে কারণটা
-duplicate গুলোই।
-
-### 5. Experimental details (45 sec)
-
-EN: Nine sources, six of them take turns as the held-out corpus. Every model,
-local, open or paid, is scored on the same fixed 300 emails per test set. Seed
-42, one 8 GB laptop, every raw answer saved, total API spend {n['total_spend_usd']:.2f} dollars.
-
-BN: নয়টা source, তার ছয়টা পালা করে held-out corpus হয়। প্রতিটা model, local হোক,
-open হোক বা paid, প্রতি test set এ একই ৩০০টা email এ score পায়। Seed 42, একটা 8 GB
-laptop, প্রতিটা raw উত্তর সংরক্ষিত, মোট API খরচ {n['total_spend_usd']:.2f} dollar।
+Deck এ `N` চাপলে প্রতিটা slide এর নিচে timing note দেখা যায়.
 
 ---
 
-## Saimon
+# SINHA · slides 1 to 5
 
-### 6. Overlap (55 sec)
+## Slide 1 · Title (15 sec)
 
-EN: How many SpamAssassin emails are inside the Kaggle set? Compared exactly,
-the way most people would: {sa['exact_raw'][0]}. With whitespace removed: {sa['exact_norm'][0]:,}. With
-near-duplicate matching: {sa['near'][0]:,}, which is {sa['near'][1]:.0f} percent of SpamAssassin.
-{thr[('kaggle', 0.8)]['pct']:.0f} percent of Kaggle has a copy somewhere else, and at the stricter
-threshold it is still {thr[('kaggle', 0.9)]['pct']:.0f} percent. Against brute force our matcher has
-precision {mv['precision']:.2f} and recall {mv['recall']:.2f}.
+**EN:** Good morning. We are Group 18. In the proposal we showed you an empty
+table and said the question marks were the project. Today the table is full,
+and some of what we found surprised us.
 
-BN: Kaggle set এর ভিতরে SpamAssassin এর কয়টা email আছে? হুবহু মিলালে {sa['exact_raw'][0]} টা।
-Whitespace বাদ দিলে {sa['exact_norm'][0]:,}। Near-duplicate matching দিয়ে {sa['near'][0]:,}, মানে SpamAssassin এর
-{sa['near'][1]:.0f} percent। Kaggle এর {thr[('kaggle', 0.8)]['pct']:.0f} percent এর copy অন্য কোথাও আছে, আর কড়া threshold এও
-{thr[('kaggle', 0.9)]['pct']:.0f} percent। Brute force এর সাথে মিলিয়ে আমাদের matcher এর precision {mv['precision']:.2f}, recall {mv['recall']:.2f}।
+**BN:** সবাইকে শুভেচ্ছা। আমরা Group 18। Proposal এ আমরা একটা খালি table দেখিয়ে
+বলেছিলাম, ওই প্রশ্নবোধক চিহ্নগুলোই আমাদের project। আজ table টা পূরণ করা, আর কিছু
+ফলাফল আমাদের নিজেদেরকেই অবাক করেছে।
 
-### 7. Leakage and the control (60 sec)
+**কীভাবে:** হাসিমুখে, ধীরে। নাম তিনটা বলার দরকার নেই, slide এ আছে।
 
-EN: This is the most important slide. On SpamAssassin, training on the other
-five corpora gives F1 {lf('spamassassin','loco_raw'):.3f}. Remove the same number of emails at random:
-{lf('spamassassin','loco_random'):.3f}, no change. Remove the duplicates: {lf('spamassassin','loco_clean'):.3f}. Up to twelve points
-disappear, and only when we remove the right emails. CEAS and TREC, which share
-nothing with the others, do not move at all.
+## Slide 2 · Where we started (35 sec)
 
-BN: এটাই সবচেয়ে গুরুত্বপূর্ণ slide। SpamAssassin এ বাকি পাঁচটা corpus এ train করলে F1
-{lf('spamassassin','loco_raw'):.3f}। সমান সংখ্যক email এলোমেলোভাবে সরালে {lf('spamassassin','loco_random'):.3f}, কোনো পরিবর্তন নেই। Duplicate
-গুলো সরালে {lf('spamassassin','loco_clean'):.3f}। বারো point পর্যন্ত উধাও, আর সেটা শুধু ঠিক email গুলো সরালেই।
-CEAS আর TREC, যাদের সাথে কারো মিল নেই, একটুও নড়ে না।
+**EN:** Quick recap. In July we tested the papers' claim ourselves with TF-IDF
+and logistic regression, a method older than deep learning, and got the same 97
+to 99 percent. Then we trained on one corpus and tested on another, and F1 fell
+from 0.99 to 0.30. Since the proposal we corrected three things. We are not the
+first to test across corpora, two recent papers did that. We added a control.
+And we now verify every duplicate exactly instead of trusting an estimate.
+So our question is: if we remove the leaked emails and always test on a corpus
+the model has never seen, how good are cheap detectors, what do they cost, and
+how much good mail do they block?
 
-### 8. What the benchmarks contain (45 sec)
+**BN:** ছোট করে আগের কথা। জুলাইতে আমরা নিজেরাই paper গুলোর দাবি যাচাই করেছিলাম
+TF-IDF আর Logistic Regression দিয়ে, যেটা deep learning এরও পুরনো, আর একই ৯৭ থেকে
+৯৯ percent পেয়েছিলাম। তারপর এক corpus এ train করে আরেকটায় test করলাম, F1 ০.৯৯ থেকে
+০.৩০ এ নেমে গেল। Proposal এর পর তিনটা জিনিস ঠিক করেছি। এক, আমরাই প্রথম না, সাম্প্রতিক
+দুইটা paper আগেই cross-corpus test করেছে। দুই, আমরা একটা control যোগ করেছি। তিন,
+প্রতিটা duplicate এখন আন্দাজে না, হিসাব করে মিলিয়ে দেখা। তাই আমাদের প্রশ্ন হলো:
+leaked email সরিয়ে, সবসময় অদেখা corpus এ test করলে সস্তা detector গুলো কতটা ভালো,
+খরচ কত, আর কতটা ভালো email আটকে দেয়?
 
-EN: Then we asked what the positive class actually is. An LLM annotator, with a
-second annotator on 300 emails, finds that only {min(r['phishing_pct'] for r in comp):.0f} to {max(r['phishing_pct'] for r in comp):.0f} percent of the
-positive emails are phishing. The rest is ordinary bulk spam. So a paper
-reporting phishing detection on these corpora is mostly reporting spam
-detection.
+**কীভাবে:** শেষ প্রশ্নটা নীল box এ আছে, ওটা দেখিয়ে থামো এক সেকেন্ড।
 
-BN: তারপর আমরা দেখলাম positive class আসলে কী। একটা LLM annotator, আর ৩০০ email এ
-দ্বিতীয় একজন annotator দিয়ে দেখা গেল positive email গুলোর মাত্র {min(r['phishing_pct'] for r in comp):.0f} থেকে {max(r['phishing_pct'] for r in comp):.0f} percent
-আসলে phishing। বাকিটা সাধারণ spam। মানে এই corpus গুলোতে "phishing detection" বললেও
-আসলে বেশিরভাগ spam detection মাপা হচ্ছে।
+## Slide 3 · Objectives (35 sec)
+
+**EN:** These were our six objectives in the proposal. All six are done. And
+after review we added four more: what the corpora actually contain, what
+happens at a realistic amount of phishing, two-stage detectors, and whether the
+models' explanations are any good. Review made the project bigger, not smaller.
+
+**BN:** Proposal এ আমাদের ছয়টা objective ছিল। ছয়টাই শেষ। Review এর পর আরো চারটা
+যোগ হয়েছে: corpus গুলোতে আসলে কী আছে, বাস্তবে যত phishing আসে তত হলে কী হয়, দুই
+ধাপের detector, আর model এর দেওয়া কারণগুলো আদৌ ভালো কিনা। Review কাজটা ছোট করেনি,
+বরং বড় করেছে।
+
+**কীভাবে:** পুরো table পড়বে না। শুধু বলো "ছয়টাই done" আর শেষ লাল row টা দেখাও।
+
+## Slide 4 · Methodology (40 sec)
+
+**EN:** Six steps, one script each. The step to look at is number three, the
+control. Removing duplicates also removes training data, so on its own a drop
+could just mean less data. That is why we run a third setting that removes the
+same number of emails at random. If the random version does not drop, the cause
+is the duplicates. And every model, free, open or paid, is scored on exactly the
+same 300 emails per test set.
+
+**BN:** ছয়টা ধাপ, প্রতিটার জন্য একটা script। যেটা খেয়াল করতে হবে সেটা তিন নম্বর,
+মানে control। Duplicate সরালে training data ও কমে যায়, তাই score কমলে সেটা শুধু কম
+data র কারণেও হতে পারত। এজন্য তৃতীয় একটা setting এ আমরা সমান সংখ্যক email এলোমেলোভাবে
+সরাই। এলোমেলো version এ score না কমলে বুঝতে হবে কারণ duplicate গুলোই। আর প্রতিটা model,
+free হোক, open হোক বা টাকা দিয়ে কেনা, প্রতি test set এ ঠিক একই ৩০০টা email এ score পায়।
+
+**কীভাবে:** লাল box টায় আঙুল দেখাও। এই control টাই পুরো argument বাঁচায়।
+
+## Slide 5 · Experimental details (45 sec)
+
+**EN:** This slide is straight from our notebook. Nine email sources. Six of
+them take turns as the held-out corpus, three are test only, including
+E-PhishLLM which is written by GPT-4o and GPT-4o-mini. On the right are the
+settings: TF-IDF, DistilBERT trained on the laptop CPU, six small open LLMs,
+three published phishing detectors and two paid models, all under one prompt.
+Seed 42, one 8 GB laptop, every raw answer saved, total API spend
+{n['total_spend_usd']:.2f} dollars. Saimon will show what we found.
+
+**BN:** এই slide টা সরাসরি আমাদের notebook থেকে। নয়টা email source। তার ছয়টা পালা
+করে held-out corpus হয়, তিনটা শুধু test এর জন্য, যার মধ্যে E-PhishLLM হলো GPT-4o আর
+GPT-4o-mini দিয়ে লেখা। ডান পাশে setting গুলো: TF-IDF, laptop CPU তে train করা
+DistilBERT, ছয়টা ছোট open LLM, তিনটা published phishing detector আর দুইটা paid model,
+সবাই একই prompt এ। Seed 42, একটা 8 GB laptop, প্রতিটা raw উত্তর সংরক্ষিত, মোট API খরচ
+{n['total_spend_usd']:.2f} dollar। এখন সাইমন দেখাবে আমরা কী পেয়েছি।
+
+**কীভাবে:** "মোট খরচ {n['total_spend_usd']:.2f} dollar" জোর দিয়ে বলো, শিক্ষক এটা মনে রাখেন।
 
 ---
 
-## Faria
+# SAIMON · slides 6 to 9
 
-### 9. The main table (60 sec)
+## Slide 6 · Overlap (55 sec) — এখানে একটা প্রশ্ন করো
 
-EN: Every detector on the same emails. Read three rows. Gemini-3.1-Flash-Lite,
-a paid model, is best at {main['Gemini-3.1-Flash-Lite']['unseen_f1_mean']:.3f} with {100*main['Gemini-3.1-Flash-Lite']['false_alarm_rate']:.1f} percent false alarms.
-Zero-shot Qwen-2.5-7B is the best open model at {main['Qwen-2.5-7B']['unseen_f1_mean']:.3f} for about three cents
-per thousand emails. And look at the published BERT detector: {main['BERT-phishing (published)']['unseen_f1_mean']:.3f} on our
-corpora, the highest number in the table, but {main['BERT-phishing (published)']['ai_phishing_f1']:.3f} on AI-written phishing. It
-was trained on the corpora we test on.
+**EN:** Thank you Sinha. A question for you all: the Kaggle phishing dataset and
+SpamAssassin are two different public datasets. How many emails do you think
+they have in common? *(wait 2 seconds, take one guess)* If you compare the text
+exactly, the way anyone would, you find {sa['exact_raw'][0]}. With whitespace removed,
+{sa['exact_norm'][0]:,}. With near-duplicate matching, {sa['near'][0]:,}, which is {sa['near'][1]:.0f} percent of
+SpamAssassin. {thr[('kaggle', 0.8)]['pct']:.0f} percent of the Kaggle corpus has a copy somewhere else.
+We verified this against brute force: precision {mv['precision']:.2f}, recall {mv['recall']:.2f}.
 
-BN: সব detector একই email এ। তিনটা row পড়ুন। Gemini-3.1-Flash-Lite, একটা paid model,
-সবার উপরে {main['Gemini-3.1-Flash-Lite']['unseen_f1_mean']:.3f}, ভুল alarm {100*main['Gemini-3.1-Flash-Lite']['false_alarm_rate']:.1f} percent। Zero-shot Qwen-2.5-7B সেরা open model,
-{main['Qwen-2.5-7B']['unseen_f1_mean']:.3f}, হাজার email এ প্রায় তিন cent। আর published BERT detector দেখুন: আমাদের
-corpus এ {main['BERT-phishing (published)']['unseen_f1_mean']:.3f}, table এর সর্বোচ্চ, কিন্তু AI এর লেখা phishing এ {main['BERT-phishing (published)']['ai_phishing_f1']:.3f}। ওটা ঠিক
-সেই corpus গুলোতেই train করা যেগুলোতে আমরা test করছি।
+**BN:** ধন্যবাদ সিনহা। সবাইকে একটা প্রশ্ন: Kaggle phishing dataset আর SpamAssassin,
+দুইটা আলাদা public dataset। আপনাদের মনে হয় এদের মধ্যে কয়টা email একই?
+*(২ সেকেন্ড অপেক্ষা করো, একটা guess নাও)* হুবহু text মিলালে, যেভাবে যে কেউ মিলাবে,
+পাওয়া যায় {sa['exact_raw'][0]} টা। Whitespace বাদ দিলে {sa['exact_norm'][0]:,} টা। আর near-duplicate matching
+দিয়ে {sa['near'][0]:,} টা, মানে SpamAssassin এর {sa['near'][1]:.0f} percent। Kaggle corpus এর {thr[('kaggle', 0.8)]['pct']:.0f} percent এর
+copy অন্য কোথাও না কোথাও আছে। এটা আমরা brute force দিয়ে যাচাই করেছি: precision
+{mv['precision']:.2f}, recall {mv['recall']:.2f}।
 
-### 10. The token that looked like a shortcut (55 sec)
+**কীভাবে:** তিনটা সংখ্যা ধীরে বলো: "দুই", "তিন হাজার আটশ", "পাঁচ হাজার"। প্রথমটায়
+থেমে যাও, ওটাই ধাক্কা।
 
-EN: We checked our own good result. The AI corpus writes links as the token
-"double angle bracket link", in 94 of 150 phishing emails and in none of the
-legitimate ones. Comparing emails that have it with emails that do not suggests
-it is worth {split_gap:.0f} points of recall. But when we remove the token from the same
-emails and ask again, the answers move by {paired_gap:.1f} points. The first test was
-confounded: emails with links are simply easier than text-only attacks. The
-result stands, and we publish the sanitised test sets.
+## Slide 7 · Leakage and the control (60 sec) — সবচেয়ে গুরুত্বপূর্ণ slide
 
-BN: আমরা নিজেদের ভালো ফলাফলটাই যাচাই করেছি। AI corpus এ link গুলো একটা token দিয়ে লেখা,
-১৫০টা phishing email এর ৯৪টায় আছে, আর legitimate কোনোটায় নেই। যেগুলোতে token আছে আর
-যেগুলোতে নেই সেগুলো তুলনা করলে মনে হয় token টা {split_gap:.0f} point recall এর মূল্য রাখে। কিন্তু একই
-email থেকে token সরিয়ে আবার জিজ্ঞেস করলে উত্তর বদলায় মাত্র {paired_gap:.1f} point। প্রথম test টা
-বিভ্রান্তিকর ছিল: link ওয়ালা email এমনিতেই সহজ। ফলাফল টিকে গেছে, আর আমরা sanitised
-test set প্রকাশ করেছি।
+**EN:** Now why does that matter. Look at the SpamAssassin row. Train on the
+other five corpora as they are: F1 {lf('spamassassin','loco_raw'):.3f}. Now remove the same number of
+training emails, but pick them at random: {lf('spamassassin','loco_random'):.3f}. No change. Now remove the
+duplicates instead: {lf('spamassassin','loco_clean'):.3f}. Up to twelve points disappear, and only when we
+remove the right emails. That is the control, and it is the reason we can say
+this is leakage and not just less data. CEAS and TREC, which share nothing with
+the others, do not move at all.
 
-### 11. Operating points (55 sec)
+**BN:** এবার কেন এটা গুরুত্বপূর্ণ। SpamAssassin row টা দেখেন। বাকি পাঁচটা corpus যেমন
+আছে তেমন train করলে F1 {lf('spamassassin','loco_raw'):.3f}। এবার সমান সংখ্যক training email সরাই, কিন্তু
+এলোমেলোভাবে বেছে: {lf('spamassassin','loco_random'):.3f}। কোনো পরিবর্তন নেই। এবার duplicate গুলো সরাই:
+{lf('spamassassin','loco_clean'):.3f}। বারো point পর্যন্ত উধাও, আর সেটা কেবল ঠিক email গুলো সরালেই। এটাই আমাদের
+control, আর এজন্যই আমরা বলতে পারি এটা leakage, শুধু কম data না। CEAS আর TREC, যাদের
+সাথে কারো মিল নেই, একটুও নড়ে না।
 
-EN: Our test sets are balanced, a mailbox is not. At five percent phishing the
-ranking changes: Gemma, the best open model on AI phishing, would flag {base['Gemma-3-12B']['false_alerts_per_1000@0.05']:.0f}
-good emails in every thousand. And a two-stage detector, TF-IDF first and the
-LLM only on what it flags, gives F1 {conf['unseen_f1']:.3f} with {100*conf['false_alarm']:.1f} percent false alarms for
-{conf['usd_per_1000']:.4f} dollars per thousand, which is cheaper and cleaner than either part alone.
+**কীভাবে:** এক row ধরে তিনটা সংখ্যা বাম থেকে ডানে পড়ো। তারপর লাল box। এই slide এ
+তাড়াহুড়া করবে না।
 
-BN: আমাদের test set ভারসাম্যপূর্ণ, কিন্তু আসল inbox না। পাঁচ percent phishing ধরলে ক্রম
-বদলে যায়: Gemma, AI phishing এ সেরা open model, হাজারে {base['Gemma-3-12B']['false_alerts_per_1000@0.05']:.0f} টা ভালো email কে ভুল করে
-ধরবে। আর দুই ধাপের detector, আগে TF-IDF, তারপর শুধু চিহ্নিত email গুলো LLM এ, F1 {conf['unseen_f1']:.3f},
-ভুল alarm {100*conf['false_alarm']:.1f} percent, খরচ হাজারে {conf['usd_per_1000']:.4f} dollar, যা আলাদা আলাদা দুইটার চেয়েই ভালো।
+## Slide 8 · What the benchmarks contain (45 sec)
 
-### 12. Explanations (40 sec)
+**EN:** Then we asked a different question: what is actually inside the positive
+class? We had an LLM label every positive email as phishing or spam, with a
+second model on 300 of them to check agreement, {100*float([r for r in n['label_study_summary'] if r['row']=='agreement'][0]['agreement']):.0f} percent. Only {min(r['phishing_pct'] for r in comp):.0f} to {max(r['phishing_pct'] for r in comp):.0f}
+percent of those emails are phishing. The rest is ordinary bulk advertising. So
+when a paper says phishing detection on these corpora, it is mostly measuring
+spam detection.
 
-EN: When the verdict is right, the model's reason points at something really in
-the email about nine times in ten. When the verdict is wrong, only about half
-the reasons do. A wrong answer usually comes with an invented justification, so
-showing an explanation to a user is only safe if the verdict is checked first.
+**BN:** এরপর আমরা অন্য একটা প্রশ্ন করলাম: positive class এর ভিতরে আসলে কী আছে? একটা
+LLM দিয়ে প্রতিটা positive email কে phishing না spam হিসেবে label করালাম, আর ৩০০টায়
+দ্বিতীয় একটা model দিয়ে মিলিয়ে দেখলাম, মিল {100*float([r for r in n['label_study_summary'] if r['row']=='agreement'][0]['agreement']):.0f} percent। দেখা গেল ওই email গুলোর মাত্র
+{min(r['phishing_pct'] for r in comp):.0f} থেকে {max(r['phishing_pct'] for r in comp):.0f} percent আসলে phishing। বাকিটা সাধারণ বিজ্ঞাপন। মানে কোনো paper যখন
+এই corpus এ "phishing detection" বলে, সে আসলে বেশিরভাগ spam detection মাপছে।
 
-BN: উত্তর ঠিক হলে model এর কারণটা দশবারে প্রায় নয়বার email এ সত্যিই থাকা কিছু দেখায়।
-উত্তর ভুল হলে অর্ধেকের মতো। ভুল উত্তরের সাথে সাধারণত বানানো কারণ আসে, তাই ব্যবহারকারীকে
-explanation দেখানো তখনই নিরাপদ যখন verdict আগে যাচাই করা হয়।
+**কীভাবে:** হলুদ box এর সংখ্যাটা বলো, তারপর এক সেকেন্ড থামো।
 
-### 13. What it means (40 sec)
+## Slide 9 · The token that looked like a shortcut (40 sec)
 
-EN: Four things. Check overlap before claiming generalisation. Cheap detectors
-are usable in the right order. Report false alarms and the base rate, not one
-F1. And be suspicious of your own good numbers, including ours.
+**EN:** One more check, this time on our own result. The AI-written corpus
+writes every phishing link as a placeholder token. It is in 94 of our 150
+phishing emails and in none of the legitimate ones. Comparing emails that have
+it with emails that do not says the token is worth {split_gap:.0f} points of recall, which
+would make our AI numbers meaningless. But when we delete the token from the
+same emails and ask the models again, the answers move by {paired_gap:.1f} points. The first
+test was comparing different kinds of email. The result stands. Faria will take
+the model comparison.
 
-BN: চারটা কথা। Generalisation দাবি করার আগে overlap দেখুন। সস্তা detector ঠিক ক্রমে
-সাজালে কাজে লাগে। একটা F1 না দিয়ে ভুল alarm আর base rate জানান। আর নিজের ভালো
-ফলাফলকেও সন্দেহ করুন, আমাদেরটা সহ।
+**BN:** আরেকটা যাচাই, এবার নিজেদের ফলাফলের উপর। AI দিয়ে লেখা corpus এ প্রতিটা phishing
+link একটা placeholder token দিয়ে লেখা। আমাদের ১৫০টা phishing email এর ৯৪টায় সেটা আছে,
+আর legitimate কোনোটায় নেই। যেগুলোতে token আছে আর যেগুলোতে নেই, এদের তুলনা করলে মনে হয়
+token টা {split_gap:.0f} point recall এর সমান, তাহলে তো আমাদের AI এর ফলাফল অর্থহীন। কিন্তু একই
+email থেকে token মুছে আবার জিজ্ঞেস করলে উত্তর বদলায় মাত্র {paired_gap:.1f} point। প্রথম test টা আসলে
+দুই ধরনের email তুলনা করছিল। ফলাফল টিকে গেছে। এখন ফারিয়া model গুলোর তুলনা দেখাবে।
 
-### 14. Limitations (35 sec)
+**কীভাবে:** গল্পের মতো বলো: "আমাদের নিজের ভালো ফলটা সন্দেহ হলো, তাই পরীক্ষা করলাম"।
 
-EN: We are not the first to test across corpora. Our test sets are 300 emails,
-so small differences are not meaningful. Our annotator is a model, not us. And
-the LLMs may have seen the old corpora in pre-training, which is why the 2025
-AI-written corpus matters most.
+---
 
-BN: আমরা প্রথম না যারা cross-corpus test করেছে। আমাদের test set ৩০০ email এর, তাই ছোট
-পার্থক্যের মানে নেই। আমাদের annotator একটা model, আমরা নিজেরা না। আর LLM গুলো পুরনো
-corpus আগেই দেখে থাকতে পারে, এজন্যই ২০২৫ এর AI corpus সবচেয়ে গুরুত্বপূর্ণ।
+# FARIA · slides 10 to 14
 
-### 15. Next two weeks (30 sec)
+## Slide 10 · Every detector on the same emails (55 sec)
 
-EN: Hand-label 300 positives ourselves to replace the model annotator, add
-threshold calibration, enlarge the test sets for the top three models, and
-package the deduplication script so other groups can run it on their own data.
+**EN:** Thank you Saimon. This is the table our proposal promised. Twenty
+detectors, the same emails. Read three rows. Gemini, a paid model, is best:
+{G['unseen_f1_mean']:.3f} with {100*G['false_alarm_rate']:.0f} percent false alarms. Zero-shot Qwen-2.5-7B is the best
+open model: {Q['unseen_f1_mean']:.3f} for about three cents per thousand emails. Now the
+interesting row: the published BERT phishing detector scores {B['unseen_f1_mean']:.3f} on our
+corpora, the highest number in the table, and {B['ai_phishing_f1']:.3f} on AI-written phishing.
+It was trained on the same corpora we test on.
 
-BN: নিজেরা ৩০০টা positive email হাতে label করব যাতে model annotator লাগে না, threshold
+**BN:** ধন্যবাদ সাইমন। এই table টাই আমাদের proposal এ দেওয়া কথা। বিশটা detector, একই
+email। তিনটা row পড়ুন। Gemini, একটা paid model, সবার সেরা: {G['unseen_f1_mean']:.3f}, ভুল alarm
+{100*G['false_alarm_rate']:.0f} percent। Zero-shot Qwen-2.5-7B সেরা open model: {Q['unseen_f1_mean']:.3f}, হাজার email এ প্রায়
+তিন cent। এবার মজার row টা: published BERT phishing detector আমাদের corpus এ পায়
+{B['unseen_f1_mean']:.3f}, table এর সর্বোচ্চ, আর AI এর লেখা phishing এ পায় {B['ai_phishing_f1']:.3f}। কারণ ওটা ঠিক সেই
+corpus গুলোতেই train করা যেগুলোতে আমরা test করছি।
+
+**কীভাবে:** শুধু তিনটা row। শেষ row টা আঙুল দিয়ে দেখাও, ওটাই আমাদের পুরো গল্পের প্রমাণ।
+
+## Slide 11 · Operating points (50 sec)
+
+**EN:** Our test sets are half phishing, a real inbox is not. At five percent
+phishing the ranking changes. Gemma, the best open model on AI phishing, would
+flag {base['Gemma-3-12B']['false_alerts_per_1000@0.05']:.0f} good emails in every thousand. Qwen flags {base['Qwen-2.5-7B']['false_alerts_per_1000@0.05']:.0f}. And on the right
+is the practical answer: put the free TF-IDF filter first and send only what it
+flags to the LLM. F1 {conf['unseen_f1']:.3f}, false alarms {100*conf['false_alarm']:.1f} percent, {conf['usd_per_1000']:.4f} dollars per
+thousand. That is half the cost of the LLM alone and fewer false alarms than
+either part by itself.
+
+**BN:** আমাদের test set এ অর্ধেক phishing, আসল inbox এ তো তা না। পাঁচ percent phishing
+ধরলে ক্রম বদলে যায়। Gemma, AI phishing এ সেরা open model, হাজারে {base['Gemma-3-12B']['false_alerts_per_1000@0.05']:.0f} টা ভালো email
+ভুল করে ধরবে। Qwen ধরবে {base['Qwen-2.5-7B']['false_alerts_per_1000@0.05']:.0f} টা। আর ডান পাশে বাস্তব সমাধান: আগে free TF-IDF filter,
+তারপর শুধু যেগুলো সে চিহ্নিত করে সেগুলো LLM এ পাঠাও। F1 {conf['unseen_f1']:.3f}, ভুল alarm
+{100*conf['false_alarm']:.1f} percent, হাজারে {conf['usd_per_1000']:.4f} dollar। খরচ LLM এর অর্ধেক, আর ভুল alarm দুইটার যেকোনো
+একটার চেয়েও কম।
+
+**কীভাবে:** "{base['Gemma-3-12B']['false_alerts_per_1000@0.05']:.0f} টা ভালো email" বলে এক সেকেন্ড থামো, এটাই মানুষকে ভাবায়।
+
+## Slide 12 · What it means (40 sec)
+
+**EN:** Four lessons. One, check overlap before claiming generalisation. Two,
+cheap detectors work if you order them properly. Three, report false alarms and
+the base rate, not a single F1. Four, be suspicious of your own good numbers.
+We also asked the models to give a reason with every verdict: when the verdict
+is right the reason is real about nine times in ten, when it is wrong only
+about half the time. A wrong answer usually comes with an invented reason.
+
+**BN:** চারটা শিক্ষা। এক, generalisation দাবি করার আগে overlap দেখুন। দুই, সস্তা
+detector ঠিক ক্রমে সাজালে কাজ করে। তিন, একটা F1 না দিয়ে ভুল alarm আর base rate জানান।
+চার, নিজের ভালো সংখ্যাকেও সন্দেহ করুন। আমরা model গুলোকে প্রতিটা উত্তরের সাথে কারণও
+জিজ্ঞেস করেছিলাম: উত্তর ঠিক হলে কারণটা দশবারে প্রায় নয়বার সত্যি, ভুল হলে অর্ধেকের মতো।
+ভুল উত্তরের সাথে সাধারণত বানানো কারণ আসে।
+
+**কীভাবে:** প্রতিটা card এক লাইনে। শেষ বাক্যটা ধীরে: "High accuracy on one dataset
+is easy, honest evaluation is the hard part."
+
+## Slide 13 · Limitations (35 sec)
+
+**EN:** What this study does not show. We are not the first to test across
+corpora, two recent papers did. Our test sets are 300 emails, so small
+differences are not meaningful, and we report the intervals. Our annotator is a
+model, not us. And the LLMs may have seen the old corpora during pre-training,
+which is exactly why the 2025 AI-written corpus matters most.
+
+**BN:** এই গবেষণা যা দেখায় না। আমরা প্রথম না যারা cross-corpus test করেছে, সাম্প্রতিক
+দুইটা paper আগেই করেছে। আমাদের test set ৩০০ email এর, তাই ছোট পার্থক্যের মানে নেই,
+আর আমরা interval গুলো দিয়েছি। আমাদের annotator একটা model, আমরা নিজেরা না। আর LLM
+গুলো পুরনো corpus আগেই দেখে থাকতে পারে, ঠিক এজন্যই ২০২৫ এর AI corpus সবচেয়ে
+গুরুত্বপূর্ণ।
+
+**কীভাবে:** প্রথম তিনটা পরিষ্কার করে বলো। নিজের সীমা জানলে বাকি কথা বিশ্বাসযোগ্য হয়।
+
+## Slide 14 · Next two weeks and the code (35 sec)
+
+**EN:** In the next two weeks: the three of us hand-label 300 emails so the
+spam versus phishing claim no longer depends on a model, we add confidence and
+threshold calibration, we enlarge the test sets for the top three models, and
+we package the deduplication script so other groups can run it on their own
+data. Everything is public: the code, every raw model answer, the paper and a
+Colab notebook. {n['llm_calls']:,} model calls, {n['total_spend_usd']:.2f} dollars, one laptop. Thank you,
+we are happy to take questions.
+
+**BN:** সামনের দুই সপ্তাহে: আমরা তিনজন নিজেরা ৩০০টা email হাতে label করব যাতে spam আর
+phishing এর দাবিটা আর কোনো model এর উপর নির্ভর না করে, confidence আর threshold
 calibration যোগ করব, সেরা তিনটা model এর test set বড় করব, আর deduplication script টা
-এমনভাবে গুছাবো যাতে অন্য group রা নিজেদের data তে চালাতে পারে।
+এমনভাবে গুছাবো যাতে অন্য group রা নিজেদের data তে চালাতে পারে। সবকিছু public: code,
+প্রতিটা raw উত্তর, paper আর একটা Colab notebook। {n['llm_calls']:,} টা model call, {n['total_spend_usd']:.2f} dollar,
+একটা laptop। ধন্যবাদ, এখন প্রশ্ন থাকলে করতে পারেন।
 
-### 16. Links and close (20 sec)
-
-EN: Everything is public: code, every raw model answer, the paper, the research
-log and a Colab notebook. {n['llm_calls']:,} model calls, {n['total_spend_usd']:.2f} dollars, one laptop. High
-accuracy on one dataset is easy. Honest evaluation is the hard part. Thank you.
-
-BN: সবকিছু public: code, প্রতিটা raw উত্তর, paper, research log আর একটা Colab notebook।
-{n['llm_calls']:,} টা model call, {n['total_spend_usd']:.2f} dollar, একটা laptop। একটা dataset এ high accuracy পাওয়া সহজ।
-কঠিন কাজটা হলো সৎ evaluation। ধন্যবাদ।
+**কীভাবে:** link দুইটা দেখাও, তিনটা সংখ্যা বলো, তারপর থামো। "so yeah that's it"
+বলবে না, ওটা শেষটা নষ্ট করে।
 
 ---
 
-## The five questions most likely to come
+# যে প্রশ্নগুলো আসবেই
 
-1. *Could the drop be from less training data?* No. Removing the same number of
-   emails at random changes the score by at most {abs(lf('spamassassin','loco_raw')-lf('spamassassin','loco_random'))*100:.1f} points; removing the
-   duplicates changes it by {(lf('spamassassin','loco_raw')-lf('spamassassin','loco_clean'))*100:.0f}.
-2. *How do you know the duplicates are real?* Every pair is verified with the
-   exact similarity, and the matcher matches brute force on 400 hard cases
-   (precision {mv['precision']:.2f}, recall {mv['recall']:.2f}).
-3. *Which model should we use?* TF-IDF in front of zero-shot Qwen-2.5-7B, or a
-   paid model if the budget allows: Gemini was better on every axis.
-4. *Is Gemma not the best, it wins on AI phishing?* It flags {100*main['Gemma-3-12B']['false_alarm_rate']:.0f} percent of
-   legitimate mail. It belongs in front of a human review queue.
-5. *What did it cost?* {n['total_spend_usd']:.2f} dollars of API calls, on one 8 GB laptop.
+**১. কম data র জন্য score কমেনি তো?**
+না, আমরা ঠিক এটাই test করেছি। সমান সংখ্যক email এলোমেলোভাবে সরালে score বদলায় মাত্র
+{abs(lf('spamassassin','loco_raw')-lf('spamassassin','loco_random'))*100:.1f} point, আর duplicate সরালে {(lf('spamassassin','loco_raw')-lf('spamassassin','loco_clean'))*100:.0f} point।
+
+**২. Duplicate গুলো সত্যি duplicate তো?**
+প্রতিটা জোড়া exact similarity দিয়ে যাচাই করা, আর ৪০০টা কঠিন ক্ষেত্রে brute force এর
+সাথে মিলিয়ে precision {mv['precision']:.2f}, recall {mv['recall']:.2f}। কয়েকটা আমরা হাতে পড়েও দেখেছি, একই লেখা,
+শুধু line break আলাদা।
+
+**৩. কোন model ব্যবহার করব?**
+সস্তায়: TF-IDF এর পরে zero-shot Qwen-2.5-7B। টাকা থাকলে Gemini, ওটা সব দিক থেকেই ভালো।
+
+**৪. Gemma তো AI phishing এ সেরা, ওটা না কেন?**
+Gemma {100*GM['false_alarm_rate']:.0f} percent ভালো email কেও phishing বলে। ওটা মানুষের review queue এর আগে
+বসানোর জন্য ভালো, সরাসরি block করার জন্য না।
+
+**৫. GPT-4 কেন ব্যবহার করলে না?**
+করেছি, reference হিসেবে দুইটা paid model চালিয়েছি। আমাদের গবেষণার প্রশ্নটা হলো কম
+বাজেটের একটা প্রতিষ্ঠান কী চালাতে পারবে, তাই মূল ফোকাস open model।
+
+**৬. খরচ কত হলো?**
+মোট {n['total_spend_usd']:.2f} dollar, একটা 8 GB laptop এ। বাকি সব free software আর public data।
+
+**৭. এটা কি নতুন কাজ?**
+Cross-corpus test নতুন না, দুইটা paper আগে করেছে। নতুন হলো: corpus গুলোর মধ্যে
+duplicate মেপে সেগুলো সরিয়ে test করা, dollar এ খরচ দেওয়া, ভুল alarm এর হার দেওয়া,
+আর operating point বিশ্লেষণ।
 """
 open(os.path.join(HERE, "speaker_script.md"), "w").write(doc)
 print("speaker_script.md written,", len(doc.split()), "words")

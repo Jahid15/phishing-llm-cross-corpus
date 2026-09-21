@@ -203,7 +203,7 @@ a{color:var(--blue)}
   <div class="spacer"></div>
   <div class="card blue"><div class="fs-20"><b>Question:</b> if we remove leaked emails and always test on a corpus the model has never seen, how good are cheap detectors, what do they cost, and how much good mail do they block?</div></div>
   <div class="num">2</div>
-  <div class="note">45 sec. Timeline in one breath, then the three corrections. Be open that we are not the first to test across corpora.</div>
+  <div class="note">35 sec. Timeline in one breath, then the three corrections. Be open that we are not the first to test across corpora.</div>
 </section>
 
 <section class="slide">
@@ -221,7 +221,7 @@ a{color:var(--blue)}
     <tr class="hl"><td>+</td><td class="l">Added after review</td><td class="l">label study, base-rate analysis, two-stage detectors, explanation quality</td><td class="ok">Done</td></tr>
   </table>
   <div class="num">3</div>
-  <div class="note">30 sec. All six done. Point at the last row: review made the project bigger, not smaller.</div>
+  <div class="note">35 sec. All six done. Point at the last row: review made the project bigger, not smaller.</div>
 </section>
 
 <section class="slide">
@@ -246,7 +246,7 @@ a{color:var(--blue)}
     <div class="card"><b class="fs-18">Same emails for everyone</b><div class="small" style="margin-top:6px">A fixed 300-email subset per test set. Local, open and paid models are all scored on exactly those emails.</div></div>
   </div>
   <div class="num">4</div>
-  <div class="note">45 sec. Spend the time on the control box. That is the answer to the first question any examiner asks.</div>
+  <div class="note">40 sec. Spend the time on the control box. That is the answer to the first question any examiner asks.</div>
 </section>
 
 <section class="slide">
@@ -333,22 +333,8 @@ a{color:var(--blue)}
 </section>
 
 <section class="slide">
-  <div class="kicker">Result 4 · Every detector on the same emails</div>
-  <div class="speaker">Faria</div>
-  <h1>Unseen corpora, false alarms, AI phishing and cost</h1>
-  <table class="tiny">
-    <tr><th class="l">Model</th><th>In-corpus F1</th><th>Unseen-corpus F1</th><th>False alarms</th><th>AI phishing F1</th><th>$ / 1,000</th></tr>
-    <tr class=hl><td class='l'>Gemini-3.1-Flash-Lite</td><td>&ndash;</td><td>0.960</td><td>2%</td><td>0.950</td><td>$0.080</td></tr><tr><td class='l'>GPT-4o-mini</td><td>&ndash;</td><td>0.950</td><td>4%</td><td>0.917</td><td>$0.046</td></tr><tr class=hl><td class='l'>Qwen-2.5-7B</td><td>&ndash;</td><td>0.928</td><td>3%</td><td>0.819</td><td>$0.033</td></tr><tr><td class='l'>Llama-3.1-8B</td><td>&ndash;</td><td>0.881</td><td>21%</td><td>0.817</td><td>$0.012</td></tr><tr><td class='l'>Gemma-3-12B</td><td>&ndash;</td><td>0.882</td><td>25%</td><td>0.955</td><td>$0.017</td></tr><tr><td class='l'>Llama-3.2-3B</td><td>&ndash;</td><td>0.850</td><td>5%</td><td>0.507</td><td>$0.017</td></tr><tr><td class='l'>Phi-4-14B</td><td>&ndash;</td><td>0.727</td><td>28%</td><td>0.759</td><td>$0.022</td></tr><tr><td class='l'>Llama-3.2-1B</td><td>&ndash;</td><td>0.623</td><td>60%</td><td>0.474</td><td>$0.009</td></tr><tr><td class='l'>TF-IDF + LogReg</td><td>0.968</td><td>0.899</td><td>10%</td><td>0.640</td><td>local</td></tr><tr><td class='l'>DistilBERT</td><td>0.975</td><td>0.891</td><td>6%</td><td>0.540</td><td>local</td></tr><tr><td class='l'>BERT-phishing (published)</td><td>&ndash;</td><td>0.962</td><td>3%</td><td>0.470</td><td>local</td></tr><tr><td class='l'>Phishsense-1B (published)</td><td>&ndash;</td><td>0.947</td><td>7%</td><td>0.839</td><td>local</td></tr>
-  </table>
-  <div class="spacer"></div>
-  <div class="small">Trained models use decontaminated data. The published detectors were trained on the same corpora we test on, which is why their unseen-corpus column and their AI-phishing column disagree so strongly.</div>
-  <div class="num">9</div>
-  <div class="note">60 sec. Three rows only: Gemini (best, paid), Qwen (best open), and a published detector (high on our corpora, low on AI mail).</div>
-</section>
-
-<section class="slide">
-  <div class="kicker">Result 5 · A token that looked like a shortcut</div>
-  <div class="speaker">Faria</div>
+  <div class="kicker">Result 4 · A token that looked like a shortcut</div>
+  <div class="speaker">Saimon</div>
   <h1>We checked our own good result, twice</h1>
   <div class="row" style="align-items:stretch;flex:1">
     <div style="flex:1.15;display:flex;flex-direction:column;gap:11px">
@@ -365,8 +351,22 @@ a{color:var(--blue)}
       <div class="small" style="margin-top:10px;line-height:1.7">When you suspect a shortcut, change that one thing on the same data.<br><br>The quick comparison would have made us report a finding that is not there.</div>
     </div>
   </div>
+  <div class="num">9</div>
+  <div class="note">40 sec. Tell it as a story: we suspected our own good number, ran the obvious test, it said we were right to worry, then the proper paired test said otherwise. Report both.</div>
+</section>
+
+<section class="slide">
+  <div class="kicker">Result 5 · Every detector on the same emails</div>
+  <div class="speaker">Faria</div>
+  <h1>Unseen corpora, false alarms, AI phishing and cost</h1>
+  <table class="tiny">
+    <tr><th class="l">Model</th><th>In-corpus F1</th><th>Unseen-corpus F1</th><th>False alarms</th><th>AI phishing F1</th><th>$ / 1,000</th></tr>
+    <tr class=hl><td class='l'>Gemini-3.1-Flash-Lite</td><td>&ndash;</td><td>0.960</td><td>2%</td><td>0.950</td><td>$0.080</td></tr><tr><td class='l'>GPT-4o-mini</td><td>&ndash;</td><td>0.950</td><td>4%</td><td>0.917</td><td>$0.046</td></tr><tr class=hl><td class='l'>Qwen-2.5-7B</td><td>&ndash;</td><td>0.928</td><td>3%</td><td>0.819</td><td>$0.033</td></tr><tr><td class='l'>Llama-3.1-8B</td><td>&ndash;</td><td>0.881</td><td>21%</td><td>0.817</td><td>$0.012</td></tr><tr><td class='l'>Gemma-3-12B</td><td>&ndash;</td><td>0.882</td><td>25%</td><td>0.955</td><td>$0.017</td></tr><tr><td class='l'>Llama-3.2-3B</td><td>&ndash;</td><td>0.850</td><td>5%</td><td>0.507</td><td>$0.017</td></tr><tr><td class='l'>Phi-4-14B</td><td>&ndash;</td><td>0.727</td><td>28%</td><td>0.759</td><td>$0.022</td></tr><tr><td class='l'>Llama-3.2-1B</td><td>&ndash;</td><td>0.623</td><td>60%</td><td>0.474</td><td>$0.009</td></tr><tr><td class='l'>TF-IDF + LogReg</td><td>0.968</td><td>0.899</td><td>10%</td><td>0.640</td><td>local</td></tr><tr><td class='l'>DistilBERT</td><td>0.975</td><td>0.891</td><td>6%</td><td>0.540</td><td>local</td></tr><tr><td class='l'>BERT-phishing (published)</td><td>&ndash;</td><td>0.962</td><td>3%</td><td>0.470</td><td>local</td></tr><tr><td class='l'>Phishsense-1B (published)</td><td>&ndash;</td><td>0.947</td><td>7%</td><td>0.839</td><td>local</td></tr>
+  </table>
+  <div class="spacer"></div>
+  <div class="small">Trained models use decontaminated data. The published detectors were trained on the same corpora we test on, which is why their unseen-corpus column and their AI-phishing column disagree so strongly.</div>
   <div class="num">10</div>
-  <div class="note">55 sec. Tell it as a story: we suspected our own good number, ran the obvious test, it said we were right to worry, then the proper paired test said otherwise. Report both.</div>
+  <div class="note">55 sec. Three rows only: Gemini (best, paid), Qwen (best open), and a published detector (high on our corpora, low on AI mail).</div>
 </section>
 
 <section class="slide">
@@ -391,26 +391,7 @@ a{color:var(--blue)}
     </div>
   </div>
   <div class="num">11</div>
-  <div class="note">55 sec. The point: the ranking changes with the base rate, and combining two cheap models beats either one.</div>
-</section>
-
-<section class="slide">
-  <div class="kicker">Result 7 · Are the reasons any good?</div>
-  <div class="speaker">Faria</div>
-  <h1>Right answers come with real reasons, wrong ones do not</h1>
-  <div class="grid2">
-    <div class="card good"><div class="label t-good">When the verdict is correct</div>
-      <div class="big t-good" style="margin-top:10px">91%</div>
-      <div class="small">of reasons point at something that is really in the email (Qwen; Gemma 92%)</div></div>
-    <div class="card accent"><div class="label t-accent">When the verdict is wrong</div>
-      <div class="big t-accent" style="margin-top:10px">53%</div>
-      <div class="small">a wrong answer usually comes with an invented reason</div></div>
-  </div>
-  <div class="spacer"></div>
-  <div class="card"><div class="small"><b>Also measured:</b> McNemar tests on the paired predictions. Qwen beats the classical models and DistilBERT on the six unseen corpora (p &lt; 0.001). Few-shot examples from old corpora do <b>not</b> significantly help there (p = 0.22) but significantly hurt on AI-written mail (p &lt; 0.001). Swapping in AI-written examples recovers most of that loss, which is the controlled version of the claim.</div></div>
-  <div class="small" style="margin-top:12px">This matters for deployment: showing a model's explanation to a user is safe only if the verdict is checked first.</div>
-  <div class="num">12</div>
-  <div class="note">45 sec. Two numbers and the significance line. Do not read the whole box.</div>
+  <div class="note">50 sec. The point: the ranking changes with the base rate, and combining two cheap models beats either one.</div>
 </section>
 
 <section class="slide">
@@ -418,15 +399,16 @@ a{color:var(--blue)}
   <div class="speaker">Faria</div>
   <h1>Four things we would tell another team</h1>
   <div class="grid2">
-    <div class="card accent"><b class="t-accent fs-18">1. Check overlap before claiming generalisation</b><div class="small" style="margin-top:6px">Five minutes of near-duplicate matching on a laptop. Exact matching finds 2 of 5,032 shared emails.</div></div>
-    <div class="card good"><b class="t-good fs-18">2. Cheap detectors are usable, in the right order</b><div class="small" style="margin-top:6px">TF-IDF in front of Qwen-2.5-7B: F1 0.911 at 1.1% false alarms for $0.0161 per 1,000. A paid model is still better on every axis.</div></div>
-    <div class="card blue"><b class="t-blue fs-18">3. Report false alarms and the base rate</b><div class="small" style="margin-top:6px">At 5% phishing the ranking changes. One F1 number cannot tell you what a detector does to an inbox.</div></div>
-    <div class="card amber"><b class="t-amber fs-18">4. Be suspicious of your own good numbers</b><div class="small" style="margin-top:6px">Our AI-phishing result was partly a placeholder token. We found it by checking, and we report both versions.</div></div>
+    <div class="card accent" style="padding:13px 18px"><b class="t-accent fs-18">1. Check overlap before claiming generalisation</b><div class="small" style="margin-top:5px">Five minutes of near-duplicate matching. Exact matching finds 2 of 5,032 shared emails.</div></div>
+    <div class="card good" style="padding:13px 18px"><b class="t-good fs-18">2. Cheap detectors work, in the right order</b><div class="small" style="margin-top:5px">TF-IDF in front of Qwen: F1 0.911, 1.1% false alarms, $0.0161 per 1,000. A paid model is still better on every axis.</div></div>
+    <div class="card blue" style="padding:13px 18px"><b class="t-blue fs-18">3. Report false alarms and the base rate</b><div class="small" style="margin-top:5px">At 5% phishing the ranking changes. One F1 number cannot tell you what a detector does to an inbox.</div></div>
+    <div class="card amber" style="padding:13px 18px"><b class="t-amber fs-18">4. Be suspicious of your own good numbers</b><div class="small" style="margin-top:5px">Our token finding survived the quick test and died on the paired one. We report both.</div></div>
   </div>
+  <div class="card" style="margin-top:16px"><div class="small"><b>One more measurement.</b> We asked two models for a reason with every verdict and had a third model judge it. When the verdict is right, the reason points at something really in the email 91% of the time (Qwen) and 92% (Gemma). When the verdict is wrong, only about 53% do: a wrong answer usually comes with an invented reason.</div></div>
   <div class="spacer"></div>
   <div class="card" style="text-align:center"><div class="fs-24" style="font-weight:700">High accuracy on one dataset is easy. <span class="t-accent">Honest evaluation is the hard part.</span></div></div>
-  <div class="num">13</div>
-  <div class="note">40 sec. One sentence each. Land on the closing line but do not finish yet, limitations come next.</div>
+  <div class="num">12</div>
+  <div class="note">40 sec. One sentence per card. Read the explanation box quickly, then the closing line, then go on to limitations.</div>
 </section>
 
 <section class="slide">
@@ -435,52 +417,41 @@ a{color:var(--blue)}
   <h1>What this study does not show</h1>
   <div class="grid2">
     <div class="card"><b class="fs-18">We are not first to test across corpora</b><div class="small" style="margin-top:6px">E-PhishGen (2025) and Bhuiyan (2026) did. Ours adds decontamination, cost and false alarms.</div></div>
-    <div class="card"><b class="fs-18">300 emails per test set</b><div class="small" style="margin-top:6px">Interval about ±0.015, so small differences are not meaningful. We report intervals and significance tests.</div></div>
+    <div class="card"><b class="fs-18">300 emails per test set</b><div class="small" style="margin-top:6px">Interval about plus or minus 0.015, so small differences are not meaningful. We report intervals and significance tests.</div></div>
     <div class="card"><b class="fs-18">Our annotator is a model</b><div class="small" style="margin-top:6px">Two models, 86% agreement on a shared sample, but not hand-labelled by us.</div></div>
     <div class="card"><b class="fs-18">LLM pre-training is unknown</b><div class="small" style="margin-top:6px">The old corpora may be inside these models already. The 2025 AI corpus is the cleanest test we have.</div></div>
     <div class="card"><b class="fs-18">Different input budgets</b><div class="small" style="margin-top:6px">TF-IDF sees 20,000 characters, LLMs 1,500, DistilBERT 128 tokens. DistilBERT's row is a lower bound.</div></div>
     <div class="card"><b class="fs-18">One prompt, one run</b><div class="small" style="margin-top:6px">No prompt search, and providers can change a model behind the same name.</div></div>
   </div>
-  <div class="num">14</div>
+  <div class="num">13</div>
   <div class="note">35 sec. Say the first three clearly. Owning these is what makes the rest believable.</div>
 </section>
 
 <section class="slide">
-  <div class="kicker">Scope of improvements within 2 weeks</div>
+  <div class="kicker">Scope of improvements within 2 weeks · Source code</div>
   <div class="speaker">Faria</div>
-  <h1>What we can finish next</h1>
-  <div class="tl">
-    <div class="card blue"><div class="date">DAYS 1 TO 4</div><b class="fs-18">Hand-labelled subset</b><div class="small" style="margin-top:6px">The three of us label 300 positives as phishing or spam, to replace the model annotator on the headline claim.</div></div>
-    <div class="card accent"><div class="date">DAYS 5 TO 8</div><b class="fs-18">Threshold calibration</b><div class="small" style="margin-top:6px">Ask each LLM for a confidence, then set the operating point per corpus, following the recalibration result of Gutierrez et al.</div></div>
-    <div class="card amber"><div class="date">DAYS 9 TO 11</div><b class="fs-18">Bigger test sets</b><div class="small" style="margin-top:6px">1,000 emails per set for the top three models to tighten the intervals. Under $1 more.</div></div>
-    <div class="card good"><div class="date">DAYS 12 TO 14</div><b class="fs-18">Write-up</b><div class="small" style="margin-top:6px">Final paper, a short artifact README, and the deduplication script packaged so other groups can run it on their own corpora.</div></div>
-  </div>
-  <div class="spacer"></div>
-  <div class="small">Everything reuses the existing scripts. Budget left: about $3 of the $5.</div>
-  <div class="num">15</div>
-  <div class="note">30 sec. Four blocks. Stress that the first one replaces a model with human labels.</div>
-</section>
-
-<section class="slide">
-  <div class="kicker">Source code</div>
-  <div class="speaker">Faria</div>
-  <h1>Everything is public and re-runnable</h1>
+  <h1>What we finish next, and where everything lives</h1>
   <div class="grid2">
-    <div class="card blue"><div class="label t-blue">GitHub</div><div class="fs-20" style="margin-top:8px;word-break:break-all"><a href="https://github.com/Jahid15/phishing-llm-cross-corpus">github.com/Jahid15/phishing-llm-cross-corpus</a></div>
-      <div class="small" style="margin-top:6px">code, every raw model answer, results, paper, research log, team guide</div></div>
-    <div class="card accent"><div class="label t-accent">Colab notebook</div><div class="fs-18" style="margin-top:8px;word-break:break-all"><a href="https://colab.research.google.com/github/Jahid15/phishing-llm-cross-corpus/blob/main/notebooks/phishing_llm_cross_corpus.ipynb">notebooks/phishing_llm_cross_corpus.ipynb</a></div>
-      <div class="small" style="margin-top:6px">loads every result in seconds, or reruns all the steps</div></div>
+    <div class="card blue"><div class="date">DAYS 1 TO 7</div><b class="fs-18">Hand-labelled subset and calibration</b>
+      <div class="small" style="margin-top:6px">The three of us label 300 positives ourselves, so the spam versus phishing claim no longer rests on a model. Then we ask each LLM for a confidence and set the operating point per corpus.</div></div>
+    <div class="card amber"><div class="date">DAYS 8 TO 14</div><b class="fs-18">Bigger tests and a reusable tool</b>
+      <div class="small" style="margin-top:6px">1,000 emails per set for the top three models to tighten the intervals, and the deduplication script packaged so other groups can run it on their own corpora. Budget left: about $3 of $5.</div></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card" style="border-color:var(--line)"><div class="label t-blue">GITHUB</div><div class="fs-19" style="margin-top:6px;word-break:break-all"><a href="https://github.com/Jahid15/phishing-llm-cross-corpus">github.com/Jahid15/phishing-llm-cross-corpus</a></div>
+      <div class="small" style="margin-top:4px">code, every raw model answer, paper, research log, team guide</div></div>
+    <div class="card" style="border-color:var(--line)"><div class="label t-accent">COLAB NOTEBOOK</div><div class="fs-17" style="margin-top:6px;word-break:break-all"><a href="https://colab.research.google.com/github/Jahid15/phishing-llm-cross-corpus/blob/main/notebooks/phishing_llm_cross_corpus.ipynb">notebooks/phishing_llm_cross_corpus.ipynb</a></div>
+      <div class="small" style="margin-top:4px">rebuilds every table and figure in seconds</div></div>
   </div>
   <div class="spacer"></div>
   <div class="grid3">
-    <div class="card"><div class="label t-muted">Total spend</div><div class="mid" style="margin-top:6px">$1.58</div><div class="small">of a $5 budget</div></div>
-    <div class="card"><div class="label t-muted">Model calls</div><div class="mid" style="margin-top:6px">40,498</div><div class="small">all answers saved</div></div>
-    <div class="card"><div class="label t-muted">Hardware</div><div class="mid" style="margin-top:6px">1 laptop</div><div class="small">8 GB, no GPU rental</div></div>
+    <div class="card"><div class="label t-muted">Total spend</div><div class="mid" style="margin-top:4px">$1.58</div><div class="small">of a $5 budget</div></div>
+    <div class="card"><div class="label t-muted">Model calls</div><div class="mid" style="margin-top:4px">40,498</div><div class="small">all answers saved</div></div>
+    <div class="card"><div class="label t-muted">Hardware</div><div class="mid" style="margin-top:4px">1 laptop</div><div class="small">8 GB, no GPU rental</div></div>
   </div>
-  <div class="spacer"></div>
-  <div class="small" style="text-align:center">Thank you. Questions?</div>
-  <div class="num">16</div>
-  <div class="note">20 sec. Read the links, then the three numbers, then stop.</div>
+  <div class="small" style="text-align:center;margin-top:10px">Thank you. Questions?</div>
+  <div class="num">14</div>
+  <div class="note">35 sec. Two blocks of plan, then the links, then the three numbers. Stop after "thank you".</div>
 </section>
 
 </div></div>

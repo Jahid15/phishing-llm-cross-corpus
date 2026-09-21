@@ -1,7 +1,7 @@
-loaded 169921 emails in 19.2 s
-minhash done 171.0 s
-lsh built 177.4 s
-exact check of 2731783 candidate pairs done 368.7 s
+loaded 169921 emails in 18.3 s
+minhash done 155.3 s
+lsh built 160.4 s
+exact check of 2731783 candidate pairs done 320.6 s
 exact_raw emails with a copy in another corpus: 136
 exact_norm emails with a copy in another corpus: 8182
 near emails with a copy in another corpus: 35243
@@ -16,4 +16,4 @@ within {'source': 'nigerian', 'corpus_internal_near_dup_pct': 35.62, 'eval_email
 within {'source': 'ephishllm', 'corpus_internal_near_dup_pct': 0.0, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 0.0}
 within {'source': 'ephishllm_it', 'corpus_internal_near_dup_pct': 0.0, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 0.0}
 within {'source': 'ephishllm_de', 'corpus_internal_near_dup_pct': 0.0, 'eval_emails': 300, 'eval_with_near_dup_in_own_train_pct': 0.0}
-saved overlap results, total time 384.7 s
+saved overlap results, total time 334.1 s
