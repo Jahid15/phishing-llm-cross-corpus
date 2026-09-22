@@ -98,9 +98,9 @@ Practice করার সহজ উপায়: `final-slides/PRACTICE.html` �
 
 ## Slide 10 · Every detector on the same emails (55 sec)
 
-**EN:** Thank you Saimon. This is the table our proposal promised. Twenty detectors, the same emails. Read three rows. Gemini, a paid model, is best: 0.960 with 2 percent false alarms. Zero-shot Qwen-2.5-7B is the best open model: 0.928 for about three cents per thousand emails. Now the interesting row: the published BERT phishing detector scores 0.962 on our corpora, the highest number in the table, and 0.470 on AI-written phishing. It was trained on the same corpora we test on.
+**EN:** Thank you Saimon. This is the table our proposal promised. Fourteen models, the same emails, twenty rows once the few-shot versions are counted. Read three rows. Gemini, a paid model, is best: 0.960 with 2 percent false alarms. Zero-shot Qwen-2.5-7B is the best open model: 0.928 for about three cents per thousand emails. Now the interesting row: the published BERT phishing detector scores 0.962 on our corpora, the highest number in the table, and 0.470 on AI-written phishing. It was trained on the same corpora we test on.
 
-**BN:** ধন্যবাদ সাইমন। এই table টাই আমাদের proposal এ দেওয়া কথা। বিশটা detector, একই email। তিনটা row পড়ুন। Gemini, একটা paid model, সবার সেরা: 0.960, ভুল alarm 2 percent। Zero-shot Qwen-2.5-7B সেরা open model: 0.928, হাজার email এ প্রায় তিন cent। এবার মজার row টা: published BERT phishing detector আমাদের corpus এ পায় 0.962, table এর সর্বোচ্চ, আর AI এর লেখা phishing এ পায় 0.470। কারণ ওটা ঠিক সেই corpus গুলোতেই train করা যেগুলোতে আমরা test করছি।
+**BN:** ধন্যবাদ সাইমন। এই table টাই আমাদের proposal এ দেওয়া কথা। চৌদ্দটা model, একই email, few-shot version ধরলে বিশটা row। তিনটা row পড়ুন। Gemini, একটা paid model, সবার সেরা: 0.960, ভুল alarm 2 percent। Zero-shot Qwen-2.5-7B সেরা open model: 0.928, হাজার email এ প্রায় তিন cent। এবার মজার row টা: published BERT phishing detector আমাদের corpus এ পায় 0.962, table এর সর্বোচ্চ, আর AI এর লেখা phishing এ পায় 0.470। কারণ ওটা ঠিক সেই corpus গুলোতেই train করা যেগুলোতে আমরা test করছি।
 
 **কীভাবে:** শুধু তিনটা row। শেষ row টা আঙুল দিয়ে দেখাও, ওটাই আমাদের পুরো গল্পের প্রমাণ।
 

@@ -147,7 +147,7 @@ f"""  <div class="pipe">
     <div class="arrow">→</div>
     <div class="card accent"><div class="label t-accent">3 Decontaminate</div><div class="small" style="margin-top:8px">train on 5, test on the 6th</div></div>
     <div class="arrow">→</div>
-    <div class="card muted"><div class="label t-muted">4 Models</div><div class="small" style="margin-top:8px">11 detectors, same emails</div></div>
+    <div class="card muted"><div class="label t-muted">4 Models</div><div class="small" style="margin-top:8px">14 models, same emails</div></div>
     <div class="arrow">→</div>
     <div class="card amber"><div class="label t-amber">5 Shift tests</div><div class="small" style="margin-top:8px">AI-written, sanitised, it/de</div></div>
     <div class="arrow">→</div>
@@ -173,7 +173,7 @@ f"""  <div class="row" style="align-items:flex-start">
     <div style="flex:1.05;display:flex;flex-direction:column;gap:9px">
       <div class="card"><b class="t-blue">Classical</b><div class="small">TF-IDF 1-2 grams, 50k features, LogReg / Naive Bayes, {n['logreg_cpu_sec_per_1000']} s per 1,000 emails</div></div>
       <div class="card"><b class="t-good">DistilBERT</b><div class="small">1 epoch, 128 tokens, 1,000 emails per corpus, laptop CPU, raw and decontaminated</div></div>
-      <div class="card"><b class="t-accent">11 detectors through one protocol</b><div class="small">6 small open LLMs (1B to 14B), 3 published phishing models, Gemini-3.1-Flash-Lite and GPT-4o-mini. Temperature 0, 1,500 chars</div></div>
+      <div class="card"><b class="t-accent">14 models through one protocol</b><div class="small">6 small open LLMs (1B to 14B), 3 published phishing models, Gemini-3.1-Flash-Lite and GPT-4o-mini. Temperature 0, 1,500 chars</div></div>
       <div class="card"><b class="t-amber">Reproducible</b><div class="small">Seed 42, 8 GB MacBook, every raw answer saved, total API spend ${n['total_spend_usd']:.2f}</div></div>
     </div>
   </div>""",

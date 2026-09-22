@@ -159,13 +159,13 @@ SLIDES = [
   tip="গল্পের মতো বলো: আমাদের নিজের ভালো ফলটা সন্দেহ হলো, তাই পরীক্ষা করলাম।"),
 
  dict(no=10, who="Faria", sec=55, title="Every detector on the same emails",
-  en=f"Thank you Saimon. This is the table our proposal promised. Twenty detectors, the same "
-     f"emails. Read three rows. Gemini, a paid model, is best: {G['unseen_f1_mean']:.3f} with {100*G['false_alarm_rate']:.0f} percent "
+  en=f"Thank you Saimon. This is the table our proposal promised. Fourteen models, the same "
+     f"emails, twenty rows once the few-shot versions are counted. Read three rows. Gemini, a paid model, is best: {G['unseen_f1_mean']:.3f} with {100*G['false_alarm_rate']:.0f} percent "
      f"false alarms. Zero-shot Qwen-2.5-7B is the best open model: {Q['unseen_f1_mean']:.3f} for about three cents "
      f"per thousand emails. Now the interesting row: the published BERT phishing detector scores "
      f"{B['unseen_f1_mean']:.3f} on our corpora, the highest number in the table, and {B['ai_phishing_f1']:.3f} on AI-written "
      f"phishing. It was trained on the same corpora we test on.",
-  bn=f"ধন্যবাদ সাইমন। এই table টাই আমাদের proposal এ দেওয়া কথা। বিশটা detector, একই email। তিনটা "
+  bn=f"ধন্যবাদ সাইমন। এই table টাই আমাদের proposal এ দেওয়া কথা। চৌদ্দটা model, একই email, few-shot version ধরলে বিশটা row। তিনটা "
      f"row পড়ুন। Gemini, একটা paid model, সবার সেরা: {G['unseen_f1_mean']:.3f}, ভুল alarm {100*G['false_alarm_rate']:.0f} percent। "
      f"Zero-shot Qwen-2.5-7B সেরা open model: {Q['unseen_f1_mean']:.3f}, হাজার email এ প্রায় তিন cent। এবার "
      f"মজার row টা: published BERT phishing detector আমাদের corpus এ পায় {B['unseen_f1_mean']:.3f}, table এর "
